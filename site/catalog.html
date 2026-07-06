@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог новых авто из Китая под заказ — цены под ключ | INAVTO ASIA</title>
+  <meta name="description" content="Каталог новых автомобилей из Китая под заказ: Zeekr, Li Auto (Lixiang), BYD, Geely, Xiaomi, AITO, Avatr, Tank и другие. Цены под ключ с доставкой и растаможкой в Россию.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="catalog">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / Авто из Китая</div>
+      <h1 class="h1">Новые авто из Китая</h1>
+      <p class="lead" style="margin-top:14px;max-width:680px">Цены указаны «под ключ» — с логистикой, таможней, утильсбором, СБКТС и нашей комиссией. Не нашли модель? Привезём почти любую с рынка Китая — <button class="btn btn-red btn-sm" data-quiz-open style="vertical-align:middle">оставьте заявку</button></p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="filters">
+        <select id="f-brand"><option value="">Все марки</option></select>
+        <select id="f-body">
+          <option value="">Любой кузов</option>
+          <option>Кроссовер</option>
+          <option>Внедорожник</option>
+          <option>Седан</option>
+          <option>Лифтбек</option>
+          <option>Кроссовер-купе</option>
+        </select>
+        <select id="f-fuel">
+          <option value="">Любой двигатель</option>
+          <option value="electro">Электро</option>
+          <option value="hybrid">Гибрид</option>
+          <option value="petrol">Бензин</option>
+        </select>
+        <select id="f-price">
+          <option value="">Любой бюджет</option>
+          <option value="0-2.5">До 2,5 млн ₽</option>
+          <option value="2.5-4">2,5–4 млн ₽</option>
+          <option value="4-6">4–6 млн ₽</option>
+          <option value="6-99">Более 6 млн ₽</option>
+        </select>
+        <select id="f-sort">
+          <option value="pop">Сначала популярные</option>
+          <option value="asc">Дешевле</option>
+          <option value="desc">Дороже</option>
+        </select>
+      </div>
+      <div class="cars-grid" id="cars"></div>
+      <div class="empty-note" id="empty" style="display:none">По выбранным фильтрам ничего не нашлось — попробуйте изменить условия или <button class="btn btn-ghost btn-sm" data-quiz-open>закажите подбор</button></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Нужна модель не из списка?</h2>
+          <p class="lead">Каталог — это самые популярные автомобили. С рынков Китая привозим практически любую модель и комплектацию под заказ.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Заказать подбор</button>
+          <a class="btn btn-ghost" href="calculator.html">Калькулятор цены</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO;
+      const cars = A.CARS.filter(c => c.country === 'china');
+      const grid = document.getElementById('cars');
+      const empty = document.getElementById('empty');
+      const $ = id => document.getElementById(id);
+
+      const brands = [...new Set(cars.map(c => c.brand))].sort();
+      $('f-brand').innerHTML += brands.map(b => '<option>' + b + '</option>').join('');
+
+      function apply() {
+        let list = cars.slice();
+        const b = $('f-brand').value, body = $('f-body').value, fuel = $('f-fuel').value,
+              price = $('f-price').value, sort = $('f-sort').value;
+        if (b) list = list.filter(c => c.brand === b);
+        if (body) list = list.filter(c => c.body.includes(body));
+        if (fuel) list = list.filter(c => c.tags.includes(fuel));
+        if (price) {
+          const [lo, hi] = price.split('-').map(Number);
+          list = list.filter(c => c.price >= lo && c.price < hi);
+        }
+        if (sort === 'asc') list.sort((x, y) => x.price - y.price);
+        if (sort === 'desc') list.sort((x, y) => y.price - x.price);
+        grid.innerHTML = list.map(A.carCard).join('');
+        empty.style.display = list.length ? 'none' : 'block';
+        A.initReveal();
+      }
+      ['f-brand', 'f-body', 'f-fuel', 'f-price', 'f-sort'].forEach(id => $(id).addEventListener('change', apply));
+      apply();
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

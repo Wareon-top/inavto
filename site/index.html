@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авто из Китая под заказ с доставкой под ключ в Россию — INAVTO ASIA</title>
+  <meta name="description" content="Новые автомобили из Китая под заказ: фиксированная цена в договоре, растаможка, доставка под ключ в любой город России за 30–60 дней. Калькулятор цены онлайн.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-tag"><i></i>Китай · Доставка под ключ в Россию</div>
+      <h1 class="h1">Авто из Китая <span class="accent">под заказ</span></h1>
+      <p class="lead">Новые электромобили, гибриды и бензиновые модели с рынка Китая. Фиксируем цену и сроки в договоре, привозим и растаможиваем «под ключ» в любой город России за 30–60 дней.</p>
+      <div class="hero-actions">
+        <button class="btn btn-red" data-quiz-open>Подобрать автомобиль</button>
+        <a class="btn btn-ghost" href="calculator.html">Рассчитать цену под ключ</a>
+      </div>
+      <div class="hero-stats">
+        <div><b class="num">30–60</b><span>дней — доставка под ключ</span></div>
+        <div><b class="num">до 1,5 млн ₽</b><span>экономия против дилера РФ</span></div>
+        <div><b class="num">16+ моделей</b><span>в каталоге — привезём любую</span></div>
+      </div>
+      <div class="hero-photo reveal" id="hero-photo">
+        <img src="img/hero-car.webp" alt="Белый электроседан BYD — вид сбоку" fetchpriority="high">
+      </div>
+      <a class="hero-floor reveal" href="catalog.html"><span>BYD · электроседан · от 3,6 млн ₽ под ключ</span><span>Весь каталог →</span></a>
+    </div>
+  </section>
+
+  <!-- ЛЕНТА БРЕНДОВ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marquee"></div>
+  </div>
+
+  <!-- ПРЕИМУЩЕСТВА-ЧИПЫ -->
+  <section class="section" style="padding-top:36px;padding-bottom:36px">
+    <div class="container">
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <!-- ПОПУЛЯРНЫЕ АВТО -->
+  <section class="section" id="popular" style="padding-top:24px">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Каталог</div>
+        <h2 class="h2" style="margin-top:14px">Популярные модели под заказ</h2>
+        <p class="lead">Актуальные цены «под ключ» — уже с логистикой, таможней и нашей комиссией. Ничего не появится сверху.</p>
+      </div>
+      <div class="pills" id="home-pills" style="margin-bottom:26px">
+        <button class="pill active" data-f="all">Все</button>
+        <button class="pill" data-f="electro">Электро</button>
+        <button class="pill" data-f="hybrid">Гибриды</button>
+        <button class="pill" data-f="petrol">Бензин</button>
+        <button class="pill" data-f="family">Для семьи</button>
+      </div>
+      <div class="cars-grid" id="home-cars"></div>
+      <div style="text-align:center;margin-top:36px">
+        <a class="btn btn-white" href="catalog.html">Открыть весь каталог</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПОЧЕМУ МЫ -->
+  <section class="section" style="background:var(--bg-2)">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Почему INAVTO ASIA</div>
+        <h2 class="h2" style="margin-top:14px">Прозрачность — наш продукт</h2>
+        <p class="lead">Главный страх при заказе авто из-за границы — «отдам деньги и пропаду в неизвестности». Мы построили процесс так, чтобы вы видели каждый шаг.</p>
+      </div>
+      <div class="bento" id="features"></div>
+    </div>
+  </section>
+
+  <!-- ТРЕКЕР -->
+  <section class="section">
+    <div class="container">
+      <div class="tracker reveal">
+        <div class="divider-label">Онлайн-трекинг заказа</div>
+        <h2 class="h2" style="margin-top:14px;max-width:680px">Вы всегда знаете, где ваш автомобиль</h2>
+        <p class="lead" style="margin-top:12px;max-width:640px">После подписания договора вы получаете доступ к статусу заказа: от выкупа до вручения. На каждом этапе — фото- и видеоотчёт в Telegram.</p>
+        <div class="route-map" aria-hidden="true">
+          <svg viewBox="0 0 1080 150" xmlns="http://www.w3.org/2000/svg">
+            <path class="route-path-bg" d="M60 110 C 240 30, 420 130, 560 78 S 880 30, 1020 92"/>
+            <path class="route-path" d="M60 110 C 240 30, 420 130, 560 78 S 880 30, 1020 92"/>
+            <circle cx="60" cy="110" r="6" fill="#942b2c"/>
+            <circle cx="560" cy="78" r="5" fill="#303c48"/>
+            <circle cx="1020" cy="92" r="6" fill="#942b2c"/>
+            <text class="route-label" x="60" y="140" text-anchor="start">Шанхай</text>
+            <text class="route-sub" x="60" y="126" text-anchor="start">выкуп и погрузка</text>
+            <text class="route-label" x="560" y="52" text-anchor="middle">Владивосток</text>
+            <text class="route-sub" x="560" y="38" text-anchor="middle">таможня · СБКТС · ЭПТС</text>
+            <text class="route-label" x="1020" y="122" text-anchor="end">Ваш город</text>
+            <text class="route-sub" x="1020" y="136" text-anchor="end">вручение с документами</text>
+          </svg>
+        </div>
+        <div id="tracker-demo"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- КАК МЫ РАБОТАЕМ -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Процесс</div>
+        <h2 class="h2" style="margin-top:14px">Как проходит заказ</h2>
+      </div>
+      <div class="steps" id="home-steps"></div>
+      <div style="text-align:center;margin-top:32px">
+        <a class="btn btn-ghost" href="kak-my-rabotaem.html">Подробнее о каждом этапе</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- КАЛЬКУЛЯТОР CTA -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <div class="divider-label">Калькулятор</div>
+          <h2 class="h2" style="margin-top:14px">Узнайте цену «под ключ» за 2 минуты</h2>
+          <p class="lead">Таможенная пошлина, утильсбор, логистика, СБКТС и комиссия — всё в одной смете. Без звонков и «цены по запросу».</p>
+        </div>
+        <div class="cta-banner-actions">
+          <a class="btn btn-red" href="calculator.html">Рассчитать стоимость</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Вопросы и ответы</div>
+        <h2 class="h2" style="margin-top:14px">Частые вопросы</h2>
+      </div>
+      <div id="faq" style="max-width:820px"></div>
+    </div>
+  </section>
+
+  <!-- ФИНАЛЬНЫЙ CTA -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Начнём с бесплатного подбора</h2>
+          <p class="lead">Ответьте на 4 вопроса — пришлём 3–5 подходящих вариантов с честным расчётом «под ключ». Это ни к чему не обязывает.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Подобрать авто</button>
+          <a class="btn btn-ghost" href="kontakty.html">Контакты</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO, I = A.ICONS;
+
+      /* Hero-фото: пока файл не загружен — чертёжная схема в инженерном стиле */
+      const heroImg = document.querySelector('#hero-photo img');
+      const heroFallback = () => {
+        document.getElementById('hero-photo').innerHTML =
+          '<div class="hero-blueprint">' +
+          '<span class="bp-label">Fig. 01 — Sedan / вид сбоку</span>' +
+          '<svg viewBox="0 0 560 210" fill="none" stroke="#050505" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">' +
+          '<line x1="24" y1="184" x2="536" y2="184" stroke-width="1" stroke-dasharray="4 6" opacity="0.5"/>' +
+          '<path d="M62 152 L74 152 A32 32 0 0 1 138 152 L346 152 A32 32 0 0 1 410 152 L472 152 C502 150 518 140 516 124 C514 111 500 103 480 98 L444 89 C422 65 394 49 360 41 C314 31 248 29 192 37 C148 43 116 61 92 93 L62 99 C46 103 37 111 35 123 C33 139 45 151 62 152 Z"/>' +
+          '<path d="M152 48 C192 42 260 42 308 49 C328 54 344 64 356 78 L144 79 C145 66 148 55 152 48 Z" stroke-width="1.2"/>' +
+          '<path d="M254 45 L254 79 M266 79 L266 150 M356 79 L360 150" stroke-width="1"/>' +
+          '<path d="M290 92 L322 92 M474 102 L502 108" stroke-width="1.2"/>' +
+          '<circle cx="106" cy="152" r="30"/><circle cx="106" cy="152" r="12" stroke-width="1"/>' +
+          '<circle cx="378" cy="152" r="30"/><circle cx="378" cy="152" r="12" stroke-width="1"/>' +
+          '<path d="M106 140 L106 122 M116 158 L132 167 M96 158 L80 167 M94 145 L77 139 M118 145 L135 139" stroke-width="1"/>' +
+          '<path d="M378 140 L378 122 M388 158 L404 167 M368 158 L352 167 M366 145 L349 139 M390 145 L407 139" stroke-width="1"/>' +
+          '<path d="M35 16 L516 16 M35 10 L35 22 M516 10 L516 22" stroke-width="1"/>' +
+          '<text x="276" y="12" text-anchor="middle" font-size="10" letter-spacing="2" stroke="none" fill="#4a4a4a" font-family="inherit">4 980 MM</text>' +
+          '<path d="M544 41 L544 184 M538 41 L550 41 M538 184 L550 184" stroke-width="1"/>' +
+          '</svg></div>';
+      };
+      if (heroImg.complete && heroImg.naturalWidth === 0) heroFallback();
+      else heroImg.addEventListener('error', heroFallback);
+
+      /* Чипы */
+      const chips = [
+        'Работаем с физ. и юр. лицами', 'Договор с фиксацией цены', 'Оплата по инвойсу через банк',
+        'Полный пакет документов', 'Таможенное оформление', 'СБКТС и ЭПТС',
+        'Страхование груза', 'Фото- и видеоотчёты', 'Дистанционное подписание договора'
+      ];
+      document.getElementById('chips').innerHTML =
+        chips.map(c => '<span class="chip reveal">' + I.check + c + '</span>').join('');
+
+      /* Карточки на главной */
+      const grid = document.getElementById('home-cars');
+      function drawCars(f) {
+        let list = A.CARS;
+        if (f !== 'all') list = list.filter(c => c.tags.includes(f));
+        grid.innerHTML = list.slice(0, 6).map(A.carCard).join('');
+        A.initReveal();
+      }
+      drawCars('all');
+      document.querySelectorAll('#home-pills .pill').forEach(p => p.addEventListener('click', () => {
+        document.querySelectorAll('#home-pills .pill').forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        drawCars(p.dataset.f);
+      }));
+
+      /* Фичи — бенто-грид */
+      const cells = [
+        '<div class="cell cell-dark sp-7 reveal"><div class="icon">' + I.doc + '</div>' +
+          '<h3>Цена и сроки зафиксированы в&nbsp;договоре</h3>' +
+          '<p style="margin-top:10px">Стоимость «под ключ», комиссия и максимальный срок доставки прописаны до старта работы. Курсовые и таможенные риски после подписания — на нашей стороне.</p>' +
+          '<div class="cell-chips" style="margin-top:auto;padding-top:18px"><span>Договор</span><span>Оплата по инвойсу</span><span>Без доплат «по факту»</span></div></div>',
+        '<div class="cell sp-5 reveal" style="transition-delay:.06s"><div class="icon">' + I.eye + '</div>' +
+          '<h3>Проверка перед выкупом</h3><p>Осмотр, диагностика и проверка истории до оплаты. Вы подтверждаете покупку по отчёту — без вашего «да» мы не платим продавцу.</p></div>',
+        '<div class="cell sp-4 reveal"><div class="icon">' + I.camera + '</div>' +
+          '<h3>Фото- и видеоотчёты</h3><p>Выкуп, погрузка, порт, таможня — вы видите свой автомобиль на каждом этапе пути.</p></div>',
+        '<div class="cell sp-4 reveal" style="transition-delay:.06s"><div class="icon">' + I.shield + '</div>' +
+          '<h3>Страхование груза</h3><p>Автомобиль застрахован на весь путь до места выдачи в российской страховой компании.</p></div>',
+        '<div class="cell cell-red sp-4 reveal" style="transition-delay:.12s">' +
+          '<b class="num">до 1,5 млн ₽</b><p>ваша выгода против цены дилера в РФ</p></div>',
+        '<div class="cell sp-5 reveal"><div class="icon">' + I.calc + '</div>' +
+          '<h3>Честная смета</h3><p>Расчёт «под ключ» до подписания договора: пошлина, утильсбор, логистика, СБКТС, комиссия.</p></div>',
+        '<div class="cell sp-7 reveal" style="transition-delay:.06s"><div class="icon">' + I.map + '</div>' +
+          '<h3>Доставка в любой город России</h3><p>Привозим и выдаём с полным пакетом документов — лично в руки или автовозом до вашего города.</p>' +
+          '<div class="cell-chips" style="margin-top:auto;padding-top:18px"><span>Москва</span><span>Санкт-Петербург</span><span>Казань</span><span>Екатеринбург</span><span>Новосибирск</span><span>Владивосток</span><span>+ ваш город</span></div></div>',
+      ];
+      document.getElementById('features').innerHTML = cells.join('');
+
+      /* Трекер-демо */
+      document.getElementById('tracker-demo').innerHTML = A.trackerHTML(4);
+
+      /* Лента брендов (дублируется для бесшовного цикла) */
+      const brands = [...new Set(A.CARS.map(c => c.brand))];
+      const strip = brands.map(b => '<span>' + b + '</span>').join('');
+      document.getElementById('marquee').innerHTML = strip + strip;
+
+      /* Шаги */
+      const steps = [
+        ['Заявка и подбор', 'Оставляете заявку или проходите квиз — присылаем варианты с расчётом «под ключ».', '1 день'],
+        ['Договор', 'Фиксируем автомобиль, цену и сроки. Подписание — в офисе или дистанционно.', '1 день'],
+        ['Проверка и выкуп', 'Проверяем авто на месте, согласовываем с вами и выкупаем. Оплата по инвойсу через банк.', '2–7 дней'],
+        ['Логистика', 'Доставка морем или ж/д до границы РФ. Груз застрахован, присылаем отчёты.', '15–30 дней'],
+        ['Таможня и СБКТС', 'Растаможка, утильсбор, лаборатория, электронный ПТС — всё делаем сами.', '5–10 дней'],
+        ['Вручение', 'Выдаём автомобиль с документами в вашем городе. Фотографируемся на память', '1 день'],
+      ];
+      document.getElementById('home-steps').innerHTML = steps.map(s =>
+        '<div class="step reveal"><h3>' + s[0] + '</h3><p>' + s[1] + '</p><span class="step-time">' + s[2] + '</span></div>').join('');
+
+
+      /* FAQ */
+      const faq = [
+        ['Сколько времени занимает доставка?', 'В среднем 30–60 дней с момента выкупа — зависит от города выдачи и маршрута (автовоз, ж/д или море). Срок фиксируется в договоре.'],
+        ['Из чего складывается цена «под ключ»?', 'Цена автомобиля + логистика + таможенная пошлина + утильсбор + СБКТС/ЭПТС + наша комиссия. Все составляющие видны в смете до подписания договора — воспользуйтесь калькулятором на сайте.'],
+        ['Как я пойму, что автомобиль в порядке?', 'Перед выкупом наш специалист осматривает автомобиль, делает диагностику и проверяет историю. Вы получаете отчёт с фото и видео и подтверждаете покупку — только после этого мы платим продавцу.'],
+        ['Какие гарантии, что я не потеряю деньги?', 'Договор с фиксацией цены и сроков, оплата по инвойсу через банк (деньги идут продавцу, а не «менеджеру на карту»), страхование груза на весь путь и фотоотчёты на каждом этапе.'],
+        ['Можно ли заказать автомобиль, которого нет в каталоге?', 'Да. Каталог — это популярные модели, но привезти можем практически любой автомобиль с рынка Китая. Оставьте заявку — посчитаем.'],
+        ['Вы работаете с юридическими лицами?', 'Да, работаем и с физическими, и с юридическими лицами, в том числе привозим партии автомобилей под бизнес-задачи.'],
+      ];
+      document.getElementById('faq').innerHTML = faq.map(f =>
+        '<div class="faq-item reveal"><button class="faq-q">' + f[0] + '</button><div class="faq-a">' + f[1] + '</div></div>').join('');
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

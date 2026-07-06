@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор стоимости авто из Китая под ключ — INAVTO ASIA</title>
+  <meta name="description" content="Онлайн-калькулятор цены автомобиля из Китая под ключ: таможенная пошлина, утильсбор, логистика, СБКТС и комиссия. Предварительный расчёт за 2 минуты.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="calculator">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / Калькулятор</div>
+      <h1 class="h1">Калькулятор цены «под ключ»</h1>
+      <p class="lead" style="margin-top:14px;max-width:720px">Предварительный расчёт для физических лиц: пошлина, утильсбор, логистика, оформление и наша комиссия. Точную смету по конкретному автомобилю пришлёт менеджер — бесплатно.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="calc-layout">
+        <div class="calc-panel">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Цена автомобиля на месте, ₽ (в пересчёте)</label>
+              <input id="c-price" type="number" min="100000" step="50000" value="2500000">
+            </div>
+            <div class="form-field">
+              <label>Тип двигателя</label>
+              <select id="c-fuel">
+                <option value="ice">Бензин / дизель</option>
+                <option value="hybrid">Гибрид (с ДВС)</option>
+                <option value="ev">Электромобиль</option>
+              </select>
+            </div>
+            <div class="form-field" id="c-vol-wrap">
+              <label>Объём двигателя, см³</label>
+              <input id="c-vol" type="number" min="600" max="7000" step="100" value="1500">
+            </div>
+            <div class="form-field">
+              <label>Мощность, л.с.</label>
+              <input id="c-power" type="number" min="50" max="1200" step="10" value="150">
+            </div>
+            <div class="form-field">
+              <label>Возраст автомобиля</label>
+              <select id="c-age">
+                <option value="new">Новый / до 3 лет</option>
+                <option value="mid">От 3 до 5 лет</option>
+                <option value="old">Старше 5 лет</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Курс евро для расчёта пошлины, ₽</label>
+              <input id="c-eur" type="number" min="50" max="250" step="1" value="100">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="calc-panel calc-result reveal">
+            <h3 class="h3" style="margin-bottom:14px">Смета «под ключ»</h3>
+            <div id="c-rows"></div>
+            <div class="calc-total"><span class="muted">Итого, примерно</span><b class="num" id="c-total">—</b></div>
+            <p class="form-note" style="margin-top:14px">Расчёт предварительный: ставки пошлин и утильсбора зависят от точных характеристик и даты оформления, курс — от дня оплаты. Итоговая смета фиксируется в договоре.</p>
+            <form class="form-grid" data-lead-form="Заявка из калькулятора" style="margin-top:18px" id="calc-lead">
+              <div class="form-field"><input name="name" placeholder="Ваше имя" required></div>
+              <div class="form-field"><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
+              <button class="btn btn-red btn-block" type="submit">Получить точный расчёт</button>
+              <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head"><h2 class="h2">Из чего складывается цена</h2></div>
+      <div class="grid grid-3" id="calc-feats"></div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO, I = A.ICONS;
+      const $ = id => document.getElementById(id);
+      const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+
+      /* Пошлина для физлиц (ЕТТ ЕАЭС, упрощённо). Возвращает ₽. */
+      function duty(priceRub, vol, age, fuel, eur) {
+        const priceEur = priceRub / eur;
+        if (fuel === 'ev') {
+          // Электромобили: пошлина 15% + НДС 20% (для физлиц с 2024 г. — через ставку как для юрлиц)
+          const d = priceRub * 0.15;
+          const vat = (priceRub + d) * 0.20;
+          return d + vat;
+        }
+        if (age === 'new') {
+          let pct = 0.48, minPerCm3 = 3.5;
+          if (priceEur <= 8500) { pct = 0.54; minPerCm3 = 2.5; }
+          else if (priceEur <= 16700) { minPerCm3 = 3.5; }
+          else if (priceEur <= 42300) { minPerCm3 = 5.5; }
+          else if (priceEur <= 84500) { minPerCm3 = 7.5; }
+          else if (priceEur <= 169000) { minPerCm3 = 15; }
+          else { minPerCm3 = 20; }
+          return Math.max(priceEur * pct, vol * minPerCm3) * eur;
+        }
+        const table = age === 'mid'
+          ? [[1000, 1.5], [1500, 1.7], [1800, 2.5], [2300, 2.7], [3000, 3.0], [Infinity, 3.6]]
+          : [[1000, 3.0], [1500, 3.2], [1800, 3.5], [2300, 4.8], [3000, 5.0], [Infinity, 5.7]];
+        const rate = table.find(r => vol <= r[0])[1];
+        return vol * rate * eur;
+      }
+
+      /* Утильсбор (упрощённо, для личного пользования; с учётом привязки льготы к мощности) */
+      function utilFee(power, age, fuel) {
+        if (power <= 160) return age === 'new' ? 3400 : 5200;
+        // свыше 160 л.с. — коммерческие ставки, зависят от мощности (ориентировочно)
+        if (power <= 250) return 850000;
+        if (power <= 320) return 1300000;
+        if (power <= 450) return 1900000;
+        return 2600000;
+      }
+
+      function recalc() {
+        const price = +$('c-price').value || 0;
+        const fuel = $('c-fuel').value;
+        const vol = fuel === 'ev' ? 0 : (+$('c-vol').value || 0);
+        const power = +$('c-power').value || 0;
+        const age = $('c-age').value;
+        const eur = +$('c-eur').value || 100;
+
+        $('c-vol-wrap').style.display = fuel === 'ev' ? 'none' : '';
+
+        const logistics = 260000;
+        const d = duty(price, vol, age, fuel, eur);
+        const util = utilFee(power, age, fuel);
+        const paperwork = 95000;   // брокер, СВХ, СБКТС, ЭПТС
+        const fee = Math.max(150000, price * 0.05); // комиссия
+        const total = price + logistics + d + util + paperwork + fee;
+
+        const rows = [
+          ['Автомобиль', price],
+          ['Логистика и страхование', logistics],
+          ['Таможенная пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d],
+          ['Утильсбор', util],
+          ['Брокер, СВХ, СБКТС, ЭПТС', paperwork],
+          ['Комиссия INAVTO ASIA', fee],
+        ];
+        $('c-rows').innerHTML = rows.map(r =>
+          '<div class="calc-row"><span>' + r[0] + '</span><b class="num">' + fmt(r[1]) + '</b></div>').join('');
+        $('c-total').textContent = fmt(total);
+
+        const lead = document.getElementById('calc-lead');
+        if (lead && lead.dataset) {
+          lead.dataset.brand = 'Расчёт: Китай, ' +
+            price.toLocaleString('ru-RU') + ' ₽, ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
+        }
+      }
+
+      /* Черновик: возвращаем пользователя к его расчёту */
+      const CALC_KEY = 'inavto_calc_draft';
+      const fields = ['c-price', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
+      try {
+        const draft = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
+        if (draft) fields.forEach(id => { if (draft[id] != null) $(id).value = draft[id]; });
+      } catch (e) { /* приватный режим */ }
+      const saveCalcDraft = () => {
+        try {
+          localStorage.setItem(CALC_KEY, JSON.stringify(
+            Object.fromEntries(fields.map(id => [id, $(id).value]))));
+        } catch (e) { /* — */ }
+      };
+      fields.forEach(id => $(id).addEventListener('input', () => { recalc(); saveCalcDraft(); A.goal('calc_used'); }));
+      recalc();
+
+      const feats = [
+        [I.truck, 'Логистика', 'Автовоз или ж/д из Китая через Забайкальск/Хоргос, либо морем до Владивостока. Груз застрахован на весь путь.'],
+        [I.doc, 'Таможня и утильсбор', 'Пошлина зависит от цены, объёма и возраста; утильсбор — от мощности. Всё оформляем сами.'],
+        [I.calc, 'Комиссия без сюрпризов', 'Наша комиссия фиксируется в договоре до начала работы. Никаких скрытых доплат «по факту».'],
+      ];
+      document.getElementById('calc-feats').innerHTML = feats.map(f =>
+        '<div class="feature reveal"><div class="icon">' + f[0] + '</div><h3>' + f[1] + '</h3><p>' + f[2] + '</p></div>').join('');
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

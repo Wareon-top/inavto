@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О компании INAVTO ASIA — автомобили из Китая под заказ</title>
+  <meta name="description" content="INAVTO ASIA — компания по подбору и доставке автомобилей из Китая под ключ: собственные специалисты на месте закупки, договор, официальная растаможка.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="o-kompanii">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / О компании</div>
+      <h1 class="h1">О компании</h1>
+      <p class="lead" style="margin-top:14px;max-width:720px">INAVTO ASIA — команда, которая делает заказ автомобиля из Китая таким же понятным, как покупка у дилера в соседнем квартале.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="prose reveal">
+        <p><b>Чем мы занимаемся.</b> Подбираем и привозим новые автомобили с рынка Китая: электромобили, гибриды и бензиновые модели. Берём на себя весь цикл — от поиска и проверки до растаможки и вручения в вашем городе.</p>
+        <p><b>Почему Китай.</b> Китайский авторынок — крупнейший в мире: новые технологичные автомобили по ценам заметно ниже российских дилерских, огромный выбор моделей и комплектаций, которых нет у дилеров РФ. Мы подбираем не «что есть», а что действительно подходит под вашу задачу и бюджет.</p>
+        <p><b>Как мы работаем с рисками.</b> Каждый автомобиль проверяется на месте до оплаты. Цена и сроки фиксируются в договоре. Деньги продавцу уходят по банковскому инвойсу. Груз застрахован. На каждом этапе вы получаете фото- и видеоотчёт — прозрачность встроена в наш процесс, а не добавлена для рекламы.</p>
+      </div>
+
+      <div class="grid grid-3" style="margin-top:44px" id="values"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Познакомимся?</h2>
+          <p class="lead">Расскажите, какой автомобиль ищете — пришлём варианты и расчёт. Или просто задайте вопрос в Telegram.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Оставить заявку</button>
+          <a class="btn btn-ghost" href="kontakty.html">Контакты</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO, I = A.ICONS;
+      const values = [
+        [I.map, 'Специалисты на месте', 'Наши люди в Китае лично осматривают автомобили и сопровождают сделку на стороне закупки.'],
+        [I.doc, 'Всё по договору', 'Работаем официально: договор, инвойсы, квитанции таможенных платежей, СБКТС и ЭПТС.'],
+        [I.bolt, 'Технологичность', 'Заявки, статусы заказа и отчёты — в Telegram. Сайт и мини-приложение работают на одной платформе.'],
+      ];
+      document.getElementById('values').innerHTML = values.map(v =>
+        '<div class="feature reveal"><div class="icon">' + v[0] + '</div><h3>' + v[1] + '</h3><p>' + v[2] + '</p></div>').join('');
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как мы работаем — этапы заказа авто из Китая | INAVTO ASIA</title>
+  <meta name="description" content="Как проходит заказ автомобиля из Китая: подбор, договор, проверка и выкуп, логистика, таможня, СБКТС и вручение. Сроки и фотоотчёты на каждом этапе.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="process">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / Как мы работаем</div>
+      <h1 class="h1">Как мы работаем</h1>
+      <p class="lead" style="margin-top:14px;max-width:700px">От заявки до вручения ключей — 6 понятных этапов. На каждом вы видите, что происходит с вашим автомобилем и деньгами.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="steps" style="grid-template-columns:repeat(2,1fr)" id="steps"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="tracker reveal">
+        <h2 class="h2" style="max-width:640px">Статус заказа — всегда под рукой</h2>
+        <p class="lead" style="margin-top:12px;max-width:640px">Каждому клиенту — персональный трекинг в Telegram: смена статуса приходит автоматически, вместе с фото и документами этапа.</p>
+        <div id="tracker-demo"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Готовы начать?</h2>
+          <p class="lead">Первый шаг бесплатный и ни к чему не обязывает: пришлём варианты и точный расчёт «под ключ».</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Оставить заявку</button>
+          <a class="btn btn-ghost" href="garantii.html">Наши гарантии</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO;
+      const steps = [
+        ['Заявка и подбор', 'Вы оставляете заявку или проходите короткий квиз. Менеджер уточняет задачу, подбирает 3–5 вариантов на площадках Китая и присылает их с фото и полным расчётом «под ключ». Сравниваете, задаёте вопросы, выбираете.', '1 день'],
+        ['Договор и фиксация условий', 'Заключаем договор, в котором зафиксированы: автомобиль, его цена, наша комиссия и сроки доставки. Подписать можно в офисе или дистанционно — через электронный документооборот.', '1 день'],
+        ['Проверка и выкуп', 'Наш специалист на месте осматривает автомобиль: кузов, техническое состояние, история, пробег. Отчёт с фото и видео отправляем вам. После вашего подтверждения оплачиваем автомобиль по инвойсу через банк — деньги уходят продавцу напрямую.', '2–7 дней'],
+        ['Логистика до России', 'Автовоз или железная дорога через Забайкальск/Хоргос, либо морем до Владивостока. Автомобиль застрахован на весь путь. Присылаем фото с погрузки и уведомления о движении груза.', '15–30 дней'],
+        ['Таможня, СБКТС и ЭПТС', 'Таможенное оформление, уплата пошлины и утильсбора, лаборатория СБКТС и выпуск электронного ПТС. Все платежи — по официальным квитанциям, которые вы видите.', '5–10 дней'],
+        ['Вручение', 'Передаём автомобиль с полным пакетом документов в вашем городе: лично или транспортной компанией. Помогаем с постановкой на учёт.', '1 день'],
+      ];
+      document.getElementById('steps').innerHTML = steps.map(s =>
+        '<div class="step reveal"><h3>' + s[0] + '</h3><p>' + s[1] + '</p><span class="step-time">' + s[2] + '</span></div>').join('');
+      document.getElementById('tracker-demo').innerHTML = A.trackerHTML(3);
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

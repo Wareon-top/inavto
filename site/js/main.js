@@ -45,6 +45,11 @@
   function renderHeader() {
     const nav = navLinks.map(([href, label, key]) =>
       `<a href="${href}"${key === page ? ' class="active"' : ''}>${label}</a>`).join('');
+    const curLang = (window.INAVTO_I18N && window.INAVTO_I18N.lang) || 'ru';
+    const langHtml = '<div class="lang-switch" role="group" aria-label="Язык сайта">' +
+      [['ru', 'Рус'], ['zh', '中文'], ['ko', '한국어']].map(([code, label]) =>
+        `<button type="button" data-lang="${code}"${code === curLang ? ' class="on"' : ''} lang="${code === 'ru' ? 'ru' : code === 'zh' ? 'zh-CN' : 'ko'}">${label}</button>`).join('') +
+      '</div>';
     const el = document.createElement('div');
     el.innerHTML = `
       <header class="header">
@@ -52,6 +57,7 @@
           <a class="logo" href="index.html"><b>INAVTO</b><span>ASIA</span></a>
           <nav class="nav">${nav}</nav>
           <div class="header-cta">
+            ${langHtml}
             <a class="header-phone" href="${C.phoneHref}">${C.phone}<small>ежедневно 9:00–21:00</small></a>
             <button class="btn btn-red btn-sm" data-quiz-open>Подобрать авто</button>
             <button class="burger" aria-label="Меню"><span></span><span></span><span></span></button>
@@ -64,9 +70,16 @@
         <a href="dostavka.html">Доставка и растаможка</a>
         <a href="o-kompanii.html">О компании</a>
         <a href="${C.phoneHref}">${C.phone}</a>
+        ${langHtml}
         <button class="btn btn-red btn-block" data-quiz-open>Подобрать авто</button>
       </div>`;
     document.body.prepend(el);
+
+    /* Переключение языка */
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-lang]');
+      if (b && window.INAVTO_I18N) window.INAVTO_I18N.setLang(b.dataset.lang);
+    });
 
     const burger = el.querySelector('.burger');
     const menu = el.querySelector('.mobile-menu');

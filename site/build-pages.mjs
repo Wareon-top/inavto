@@ -144,6 +144,7 @@ function pageHTML(car) {
   </section>` : ''}
 
   <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
   <script>
     window.INAVTO_PAGE_INIT = function () {
       var A = window.INAVTO;

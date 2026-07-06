@@ -273,6 +273,9 @@
             <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Имя" required></div>
             <div class="form-field"><label>Телефон</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
             <div class="form-field"><label>${isBiz ? 'Регион работы' : 'Город доставки'}</label><input name="city" placeholder="${isBiz ? 'Например, Сибирь' : 'Например, Москва'}"></div>
+            <div class="form-field"><label>Как с вами связаться?</label><select name="messenger">
+              <option>Telegram</option><option>WhatsApp</option><option>Звонок по телефону</option>
+            </select></div>
             <button class="btn btn-red btn-block" type="submit">${isBiz ? 'Получить условия' : 'Получить подборку'}</button>
             <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
           </form>
@@ -282,10 +285,12 @@
         body.querySelector('#quiz-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const f = e.target;
+          const city = f.city.value.trim();
+          const messenger = f.messenger ? f.messenger.value : '';
           const payload = {
             name: f.name.value.trim(),
             phone: f.phone.value.trim(),
-            city: f.city.value.trim(),
+            city: city + (messenger ? (city ? ' · ' : '') + 'связь: ' + messenger : ''),
             budget: state.answers.budget || '',
             brand: isBiz ? '#бизнес ' + (state.answers.volume || '') : '#длясебя',
             body: state.answers.body || '',
@@ -382,13 +387,15 @@
       attachPhoneMask(f.querySelector('input[name=phone]'));
       f.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const messenger = f.messenger ? f.messenger.value : '';
+        const comment = (f.querySelector('[name=comment]') && f.querySelector('[name=comment]').value || '').trim();
         const payload = {
           name: (f.name && f.name.value || '').trim() || '—',
           phone: (f.phone && f.phone.value || '').trim(),
           city: (f.city && f.city.value || '').trim(),
           budget: f.dataset.leadForm || 'заявка с сайта',
           brand: (f.dataset.brand || ''),
-          body: (f.querySelector('[name=comment]') && f.querySelector('[name=comment]').value || '').trim(),
+          body: comment + (messenger ? (comment ? ' · ' : '') + 'связь: ' + messenger : ''),
           fuel: '',
         };
         if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }

@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite runtime data
+backend/*.db
+backend/data/
+
+# Editor
+.vscode/
+.idea/

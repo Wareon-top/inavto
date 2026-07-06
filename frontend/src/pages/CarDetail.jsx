@@ -150,7 +150,7 @@ export default function CarDetail() {
         <button
           onClick={() => {
             setBooked(true)
-            window.open('https://t.me/inavtochina', '_blank')
+            window.open('https://t.me/Dilshat1985', '_blank')
           }}
           className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
             booked ? 'bg-green-600 text-white' : 'bg-[#C8102E] text-white'
@@ -160,13 +160,13 @@ export default function CarDetail() {
         </button>
         <div className="flex gap-2">
           <button
-            onClick={() => window.open('https://t.me/inavtochina', '_blank')}
+            onClick={() => window.open('https://t.me/Dilshat1985', '_blank')}
             className="flex-1 bg-white/10 text-white py-2.5 rounded-xl text-sm font-medium"
           >
             Связаться
           </button>
           <button
-            onClick={() => window.open('https://t.me/inavtochina', '_blank')}
+            onClick={() => window.open('https://t.me/Dilshat1985', '_blank')}
             className="flex-1 bg-white/10 text-white py-2.5 rounded-xl text-sm font-medium"
           >
             Получить расчёт

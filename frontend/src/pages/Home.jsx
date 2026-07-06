@@ -34,7 +34,7 @@ export default function Home() {
             <p className="text-gray-400 text-xs">Автомобили из Китая под ключ</p>
           </div>
           <button
-            onClick={() => window.open('https://t.me/inavtochina', '_blank')}
+            onClick={() => window.open('https://t.me/Dilshat1985', '_blank')}
             className="bg-[#C8102E]/20 border border-[#C8102E]/40 text-[#C8102E] text-xs font-medium px-3 py-1.5 rounded-full"
           >
             Связаться
@@ -92,7 +92,7 @@ export default function Home() {
             <div className="text-gray-500 text-xs mt-0.5">Отследить статус</div>
           </button>
           <button
-            onClick={() => window.open('https://t.me/inavtochina', '_blank')}
+            onClick={() => window.open('https://t.me/Dilshat1985', '_blank')}
             className="card-hover bg-[#C8102E]/10 border border-[#C8102E]/30 rounded-2xl p-4 text-left"
           >
             <div className="text-2xl mb-2">💬</div>

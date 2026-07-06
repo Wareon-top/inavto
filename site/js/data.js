@@ -4,10 +4,10 @@
 window.INAVTO = window.INAVTO || {};
 
 window.INAVTO.CONTACTS = {
-  phone: '+7 900 000-00-00',
-  phoneHref: 'tel:+79000000000',
-  telegram: 'https://t.me/inavtochina',
-  whatsapp: 'https://wa.me/79000000000',
+  phone: '+7 967 646-36-29',
+  phoneHref: 'tel:+79676463629',
+  telegram: 'https://t.me/Dilshat1985',
+  whatsapp: 'https://wa.me/79676463629',
   email: 'info@inavto.asia',
 };
 

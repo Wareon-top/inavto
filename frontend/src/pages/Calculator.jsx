@@ -152,7 +152,7 @@ export default function Calculator() {
       </p>
 
       <button
-        onClick={() => window.open('https://t.me/inavtochina', '_blank')}
+        onClick={() => window.open('https://t.me/Dilshat1985', '_blank')}
         className="w-full bg-[#C8102E] text-white font-bold py-4 rounded-xl text-sm"
       >
         Получить точный расчёт

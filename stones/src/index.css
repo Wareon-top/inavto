@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #000;
+}
+
+/* Scroll-into-view fade-up: elements start hidden, animate once */
+.hero-anim {
+  opacity: 0;
+  transform: translateY(26px);
+}
+.hero-fade {
+  animation: heroFade 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes heroFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Image clip-reveal: uncovers from top to bottom */
+.img-anim {
+  clip-path: inset(0 0 100% 0);
+}
+.img-reveal {
+  animation: imgReveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes imgReveal {
+  to {
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim {
+    opacity: 1;
+    transform: none;
+  }
+  .img-anim {
+    clip-path: none;
+  }
+  .hero-fade,
+  .img-reveal {
+    animation: none;
+  }
+}

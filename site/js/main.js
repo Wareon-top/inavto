@@ -146,6 +146,7 @@
               <h4>Компания</h4>
               <a href="kak-my-rabotaem.html">Как мы работаем</a>
               <a href="vydannye-avto.html">Выданные авто</a>
+              <a href="blog/index.html">Блог</a>
               <a href="garantii.html">Гарантии</a>
               <a href="dostavka.html">Доставка и растаможка</a>
               <a href="dlya-biznesa.html">Для бизнеса</a>

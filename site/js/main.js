@@ -47,8 +47,8 @@
       `<a href="${href}"${key === page ? ' class="active"' : ''}>${label}</a>`).join('');
     const curLang = (window.INAVTO_I18N && window.INAVTO_I18N.lang) || 'ru';
     const langHtml = '<div class="lang-switch" role="group" aria-label="Язык сайта">' +
-      [['ru', 'Рус'], ['zh', '中文'], ['ko', '한국어']].map(([code, label]) =>
-        `<button type="button" data-lang="${code}"${code === curLang ? ' class="on"' : ''} lang="${code === 'ru' ? 'ru' : code === 'zh' ? 'zh-CN' : 'ko'}">${label}</button>`).join('') +
+      [['ru', 'Рус'], ['zh', '中文'], ['en', 'EN']].map(([code, label]) =>
+        `<button type="button" data-lang="${code}"${code === curLang ? ' class="on"' : ''} lang="${code === 'ru' ? 'ru' : code === 'zh' ? 'zh-CN' : 'en'}">${label}</button>`).join('') +
       '</div>';
     const el = document.createElement('div');
     el.innerHTML = `

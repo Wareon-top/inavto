@@ -28,8 +28,35 @@
     tg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6 18.8 19c-.2 1-.8 1.2-1.7.8l-4.6-3.4-2.2 2.1c-.3.3-.5.5-1 .5l.3-4.6L18 6.9c.4-.3-.1-.5-.6-.2L7.1 13.2l-4.5-1.4c-1-.3-1-1 .2-1.4l17.7-6.8c.8-.3 1.5.2 1.4 1z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.7-1.3 1.3-1.8 1.3-.5.1-1 .2-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.5.5c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.2 2.4 1.5 2.7 1.7.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2.1 1c.3.1.5.2.6.4 0 .1 0 .7-.2 1.2z"/></svg>',
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
   };
   A.ICONS = ICONS;
+
+  /* ---------- Избранное (localStorage) ---------- */
+  const FAV_KEY = 'inavto_favs';
+  const favList = () => {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch (e) { return []; }
+  };
+  A.favs = {
+    list: favList,
+    has: (slug) => favList().includes(slug),
+    toggle(slug) {
+      let l = favList();
+      if (l.includes(slug)) l = l.filter(x => x !== slug);
+      else { l.push(slug); A.goal('fav_add'); }
+      try { localStorage.setItem(FAV_KEY, JSON.stringify(l)); } catch (e) { /* — */ }
+      document.dispatchEvent(new CustomEvent('inavto:favs'));
+      return l;
+    },
+  };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fav]');
+    if (!b) return;
+    e.preventDefault();
+    A.favs.toggle(b.dataset.fav);
+    document.querySelectorAll('[data-fav="' + b.dataset.fav + '"]').forEach(x =>
+      x.classList.toggle('on', A.favs.has(b.dataset.fav)));
+  });
 
   /* ---------- Layout: шапка ---------- */
   const page = document.body.dataset.page || '';
@@ -68,6 +95,7 @@
         <a href="index.html">Главная</a>${nav}
         <a href="dlya-biznesa.html">Для бизнеса</a>
         <a href="dostavka.html">Доставка и растаможка</a>
+        <a href="vydannye-avto.html">Выданные авто</a>
         <a href="o-kompanii.html">О компании</a>
         <a href="${C.phoneHref}">${C.phone}</a>
         ${langHtml}
@@ -117,6 +145,7 @@
             <div>
               <h4>Компания</h4>
               <a href="kak-my-rabotaem.html">Как мы работаем</a>
+              <a href="vydannye-avto.html">Выданные авто</a>
               <a href="garantii.html">Гарантии</a>
               <a href="dostavka.html">Доставка и растаможка</a>
               <a href="dlya-biznesa.html">Для бизнеса</a>
@@ -188,10 +217,14 @@
   /* ---------- Карточка авто ---------- */
   A.carCard = function (car) {
     const priceNote = 'новый, под ключ';
+    const fav = A.favs.has(car.slug);
     return `<article class="car-card reveal">
       <a href="cars/${car.slug}.html">${A.carVisual(car)}</a>
       <div class="car-card-body">
-        <h3>${car.name}</h3>
+        <div class="car-card-head">
+          <h3>${car.name}</h3>
+          <button class="fav-btn${fav ? ' on' : ''}" data-fav="${car.slug}" aria-label="В избранное" title="В избранное">${ICONS.heart}</button>
+        </div>
         <div class="car-sub">${car.body} · ${car.fuel}</div>
         <ul class="car-specs">
           <li><span>Мощность</span><b>${car.power}</b></li>
@@ -435,6 +468,25 @@
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
   }
   A.initReveal = initReveal;
+
+  /* ---------- Выданные авто ---------- */
+  A.deliveredCard = function (d, demo) {
+    const car = A.CARS.find(c => c.name === d.model);
+    const photo = d.photo
+      ? `<img src="${d.photo}" alt="Вручение ${d.model} — ${d.city}" loading="lazy">`
+      : (car ? A.carVisual(car) : '');
+    return `<article class="delivered-card reveal">
+      <div class="dc-photo">
+        <span class="dc-badge">${demo ? 'макет' : 'выдано'}</span>
+        ${photo}
+        ${demo ? '<span class="demo-ribbon">Здесь будет фото вручения</span>' : ''}
+      </div>
+      <div class="dc-body">
+        <h3>${d.model}</h3>
+        <div class="dc-meta"><span>${d.city} · ${d.date}</span><b>${d.days} дн. до выдачи</b></div>
+      </div>
+    </article>`;
+  };
 
   /* ---------- Трекер ---------- */
   A.trackerHTML = function (doneCount) {

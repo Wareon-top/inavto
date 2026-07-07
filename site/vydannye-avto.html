@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Выданные автомобили из Китая — фото вручений | INAVTO ASIA</title>
+  <meta name="description" content="Фотоотчёты вручений автомобилей из Китая клиентам INAVTO ASIA: модель, город выдачи и фактический срок доставки.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="vydannye">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / Выданные авто</div>
+      <h1 class="h1">Выданные <span class="accent">авто</span></h1>
+      <p class="lead" style="margin-top:14px;max-width:680px">Каждое вручение — с фото, моделью, городом и фактическим сроком доставки. Не обещания, а результат.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div id="delivered-note" class="fav-bar show" style="display:none">
+        <span>Раздел наполняется: первые вручения уже едут к своим владельцам. Ниже — макет того, как будет выглядеть каждая выдача.</span>
+      </div>
+      <div class="delivered-grid" id="delivered-grid"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Следующее вручение — ваше</h2>
+          <p class="lead">Ответьте на 4 вопроса — пришлём варианты с расчётом «под ключ». Через 30–60 дней здесь может быть фото вашего автомобиля.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Подобрать авто</button>
+          <a class="btn btn-ghost" href="catalog.html">Каталог</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const A = window.INAVTO;
+      const grid = document.getElementById('delivered-grid');
+      const note = document.getElementById('delivered-note');
+      const list = A.DELIVERED || [];
+      if (list.length) {
+        grid.innerHTML = list.map(d => A.deliveredCard(d, false)).join('');
+      } else {
+        note.style.display = '';
+        const demo = [
+          { model: 'Zeekr 001', city: 'Москва', days: 43, date: 'пример записи' },
+          { model: 'Lixiang L7', city: 'Казань', days: 51, date: 'пример записи' },
+          { model: 'BYD Song Plus DM-i', city: 'Новосибирск', days: 38, date: 'пример записи' },
+        ];
+        grid.innerHTML = demo.map(d => A.deliveredCard(d, true)).join('');
+      }
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

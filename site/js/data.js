@@ -128,6 +128,13 @@ window.INAVTO.CARS = [
 
 ];
 
+/* Выданные автомобили (соцдоказательство).
+   Формат записи: { model: 'Zeekr 001', city: 'Казань', days: 43,
+                    date: 'июнь 2026', photo: 'img/delivered/zeekr-001-kazan.webp' }
+   Фото кладём в site/img/delivered/. Пока массив пуст — блок на главной скрыт,
+   страница vydannye-avto.html показывает макеты с пометкой. */
+window.INAVTO.DELIVERED = [];
+
 /* Этапы доставки для трекера */
 window.INAVTO.STAGES = [
   { key: 'contract', t: 'Договор', s: 'фиксируем цену и сроки' },

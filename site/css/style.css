@@ -923,6 +923,93 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   .cursor-dot.grow { width: 44px; height: 44px; }
 }
 
+/* ---------- Выданные авто ---------- */
+.delivered-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-strong); border: 1px solid var(--line-strong); }
+.delivered-card { background: var(--card); display: flex; flex-direction: column; }
+.dc-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #14161c; }
+.dc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dc-photo .car-visual { position: absolute; inset: 0; aspect-ratio: auto; }
+.dc-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  background: var(--red); color: #fafafa;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 6px 12px;
+}
+.demo-ribbon {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5, 5, 5, 0.55);
+  color: rgba(250, 250, 250, 0.85);
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+  text-align: center; padding: 20px; line-height: 2;
+}
+.dc-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 4px; }
+.dc-body h3 { font-family: var(--font-display); font-weight: 500; font-size: 15px; text-transform: uppercase; }
+.dc-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--muted); }
+.dc-meta b { color: var(--red); font-weight: 700; white-space: nowrap; }
+@media (max-width: 1024px) { .delivered-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .delivered-grid { grid-template-columns: 1fr; } }
+
+/* ---------- PDF-лид-магнит ---------- */
+.magnet {
+  display: grid; grid-template-columns: 0.65fr 1.35fr;
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  padding: clamp(28px, 4.5vw, 56px);
+}
+.magnet-cover {
+  aspect-ratio: 1 / 1.414;
+  background: var(--ink);
+  color: #fafafa;
+  padding: 9% 10%;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--ink);
+  box-shadow: 14px 14px 0 var(--red);
+  max-width: 300px;
+  margin: 0 auto;
+  width: 100%;
+}
+.magnet-cover .mc-brand { font-family: var(--font-display); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
+.magnet-cover .mc-brand span { color: var(--red); }
+.magnet-cover .mc-title { font-family: var(--font-display); font-weight: 600; font-size: clamp(15px, 1.6vw, 21px); line-height: 1.3; text-transform: uppercase; margin-top: auto; }
+.magnet-cover .mc-sub { font-size: 10px; color: rgba(250, 250, 250, 0.55); margin-top: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.magnet-cover .mc-tag { margin-top: 18px; border-top: 1px solid var(--red); padding-top: 10px; font-size: 9.5px; letter-spacing: 0.24em; color: var(--red); text-transform: uppercase; font-weight: 700; }
+.magnet-list { list-style: none; margin: 18px 0 24px; display: grid; gap: 10px; }
+.magnet-list li { display: flex; gap: 12px; font-size: 14px; color: var(--muted); }
+.magnet-list li::before { content: '—'; color: var(--red); font-weight: 700; flex: none; }
+.magnet-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end; }
+.magnet-form .btn { white-space: nowrap; }
+@media (max-width: 900px) { .magnet { grid-template-columns: 1fr; } .magnet-form { grid-template-columns: 1fr; } }
+
+/* ---------- Избранное ---------- */
+.fav-btn {
+  width: 34px; height: 34px; flex: none;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--muted-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: 0.15s;
+  border-radius: 0;
+}
+.fav-btn svg { width: 16px; height: 16px; }
+.fav-btn:hover { border-color: var(--red); color: var(--red); }
+.fav-btn.on { background: var(--red); border-color: var(--red); color: #fafafa; }
+.car-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.fav-bar {
+  display: none;
+  justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  border: 1px solid var(--red);
+  background: var(--red-soft);
+  padding: 14px 18px;
+  margin-bottom: 26px;
+  font-size: 13px;
+}
+.fav-bar.show { display: flex; }
+.fav-bar b { color: var(--red); }
+.fav-bar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
 /* ---------- Переключатель языка ---------- */
 .lang-switch { display: flex; border: 1px solid var(--ink); flex: none; }
 .lang-switch button {

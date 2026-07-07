@@ -172,7 +172,7 @@ for (const car of CARS) {
 }
 
 const staticPages = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
-  'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'o-kompanii.html', 'kontakty.html']
+  'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'vydannye-avto.html', 'o-kompanii.html', 'kontakty.html']
 const urls = [
   ...staticPages.map((p) => `${DOMAIN}/${p}`),
   ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),

@@ -25,9 +25,22 @@
       <div class="calc-layout">
         <div class="calc-panel">
           <div class="form-grid">
-            <div class="form-field">
-              <label>Цена автомобиля на месте, ₽ (в пересчёте)</label>
-              <input id="c-price" type="number" min="100000" step="50000" value="2500000">
+            <div class="calc-price-grid">
+              <div class="form-field">
+                <label>Цена автомобиля</label>
+                <input id="c-price" type="number" min="10000" step="1000" value="220000">
+              </div>
+              <div class="form-field">
+                <label>Валюта</label>
+                <select id="c-cur">
+                  <option value="cny">Юани, CN¥</option>
+                  <option value="rub">Рубли, ₽</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field" id="c-cny-wrap">
+              <label>Курс юаня, ₽</label>
+              <input id="c-cny" type="number" min="5" max="30" step="0.1" value="11.4">
             </div>
             <div class="form-field">
               <label>Тип двигателя</label>
@@ -36,6 +49,7 @@
                 <option value="hybrid">Гибрид (с ДВС)</option>
                 <option value="ev">Электромобиль</option>
               </select>
+              <div class="form-note" style="margin-top:6px">Последовательные гибриды (EREV) считаются как электромобили.</div>
             </div>
             <div class="form-field" id="c-vol-wrap">
               <label>Объём двигателя, см³</label>
@@ -44,6 +58,7 @@
             <div class="form-field">
               <label>Мощность, л.с.</label>
               <input id="c-power" type="number" min="50" max="1200" step="10" value="150">
+              <div class="form-note" style="margin-top:6px">Для гибридов указывайте суммарную мощность ДВС и электромоторов.</div>
             </div>
             <div class="form-field">
               <label>Возраст автомобиля</label>
@@ -62,9 +77,8 @@
 
         <div>
           <div class="calc-panel calc-result reveal">
-            <h3 class="h3" style="margin-bottom:14px">Смета «под ключ»</h3>
+            <div class="calc-total" style="padding-top:0;margin-bottom:6px"><span class="muted">Итоговая цена с доставкой из Китая</span><b class="num" id="c-total">—</b></div>
             <div id="c-rows"></div>
-            <div class="calc-total"><span class="muted">Итого, примерно</span><b class="num" id="c-total">—</b></div>
             <p class="form-note" style="margin-top:14px">Расчёт предварительный: ставки пошлин и утильсбора зависят от точных характеристик и даты оформления, курс — от дня оплаты. Итоговая смета фиксируется в договоре.</p>
             <form class="form-grid" data-lead-form="Заявка из калькулятора" style="margin-top:18px" id="calc-lead">
               <div class="form-field"><input name="name" placeholder="Ваше имя" required></div>
@@ -129,8 +143,23 @@
         return 2600000;
       }
 
+      /* Таможенный сбор за оформление (пост. № 1638, ставки с 01.01.2026) */
+      function customsFee(priceRub) {
+        if (priceRub <= 200000) return 1231;
+        if (priceRub <= 450000) return 2462;
+        if (priceRub <= 1200000) return 4924;
+        if (priceRub <= 2700000) return 13541;
+        if (priceRub <= 4200000) return 18465;
+        if (priceRub <= 5500000) return 21344;
+        if (priceRub <= 10000000) return 49240;
+        return 73860;
+      }
+
       function recalc() {
-        const price = +$('c-price').value || 0;
+        const rawPrice = +$('c-price').value || 0;
+        const cur = $('c-cur').value;
+        const cny = +$('c-cny').value || 11.4;
+        const price = cur === 'cny' ? Math.round(rawPrice * cny) : rawPrice;
         const fuel = $('c-fuel').value;
         const vol = fuel === 'ev' ? 0 : (+$('c-vol').value || 0);
         const power = +$('c-power').value || 0;
@@ -138,39 +167,54 @@
         const eur = +$('c-eur').value || 100;
 
         $('c-vol-wrap').style.display = fuel === 'ev' ? 'none' : '';
+        $('c-cny-wrap').style.display = cur === 'cny' ? '' : 'none';
 
         const logistics = 260000;
         const d = duty(price, vol, age, fuel, eur);
+        const cFee = customsFee(price);
         const util = utilFee(power, age, fuel);
+        const customs = d + cFee + util;
         const paperwork = 95000;   // брокер, СВХ, СБКТС, ЭПТС
         const fee = Math.max(150000, price * 0.05); // комиссия
-        const total = price + logistics + d + util + paperwork + fee;
+        const delivery = logistics + paperwork + fee;
+        const total = price + customs + delivery;
 
-        const rows = [
-          ['Автомобиль', price],
-          ['Логистика и страхование', logistics],
-          ['Таможенная пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d],
-          ['Утильсбор', util],
-          ['Брокер, СВХ, СБКТС, ЭПТС', paperwork],
-          ['Комиссия INAVTO ASIA', fee],
-        ];
-        $('c-rows').innerHTML = rows.map(r =>
-          '<div class="calc-row"><span>' + r[0] + '</span><b class="num">' + fmt(r[1]) + '</b></div>').join('');
+        const row = (name, val, eq) =>
+          '<div class="calc-row"><span>' + name + '</span><b class="num">' +
+          (eq ? '<i class="calc-eq num">' + eq + '</i>' : '') + fmt(val) + '</b></div>';
+        const group = (name, val) =>
+          '<div class="calc-group-head"><span>' + name + '</span><b class="num">' + fmt(val) + '</b></div>';
+
+        $('c-rows').innerHTML =
+          row('Автомобиль', price, cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥' : '') +
+          group('Пошлина и сборы на физлицо', customs) +
+          '<div class="calc-sub">Ставки и коэффициенты от 01.01.2026</div>' +
+          row('Пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d, fuel === 'ev' ? '' : Math.round(d / eur).toLocaleString('ru-RU') + ' €') +
+          row('Таможенный сбор', cFee) +
+          row('Утильсбор', util) +
+          group('Доставка и оформление', delivery) +
+          row('Логистика и страхование', logistics) +
+          row('Брокер, СВХ, СБКТС, ЭПТС', paperwork) +
+          row('Комиссия INAVTO ASIA', fee);
         $('c-total').textContent = fmt(total);
 
         const lead = document.getElementById('calc-lead');
         if (lead && lead.dataset) {
           lead.dataset.brand = 'Расчёт: Китай, ' +
-            price.toLocaleString('ru-RU') + ' ₽, ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
+            (cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥ (' + price.toLocaleString('ru-RU') + ' ₽)' : price.toLocaleString('ru-RU') + ' ₽') +
+            ', ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
         }
       }
 
       /* Черновик: возвращаем пользователя к его расчёту */
       const CALC_KEY = 'inavto_calc_draft';
-      const fields = ['c-price', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
+      const fields = ['c-price', 'c-cur', 'c-cny', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
       try {
         const draft = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
-        if (draft) fields.forEach(id => { if (draft[id] != null) $(id).value = draft[id]; });
+        if (draft) {
+          if (draft['c-cur'] == null) draft['c-cur'] = 'rub';  // старые черновики хранили цену в рублях
+          fields.forEach(id => { if (draft[id] != null) $(id).value = draft[id]; });
+        }
       } catch (e) { /* приватный режим */ }
       const saveCalcDraft = () => {
         try {

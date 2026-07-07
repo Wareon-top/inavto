@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="calculator">
@@ -34,6 +35,7 @@
                 <label>Валюта</label>
                 <select id="c-cur">
                   <option value="cny">Юани, CN¥</option>
+                  <option value="usd">Доллары, $</option>
                   <option value="rub">Рубли, ₽</option>
                 </select>
               </div>
@@ -41,6 +43,10 @@
             <div class="form-field" id="c-cny-wrap">
               <label>Курс юаня, ₽</label>
               <input id="c-cny" type="number" min="5" max="30" step="0.1" value="11.4">
+            </div>
+            <div class="form-field" id="c-usd-wrap" style="display:none">
+              <label>Курс доллара, ₽</label>
+              <input id="c-usd" type="number" min="40" max="200" step="0.5" value="80">
             </div>
             <div class="form-field">
               <label>Тип двигателя</label>
@@ -159,7 +165,9 @@
         const rawPrice = +$('c-price').value || 0;
         const cur = $('c-cur').value;
         const cny = +$('c-cny').value || 11.4;
-        const price = cur === 'cny' ? Math.round(rawPrice * cny) : rawPrice;
+        const usd = +$('c-usd').value || 80;
+        const price = cur === 'cny' ? Math.round(rawPrice * cny)
+          : cur === 'usd' ? Math.round(rawPrice * usd) : rawPrice;
         const fuel = $('c-fuel').value;
         const vol = fuel === 'ev' ? 0 : (+$('c-vol').value || 0);
         const power = +$('c-power').value || 0;
@@ -168,6 +176,7 @@
 
         $('c-vol-wrap').style.display = fuel === 'ev' ? 'none' : '';
         $('c-cny-wrap').style.display = cur === 'cny' ? '' : 'none';
+        $('c-usd-wrap').style.display = cur === 'usd' ? '' : 'none';
 
         const logistics = 260000;
         const d = duty(price, vol, age, fuel, eur);
@@ -175,7 +184,7 @@
         const util = utilFee(power, age, fuel);
         const customs = d + cFee + util;
         const paperwork = 95000;   // брокер, СВХ, СБКТС, ЭПТС
-        const fee = Math.max(150000, price * 0.05); // комиссия
+        const fee = 70000;         // фиксированная комиссия INAVTO ASIA
         const delivery = logistics + paperwork + fee;
         const total = price + customs + delivery;
 
@@ -185,8 +194,10 @@
         const group = (name, val) =>
           '<div class="calc-group-head"><span>' + name + '</span><b class="num">' + fmt(val) + '</b></div>';
 
+        const priceEq = cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥'
+          : cur === 'usd' ? rawPrice.toLocaleString('ru-RU') + ' $' : '';
         $('c-rows').innerHTML =
-          row('Автомобиль', price, cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥' : '') +
+          row('Автомобиль', price, priceEq) +
           group('Пошлина и сборы на физлицо', customs) +
           '<div class="calc-sub">Ставки и коэффициенты от 01.01.2026</div>' +
           row('Пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d, fuel === 'ev' ? '' : Math.round(d / eur).toLocaleString('ru-RU') + ' €') +
@@ -201,14 +212,15 @@
         const lead = document.getElementById('calc-lead');
         if (lead && lead.dataset) {
           lead.dataset.brand = 'Расчёт: Китай, ' +
-            (cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥ (' + price.toLocaleString('ru-RU') + ' ₽)' : price.toLocaleString('ru-RU') + ' ₽') +
+            (cur === 'rub' ? price.toLocaleString('ru-RU') + ' ₽'
+              : rawPrice.toLocaleString('ru-RU') + (cur === 'cny' ? ' ¥ (' : ' $ (') + price.toLocaleString('ru-RU') + ' ₽)') +
             ', ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
         }
       }
 
       /* Черновик: возвращаем пользователя к его расчёту */
       const CALC_KEY = 'inavto_calc_draft';
-      const fields = ['c-price', 'c-cur', 'c-cny', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
+      const fields = ['c-price', 'c-cur', 'c-cny', 'c-usd', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
       try {
         const draft = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
         if (draft) {

@@ -18,6 +18,7 @@
 | `garantii.html` | Гарантии сделки |
 | `dostavka.html` | Доставка и растаможка |
 | `dlya-biznesa.html` | Условия для юрлиц и перекупщиков (партии) |
+| `vydannye-avto.html` | Выданные авто: фото вручений (данные — `INAVTO.DELIVERED` в data.js) |
 | `o-kompanii.html` | О компании |
 | `kontakty.html` | Контакты + обратный звонок |
 | `privacy.html` | Политика конфиденциальности |

@@ -23,6 +23,17 @@
 
   <section class="section" style="padding-top:16px">
     <div class="container">
+      <div class="fav-bar" id="fav-bar">
+        <span id="fav-count">В избранном: <b>0</b></span>
+        <div class="fav-bar-actions">
+          <button class="btn btn-ghost btn-sm" id="fav-show">Показать избранное</button>
+          <button class="btn btn-red btn-sm" id="fav-share">Поделиться подборкой</button>
+        </div>
+      </div>
+      <div class="fav-bar show" id="shared-bar" style="display:none">
+        <span>Вам поделились подборкой автомобилей. Понравилось — жмите ♥, чтобы сохранить себе.</span>
+        <div class="fav-bar-actions"><a class="btn btn-ghost btn-sm" href="catalog.html">Весь каталог</a></div>
+      </div>
       <div class="filters">
         <select id="f-brand"><option value="">Все марки</option></select>
         <select id="f-body">
@@ -103,6 +114,65 @@
         A.initReveal();
       }
       ['f-brand', 'f-body', 'f-fuel', 'f-price', 'f-sort'].forEach(id => $(id).addEventListener('change', apply));
+
+      /* ---------- Избранное: бар, фильтр, шаринг ---------- */
+      let favOnly = false;
+      const favBar = $('fav-bar'), favCount = $('fav-count'), favShow = $('fav-show');
+
+      function refreshFavBar() {
+        const n = A.favs.list().length;
+        favBar.classList.toggle('show', n > 0 || favOnly);
+        favCount.innerHTML = 'В избранном: <b>' + n + '</b>';
+        favShow.textContent = favOnly ? 'Показать все модели' : 'Показать избранное';
+        if (favOnly && n === 0) { favOnly = false; apply(); }
+      }
+      const baseApply = apply;
+      apply = function () {
+        if (favOnly) {
+          const favs = A.favs.list();
+          const list = cars.filter(c => favs.includes(c.slug));
+          grid.innerHTML = list.map(A.carCard).join('');
+          empty.style.display = list.length ? 'none' : 'block';
+          A.initReveal();
+        } else {
+          baseApply();
+        }
+        refreshFavBar();
+      };
+      favShow.addEventListener('click', () => { favOnly = !favOnly; apply(); });
+      document.addEventListener('inavto:favs', refreshFavBar);
+
+      $('fav-share').addEventListener('click', () => {
+        const favs = A.favs.list();
+        if (!favs.length) return;
+        const url = location.origin + location.pathname.replace(/[^/]*$/, '') +
+          'catalog.html?favs=' + favs.join(',');
+        A.goal('fav_share');
+        const done = () => {
+          $('fav-share').textContent = 'Ссылка скопирована!';
+          setTimeout(() => { $('fav-share').textContent = 'Поделиться подборкой'; }, 2200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done).catch(() => window.prompt('Скопируйте ссылку на подборку:', url));
+        } else {
+          window.prompt('Скопируйте ссылку на подборку:', url);
+        }
+      });
+
+      /* Открытие чужой подборки: catalog.html?favs=slug1,slug2 */
+      const shared = new URLSearchParams(location.search).get('favs');
+      if (shared) {
+        const slugs = shared.split(',').filter(sl => cars.some(c => c.slug === sl));
+        if (slugs.length) {
+          $('shared-bar').style.display = '';
+          document.querySelector('.filters').style.display = 'none';
+          grid.innerHTML = cars.filter(c => slugs.includes(c.slug)).map(A.carCard).join('');
+          empty.style.display = 'none';
+          A.initReveal();
+          refreshFavBar();
+          return;
+        }
+      }
       apply();
     };
   </script>

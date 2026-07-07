@@ -77,6 +77,7 @@
             <div class="form-field">
               <label>Курс евро для расчёта пошлины, ₽</label>
               <input id="c-eur" type="number" min="50" max="250" step="1" value="100">
+              <div class="form-note" id="c-rates-note" style="display:none;margin-top:6px">Курсы ЦБ РФ подставлены автоматически — можно править вручную.</div>
             </div>
           </div>
         </div>
@@ -236,6 +237,37 @@
       };
       fields.forEach(id => $(id).addEventListener('input', () => { recalc(); saveCalcDraft(); A.goal('calc_used'); }));
       recalc();
+
+      /* Автокурсы ЦБ РФ (кэш 12 ч); поля остаются редактируемыми */
+      const RATES_KEY = 'inavto_rates';
+      function applyRates(r) {
+        if (r.cny) $('c-cny').value = Math.round(r.cny * 10) / 10;
+        if (r.usd) $('c-usd').value = Math.round(r.usd * 2) / 2;
+        if (r.eur) $('c-eur').value = Math.round(r.eur);
+        const note = document.getElementById('c-rates-note');
+        if (note) note.style.display = '';
+        recalc(); saveCalcDraft();
+      }
+      (function loadRates() {
+        try {
+          const c = JSON.parse(localStorage.getItem(RATES_KEY) || 'null');
+          if (c && Date.now() - c.t < 12 * 3600 * 1000) { applyRates(c); return; }
+        } catch (e) { /* — */ }
+        fetch('https://www.cbr-xml-daily.ru/daily_json.js')
+          .then(res => res.json())
+          .then(d => {
+            const v = d.Valute || {};
+            const rates = {
+              t: Date.now(),
+              cny: v.CNY ? v.CNY.Value / v.CNY.Nominal : 0,
+              usd: v.USD ? v.USD.Value / v.USD.Nominal : 0,
+              eur: v.EUR ? v.EUR.Value / v.EUR.Nominal : 0,
+            };
+            try { localStorage.setItem(RATES_KEY, JSON.stringify(rates)); } catch (e) { /* — */ }
+            applyRates(rates);
+          })
+          .catch(() => { /* офлайн — остаются значения по умолчанию/из черновика */ });
+      })();
 
       const feats = [
         [I.truck, 'Логистика', 'Автовоз или ж/д из Китая через Забайкальск/Хоргос, либо морем до Владивостока. Груз застрахован на весь путь.'],

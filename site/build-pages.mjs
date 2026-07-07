@@ -171,15 +171,257 @@ for (const car of CARS) {
   fs.writeFileSync(path.join(outDir, `${car.slug}.html`), pageHTML(car))
 }
 
+
+/* ================= ГЕО-СТРАНИЦЫ «Авто из Китая в {город}» ================= */
+
+const CITIES = [
+  ['moskva', 'Москва', 'в Москве', 'west'],
+  ['sankt-peterburg', 'Санкт-Петербург', 'в Санкт-Петербурге', 'west'],
+  ['novosibirsk', 'Новосибирск', 'в Новосибирске', 'siberia'],
+  ['ekaterinburg', 'Екатеринбург', 'в Екатеринбурге', 'ural'],
+  ['kazan', 'Казань', 'в Казани', 'west'],
+  ['nizhniy-novgorod', 'Нижний Новгород', 'в Нижнем Новгороде', 'west'],
+  ['krasnoyarsk', 'Красноярск', 'в Красноярске', 'siberia'],
+  ['chelyabinsk', 'Челябинск', 'в Челябинске', 'ural'],
+  ['samara', 'Самара', 'в Самаре', 'west'],
+  ['ufa', 'Уфа', 'в Уфе', 'ural'],
+  ['rostov-na-donu', 'Ростов-на-Дону', 'в Ростове-на-Дону', 'west'],
+  ['omsk', 'Омск', 'в Омске', 'siberia'],
+  ['krasnodar', 'Краснодар', 'в Краснодаре', 'west'],
+  ['voronezh', 'Воронеж', 'в Воронеже', 'west'],
+  ['perm', 'Пермь', 'в Перми', 'ural'],
+  ['volgograd', 'Волгоград', 'в Волгограде', 'west'],
+  ['saratov', 'Саратов', 'в Саратове', 'west'],
+  ['tyumen', 'Тюмень', 'в Тюмени', 'ural'],
+  ['tolyatti', 'Тольятти', 'в Тольятти', 'west'],
+  ['izhevsk', 'Ижевск', 'в Ижевске', 'ural'],
+  ['barnaul', 'Барнаул', 'в Барнауле', 'siberia'],
+  ['irkutsk', 'Иркутск', 'в Иркутске', 'siberia'],
+  ['khabarovsk', 'Хабаровск', 'в Хабаровске', 'fareast'],
+  ['vladivostok', 'Владивосток', 'во Владивостоке', 'fareast'],
+  ['yaroslavl', 'Ярославль', 'в Ярославле', 'west'],
+  ['kemerovo', 'Кемерово', 'в Кемерове', 'siberia'],
+  ['novokuznetsk', 'Новокузнецк', 'в Новокузнецке', 'siberia'],
+  ['tomsk', 'Томск', 'в Томске', 'siberia'],
+  ['orenburg', 'Оренбург', 'в Оренбурге', 'ural'],
+  ['surgut', 'Сургут', 'в Сургуте', 'ural'],
+  ['chita', 'Чита', 'в Чите', 'fareast'],
+  ['ulan-ude', 'Улан-Удэ', 'в Улан-Удэ', 'fareast'],
+]
+
+const REGION = {
+  fareast: {
+    term: '25–45 дней',
+    route: 'Ваш регион — ближайший к Китаю: автомобили заезжают через Забайкальск или приходят морем во Владивосток, без длинного плеча по России. Отсюда и самые короткие сроки.',
+  },
+  siberia: {
+    term: '30–50 дней',
+    route: 'Сибирь стоит на основном маршруте из Китая: автомобиль пересекает границу в Забайкальске или Хоргосе и едет к вам железной дорогой либо автовозом.',
+  },
+  ural: {
+    term: '35–55 дней',
+    route: 'До Урала автомобили идут через Хоргос или Забайкальск железной дорогой и автовозом — маршрут отработанный, сроки предсказуемые.',
+  },
+  west: {
+    term: '40–60 дней',
+    route: 'В европейскую часть России автомобили привозим железной дорогой или автовозом через Забайкальск/Хоргос; для юга Китая часто выгоднее морем до Владивостока и далее по ж-д.',
+  },
+}
+
+const GEO_INTROS = [
+  (c) => `Привозим новые автомобили из Китая ${c[2]} «под ключ»: выкуп, проверка, логистика, растаможка, СБКТС и вручение с полным пакетом документов. Цена и срок фиксируются в договоре до старта работы.`,
+  (c) => `Подбираем и доставляем новые автомобили из Китая ${c[2]}: электромобили, гибриды и бензиновые модели. Берём на себя весь цикл — от поиска на китайских площадках до выдачи с документами, готовыми для ГИБДД.`,
+  (c) => `Новые авто из Китая с доставкой ${c[2]} — с фиксацией цены в договоре, оплатой по банковскому инвойсу и фотоотчётами на каждом этапе пути. Растаможка и сертификация — полностью на нас.`,
+]
+
+function geoHTML(city, i) {
+  const [slug, name, inCity, regionKey] = city
+  const region = REGION[regionKey]
+  const title = `Авто из Китая ${inCity} — под заказ с доставкой под ключ | INAVTO ASIA`
+  const desc = `Новые автомобили из Китая под заказ с доставкой ${inCity}: фиксированная цена в договоре, растаможка, СБКТС/ЭПТС, срок ${region.term}. Комиссия 70 000 ₽, расчёт под ключ за день.`
+  const intro = GEO_INTROS[i % GEO_INTROS.length](city)
+
+  const faq = [
+    [`Сколько ехать автомобилю из Китая ${inCity}?`,
+      `Ориентировочно ${region.term} с момента выкупа. ${region.route} Максимальный срок фиксируется в договоре.`],
+    [`Как проходит выдача ${inCity}?`,
+      `Автомобиль передаём лично в руки или автовозом до вашего адреса — с полным пакетом документов: договор, инвойсы, таможенные квитанции, СБКТС и электронный ПТС. Поможем с постановкой на учёт.`],
+    [`Сколько стоит доставка ${inCity}?`,
+      `Логистика и все платежи считаются заранее и входят в смету «под ключ» — воспользуйтесь калькулятором на сайте или оставьте заявку: пришлём точный расчёт для вашего города в течение дня.`],
+  ]
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  }
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: `${DOMAIN}/` },
+      { '@type': 'ListItem', position: 2, name: 'Доставка и растаможка', item: `${DOMAIN}/dostavka.html` },
+      { '@type': 'ListItem', position: 3, name: name },
+    ],
+  }
+
+  const others = CITIES.filter((c) => c[0] !== slug).slice(0, 14)
+  const topSlugs = CARS.slice(0, 6).map((c) => c.slug).join(',')
+
+  return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="../">
+  <title>${esc(title)}</title>
+  <meta name="description" content="${esc(desc)}">
+  <link rel="canonical" href="${DOMAIN}/gorod/${slug}.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">${JSON.stringify(breadcrumbLd)}</script>
+  <script type="application/ld+json">${JSON.stringify(faqLd)}</script>
+</head>
+<body data-page="geo">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / <a href="dostavka.html">Доставка</a> / ${esc(name)}</div>
+      <h1 class="h1">Авто из Китая <span class="accent">${esc(inCity)}</span></h1>
+      <p class="lead" style="margin-top:14px;max-width:720px">${esc(intro)}</p>
+      <div class="hero-actions" style="margin-top:32px">
+        <button class="btn btn-red" data-quiz-open>Подобрать автомобиль</button>
+        <a class="btn btn-ghost" href="calculator.html">Рассчитать цену под ключ</a>
+      </div>
+      <div class="hero-stats">
+        <div><b class="num">${region.term}</b><span>доставка ${esc(inCity)}</span></div>
+        <div><b class="num">70 000 ₽</b><span>фиксированная комиссия</span></div>
+        <div><b class="num">1–2 дня</b><span>выкуп после вашего «да»</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Маршрут</div>
+        <h2 class="h2" style="margin-top:14px">Как мы доставляем ${esc(inCity)}</h2>
+        <p class="lead">${esc(region.route)}</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="feature reveal"><h3>Логистика и страховка</h3><p>Автовоз, железная дорога или море — маршрут подбираем под задачу. Груз застрахован на весь путь, фото с погрузки и статусы приходят в Telegram.</p></div>
+        <div class="feature reveal"><h3>Растаможка по пути</h3><p>Пошлина, таможенный сбор, утильсбор, СБКТС и электронный ПТС — оформляем сами, по официальным квитанциям, которые вы видите.</p></div>
+        <div class="feature reveal"><h3>Выдача ${esc(inCity)}</h3><p>Передаём автомобиль с полным пакетом документов — лично в руки или автовозом до адреса. Помогаем с постановкой на учёт в ГИБДД.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">Каталог</div>
+        <h2 class="h2" style="margin-top:14px">Популярные модели под заказ</h2>
+        <p class="lead">Цены «под ключ» — с логистикой, таможней и нашей комиссией. Привезём и любую другую модель с рынка Китая.</p>
+      </div>
+      <div class="cars-grid" data-geo-cars="${topSlugs}"></div>
+      <div style="text-align:center;margin-top:36px"><a class="btn btn-white" href="catalog.html">Открыть весь каталог</a></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head"><h2 class="h2">Частые вопросы</h2></div>
+      <div style="max-width:820px">
+        ${faq.map(([q, a]) => `<div class="faq-item"><button class="faq-q">${esc(q)}</button><div class="faq-a">${esc(a)}</div></div>`).join('\n        ')}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="divider-label" style="margin-bottom:22px">Другие города</div>
+      <div class="geo-links">
+        ${others.map((c) => `<a href="gorod/${c[0]}.html">${esc(c[1])}</a>`).join('\n        ')}
+        <a href="dostavka.html"><b>Все города →</b></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Начнём с бесплатного подбора</h2>
+          <p class="lead">Ответьте на 4 вопроса — пришлём 3–5 подходящих вариантов с расчётом «под ключ» до вашего города.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Подобрать авто</button>
+          <a class="btn btn-ghost" href="kontakty.html">Контакты</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      var A = window.INAVTO;
+      var grid = document.querySelector('[data-geo-cars]');
+      if (grid) grid.innerHTML = grid.dataset.geoCars.split(',')
+        .map(function (s) { return A.CARS.find(function (c) { return c.slug === s; }); })
+        .filter(Boolean).map(A.carCard).join('');
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+`
+}
+
+const geoDir = path.join(ROOT, 'gorod')
+fs.mkdirSync(geoDir, { recursive: true })
+CITIES.forEach((city, i) => {
+  fs.writeFileSync(path.join(geoDir, `${city[0]}.html`), geoHTML(city, i))
+})
+
+/* Хаб городов на странице «Доставка» — блок между маркерами */
+const dostavkaPath = path.join(ROOT, 'dostavka.html')
+let dostavka = fs.readFileSync(dostavkaPath, 'utf8')
+const hub = `<!-- GEO-LINKS:START -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head">
+        <div class="divider-label">География</div>
+        <h2 class="h2" style="margin-top:14px">Доставка по городам</h2>
+      </div>
+      <div class="geo-links">
+        ${CITIES.map((c) => `<a href="gorod/${c[0]}.html">${esc(c[1])}</a>`).join('\n        ')}
+      </div>
+    </div>
+  </section>
+  <!-- GEO-LINKS:END -->`
+if (dostavka.includes('<!-- GEO-LINKS:START -->')) {
+  dostavka = dostavka.replace(/<!-- GEO-LINKS:START -->[\s\S]*?<!-- GEO-LINKS:END -->/, hub)
+  fs.writeFileSync(dostavkaPath, dostavka)
+}
+
 const staticPages = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
   'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'vydannye-avto.html', 'o-kompanii.html', 'kontakty.html']
 const urls = [
   ...staticPages.map((p) => `${DOMAIN}/${p}`),
   ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),
+  ...CITIES.map((c) => `${DOMAIN}/gorod/${c[0]}.html`),
+  `${DOMAIN}/blog/`,
+  `${DOMAIN}/blog/utilsbor-2026.html`,
+  `${DOMAIN}/blog/erev-vs-phev.html`,
+  `${DOMAIN}/blog/kak-proverit-posrednika.html`,
 ]
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`)
 fs.writeFileSync(path.join(ROOT, 'robots.txt'),
   `User-agent: *\nAllow: /\nDisallow: /car.html\nSitemap: ${DOMAIN}/sitemap.xml\n`)
 
-console.log(`OK: ${CARS.length} model pages, sitemap.xml (${urls.length} URLs), robots.txt`)
+console.log(`OK: ${CARS.length} model pages, ${CITIES.length} geo pages, sitemap.xml (${urls.length} URLs), robots.txt`)

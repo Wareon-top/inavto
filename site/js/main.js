@@ -93,7 +93,6 @@
       </header>
       <div class="mobile-menu">
         <a href="index.html">Главная</a>${nav}
-        <a href="dlya-biznesa.html">Для бизнеса</a>
         <a href="dostavka.html">Доставка и растаможка</a>
         <a href="vydannye-avto.html">Выданные авто</a>
         <a href="o-kompanii.html">О компании</a>

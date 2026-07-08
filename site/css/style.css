@@ -524,6 +524,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 
 /* ---------- Шаги ---------- */
 .steps { counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-strong); border: 1px solid var(--line-strong); }
+.steps.steps-2 { grid-template-columns: repeat(2, 1fr); }
 .step {
   counter-increment: step;
   background: var(--card);
@@ -710,6 +711,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 .calc-group-head b { font-variant-numeric: tabular-nums; }
 .calc-sub { font-size: 11px; color: var(--muted-2); padding-bottom: 6px; }
 .calc-eq { font-style: normal; font-weight: 500; font-size: 12px; color: var(--muted-2); margin-right: 8px; }
+/* суммы не переносятся («1 220 781 ₽» одной строкой), а поля не распирают панель на телефоне */
+.calc-row b, .calc-group-head b { white-space: nowrap; }
+.calc-layout > *, .calc-price-grid > * { min-width: 0; }
 
 /* ---------- FAQ ---------- */
 .faq-item { border: none; border-bottom: 1px solid var(--line-strong); border-radius: 0; background: transparent; margin-bottom: 0; overflow: hidden; box-shadow: none; }
@@ -1133,20 +1137,35 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   .burger { display: flex; margin-left: auto; }
   .header-cta .btn { display: none; }
   .header-phone { display: none; }
+  /* на телефонах blur может не работать — шапка почти непрозрачная */
+  .header { background: rgba(250, 250, 250, 0.97); }
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .cta-banner { grid-template-columns: 1fr; }
   .cta-banner-actions { justify-content: flex-start; }
 }
 
 @media (max-width: 620px) {
-  .grid-2, .grid-3, .grid-4, .cars-grid, .steps { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .grid-4, .cars-grid, .steps, .steps.steps-2 { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
   .hero-actions .btn { flex: 1; }
-  .filters select, .filters input { min-width: 100%; }
+  .hero-tag { font-size: 9.5px; letter-spacing: 0.16em; padding: 8px 12px; gap: 8px; }
+  /* фильтры каталога — компактно, в две колонки */
+  .filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .filters select, .filters input { min-width: 0; width: 100%; }
+  .filters > :last-child:nth-child(odd) { grid-column: 1 / -1; }
   /* квиз — во весь экран: выше доходимость до конца */
   .modal-backdrop { padding: 0; align-items: stretch; }
   .modal { max-width: none; max-height: none; height: 100%; border: none; padding-top: 64px; }
   .chips { border-right: 1px solid var(--line-strong); border-bottom: none; }
-  .chip { flex: 1 0 100%; border-bottom: 1px solid var(--line-strong); border-right: none; }
+  .chip { flex: 1 0 100%; border-bottom: 1px solid var(--line-strong); border-right: none; justify-content: flex-start; padding: 12px 16px; }
   .chip:last-child { border-bottom: none; }
+  /* трекер статусов — вертикальная линия времени вместо горизонтальной прокрутки */
+  .tracker { padding: 24px 20px; }
+  .tracker-line { display: block; overflow: visible; margin-top: 20px; padding-bottom: 0; }
+  .tracker-node { display: grid; grid-template-columns: 34px 1fr; column-gap: 14px; text-align: left; min-width: 0; padding-bottom: 22px; }
+  .tracker-node:last-child { padding-bottom: 0; }
+  .tracker-dot { grid-row: 1 / span 2; margin: 2px auto 0; }
+  .tracker-node b { font-size: 13px; }
+  .tracker-node span { font-size: 11.5px; display: block; }
+  .tracker-node::after { top: 34px; bottom: 6px; left: 16px; right: auto; width: 1px; height: auto; }
 }

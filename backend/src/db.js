@@ -44,6 +44,30 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS site_cars (
+    slug TEXT PRIMARY KEY,
+    brand TEXT NOT NULL,
+    name TEXT NOT NULL,
+    body TEXT DEFAULT 'Кроссовер',
+    fuel TEXT DEFAULT 'Бензин',
+    power TEXT DEFAULT '',
+    drive TEXT DEFAULT '',
+    range TEXT DEFAULT '—',
+    battery TEXT DEFAULT '—',
+    price_rub REAL NOT NULL,
+    price_cny INTEGER DEFAULT 0,
+    price_usd INTEGER DEFAULT 0,
+    year INTEGER DEFAULT 2026,
+    tags TEXT DEFAULT '[]',
+    grad TEXT DEFAULT '["#37424e","#141a20"]',
+    descr TEXT DEFAULT '',
+    photos TEXT DEFAULT '[]',
+    sort INTEGER DEFAULT 100,
+    hidden INTEGER DEFAULT 0,
+    updated_at TEXT DEFAULT (datetime('now')),
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS orders (
     id TEXT PRIMARY KEY,
     car_name TEXT NOT NULL,

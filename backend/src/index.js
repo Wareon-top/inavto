@@ -1,20 +1,31 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { initBot } from './bot.js'
 import carsRouter from './routes/cars.js'
 import selectionsRouter from './routes/selections.js'
 import ordersRouter from './routes/orders.js'
+import siteCarsRouter from './routes/siteCars.js'
+import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const ROOT = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(cors())
-app.use(express.json())
+app.use(express.json({ limit: '8mb' }))
 
 app.use('/api/cars', carsRouter)
 app.use('/api/selections', selectionsRouter)
 app.use('/api/orders', ordersRouter)
+app.use('/api/site-cars', siteCarsRouter)
+app.use('/api/upload', uploadRouter)
+
+/* Админка и загруженные фото */
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d' }))
+app.get('/admin', (_, res) => res.sendFile(path.join(ROOT, '../public/admin.html')))
 
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }))
 

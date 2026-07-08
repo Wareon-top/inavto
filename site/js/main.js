@@ -208,19 +208,27 @@
 
   A.carVisual = function (car, cls) {
     const flag = 'China';
+    const photo = car.photos && car.photos[0];
+    const media = photo
+      ? `<img class="cv-photo" src="${photo}" alt="${car.name}" loading="lazy">`
+      : CAR_SILHOUETTE;
     return `<div class="car-visual ${cls || ''}" style="background:linear-gradient(155deg, ${car.grad[0]}, ${car.grad[1]})">
       <span class="cv-brand">${car.brand}</span>
       <span class="cv-flag">${flag}</span>
-      ${CAR_SILHOUETTE}
+      ${media}
     </div>`;
   };
 
   /* ---------- Карточка авто ---------- */
+  A.carUrl = (car) => (A.STATIC_SLUGS && A.STATIC_SLUGS.has(car.slug))
+    ? 'cars/' + car.slug + '.html'
+    : 'car.html?slug=' + car.slug;
+
   A.carCard = function (car) {
     const priceNote = 'новый, под ключ';
     const fav = A.favs.has(car.slug);
     return `<article class="car-card reveal">
-      <a href="cars/${car.slug}.html">${A.carVisual(car)}</a>
+      <a href="${A.carUrl(car)}">${A.carVisual(car)}</a>
       <div class="car-card-body">
         <div class="car-card-head">
           <h3>${car.name}</h3>
@@ -235,7 +243,7 @@
         <div class="car-price-row">
           <div class="car-price num">от ${car.price.toFixed(1).replace('.', ',')} млн ₽<small>${priceNote}</small></div>
         </div>
-        <a class="btn btn-ghost btn-sm" href="cars/${car.slug}.html">Подробнее</a>
+        <a class="btn btn-ghost btn-sm" href="${A.carUrl(car)}">Подробнее</a>
       </div>
     </article>`;
   };
@@ -672,8 +680,24 @@
     requestAnimationFrame(() => requestAnimationFrame(() => h.classList.add('h1-revealed')));
   }
 
+  /* ---------- Каталог с сервера (админка) с фолбэком на data.js ---------- */
+  async function loadRemoteCatalog() {
+    if (!window.INAVTO_API) return;   // чистая статика — работаем от data.js
+    A.STATIC_SLUGS = new Set(A.CARS.map((c) => c.slug));
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3000);
+      const r = await fetch(API_BASE + '/api/site-cars', { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) return;
+      const list = await r.json();
+      if (Array.isArray(list) && list.length) A.CARS = list;
+    } catch (e) { /* сервер молчит — показываем встроенный каталог */ }
+  }
+
   /* ---------- Старт ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadRemoteCatalog();
     renderHeader();
     renderFooter();
     renderQuizModal();

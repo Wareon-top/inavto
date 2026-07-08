@@ -54,6 +54,8 @@
       ];
       if (car.range !== '—') specs.push(['Запас хода', car.range]);
       if (car.battery !== '—') specs.push(['Батарея', car.battery]);
+      if (car.priceCny) specs.push(['Цена в Китае', '¥ ' + car.priceCny.toLocaleString('ru-RU')]);
+      if (car.priceUsd) specs.push(['Цена в долларах', '$ ' + car.priceUsd.toLocaleString('ru-RU')]);
       specs.push(['Состояние', stateNote]);
 
       document.getElementById('car-wrap').innerHTML = `

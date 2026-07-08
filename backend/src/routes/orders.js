@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import db from '../db.js'
+import { adminOnly } from '../auth.js'
 import { notifyAdmin } from '../bot.js'
 
 const router = Router()
@@ -17,7 +18,7 @@ router.get('/', (req, res) => {
   res.json(orders)
 })
 
-router.post('/', (req, res) => {
+router.post('/', adminOnly, (req, res) => {
   const { id, car_name, price, status = 'search', note, eta, client_name, client_phone } = req.body
   if (!id || !car_name || !price) return res.status(400).json({ error: 'id, car_name, price required' })
 
@@ -29,7 +30,7 @@ router.post('/', (req, res) => {
   res.status(201).json({ ok: true })
 })
 
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', adminOnly, async (req, res) => {
   const { status, note } = req.body
   if (!VALID_STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status' })
 

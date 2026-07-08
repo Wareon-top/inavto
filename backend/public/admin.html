@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Каталог — админка INAVTO ASIA</title>
+<style>
+  :root { --bg:#fafafa; --card:#fff; --ink:#050505; --muted:#4a4a4a; --muted2:#9a9a9a;
+    --line:rgba(5,5,5,.14); --line2:rgba(5,5,5,.3); --red:#c8102e; --red-soft:rgba(200,16,46,.06); --green:#177245; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; background:var(--bg); color:var(--ink);
+    font-size:14px; line-height:1.55; padding-bottom:80px; }
+  .wrap { max-width:1160px; margin:0 auto; padding:0 20px; }
+  header.bar { background:var(--ink); color:#fafafa; padding:14px 0; margin-bottom:28px; }
+  .bar .wrap { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .logo { font-weight:700; letter-spacing:.18em; text-transform:uppercase; font-size:13px; }
+  .logo span { color:#fff; background:var(--red); padding:2px 8px; margin-left:8px; letter-spacing:.28em; font-size:10px; }
+  .bar small { opacity:.65; }
+  h1 { font-size:22px; text-transform:uppercase; letter-spacing:.02em; margin-bottom:4px; }
+  h2 { font-size:15px; margin:0 0 14px; text-transform:uppercase; letter-spacing:.08em; }
+  .sub { color:var(--muted); margin-bottom:22px; max-width:70ch; }
+  .panel { background:var(--card); border:1px solid var(--ink); padding:22px; margin-bottom:26px; }
+  label { display:block; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px; }
+  input, select, textarea { width:100%; border:none; border-bottom:1px solid var(--line2); background:transparent;
+    padding:9px 0; font:inherit; color:var(--ink); border-radius:0; }
+  input:focus, select:focus, textarea:focus { outline:none; border-bottom-color:var(--red); }
+  textarea { resize:vertical; min-height:74px; }
+  .grid { display:grid; gap:18px 22px; }
+  .g4 { grid-template-columns:repeat(4,1fr); } .g3 { grid-template-columns:repeat(3,1fr); } .g2 { grid-template-columns:repeat(2,1fr); }
+  @media (max-width:900px){ .g4,.g3 { grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .g4,.g3,.g2 { grid-template-columns:1fr;} }
+  .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--ink); background:var(--ink); color:#fafafa;
+    padding:11px 20px; font:inherit; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
+  .btn:hover { background:transparent; color:var(--ink); }
+  .btn.red { background:var(--red); border-color:var(--red); }
+  .btn.red:hover { background:transparent; color:var(--red); }
+  .btn.ghost { background:transparent; color:var(--ink); }
+  .btn.ghost:hover { background:var(--ink); color:#fafafa; }
+  .btn.sm { padding:7px 12px; font-size:10.5px; }
+  .btn[disabled] { opacity:.4; pointer-events:none; }
+  .muted { color:var(--muted2); }
+  .msg { padding:12px 16px; border:1px solid var(--red); background:var(--red-soft); margin-bottom:18px; display:none; }
+  .msg.ok { border-color:var(--green); background:rgba(23,114,69,.07); }
+  .msg.show { display:block; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--ink); }
+  th, td { border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:middle; }
+  th { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; background:var(--ink); color:#fafafa; }
+  td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr:hover td { background:var(--bg); }
+  .thumb { width:64px; height:44px; object-fit:cover; display:block; background:#1a2230; }
+  .thumb.empty { display:flex; align-items:center; justify-content:center; color:#fff; opacity:.5; font-size:9px;
+    letter-spacing:.1em; text-transform:uppercase; }
+  .rowname b { display:block; }
+  .rowname small { color:var(--muted2); }
+  .badge { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    padding:3px 8px; border:1px solid currentColor; }
+  .badge.hid { color:var(--muted2); } .badge.vis { color:var(--green); }
+  .actions { display:flex; gap:6px; }
+  .tags { display:flex; flex-wrap:wrap; gap:8px 14px; }
+  .tags label { display:flex; align-items:center; gap:7px; font-size:12px; text-transform:none; letter-spacing:0;
+    font-weight:500; color:var(--ink); margin:0; cursor:pointer; }
+  .tags input { width:15px; height:15px; accent-color:var(--red); }
+  .photos { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+  .ph { position:relative; width:120px; height:82px; border:1px solid var(--line2); }
+  .ph img { width:100%; height:100%; object-fit:cover; display:block; }
+  .ph button { position:absolute; top:4px; right:4px; width:22px; height:22px; border:none; background:var(--red);
+    color:#fff; font-size:12px; line-height:1; cursor:pointer; }
+  .ph .main { position:absolute; left:4px; bottom:4px; background:var(--ink); color:#fff; font-size:8.5px;
+    letter-spacing:.12em; padding:2px 6px; text-transform:uppercase; }
+  .drop { border:1px dashed var(--line2); padding:16px; text-align:center; color:var(--muted); cursor:pointer; }
+  .drop:hover { border-color:var(--red); color:var(--red); }
+  .toolbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .price-hint { font-size:11px; color:var(--muted2); margin-top:4px; }
+  #login { max-width:460px; margin:8vh auto; }
+  .footer-note { color:var(--muted2); font-size:12px; margin-top:20px; max-width:78ch; }
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small></div>
+  <small id="who"></small>
+</div></header>
+
+<div class="wrap">
+  <div class="msg" id="msg"></div>
+
+  <!-- ВХОД -->
+  <div class="panel" id="login">
+    <h1>Вход</h1>
+    <p class="sub">Введите ключ доступа (ADMIN_TOKEN с сервера). Ключ сохранится в этом браузере.</p>
+    <label>Ключ доступа</label>
+    <input type="password" id="token" autocomplete="off">
+    <div style="margin-top:18px"><button class="btn red" id="loginBtn">Войти</button></div>
+  </div>
+
+  <!-- ПАНЕЛЬ -->
+  <div id="app" style="display:none">
+    <div class="toolbar">
+      <div>
+        <h1>Каталог сайта</h1>
+        <span class="muted" id="count"></span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost sm" id="importBtn" style="display:none">Импортировать 16 моделей сайта</button>
+        <button class="btn ghost sm" id="logoutBtn">Выйти</button>
+        <button class="btn red" id="addBtn">+ Добавить автомобиль</button>
+      </div>
+    </div>
+
+    <!-- ФОРМА -->
+    <div class="panel" id="form" style="display:none">
+      <h2 id="formTitle">Новый автомобиль</h2>
+      <div class="grid g3" style="margin-bottom:18px">
+        <div><label>Название (модель) *</label><input id="f-name" placeholder="Zeekr 7X"></div>
+        <div><label>Марка *</label><input id="f-brand" placeholder="Zeekr"></div>
+        <div><label>Слаг (адрес страницы)</label><input id="f-slug" placeholder="zeekr-7x"></div>
+      </div>
+      <div class="grid g4" style="margin-bottom:18px">
+        <div><label>Кузов</label><select id="f-body">
+          <option>Кроссовер</option><option>Внедорожник</option><option>Седан</option>
+          <option>Лифтбек</option><option>Кроссовер-купе</option><option>Минивэн</option><option>Хэтчбек</option>
+        </select></div>
+        <div><label>Двигатель</label><select id="f-fuel">
+          <option>Бензин</option><option>Электро</option><option>Гибрид (EREV)</option>
+          <option>Гибрид (PHEV)</option><option>Гибрид (HEV)</option>
+        </select></div>
+        <div><label>Мощность</label><input id="f-power" placeholder="421 л.с."></div>
+        <div><label>Привод</label><input id="f-drive" placeholder="Полный"></div>
+        <div><label>Запас хода</label><input id="f-range" placeholder="705 км или —"></div>
+        <div><label>Батарея</label><input id="f-battery" placeholder="100 кВт·ч или —"></div>
+        <div><label>Год</label><input id="f-year" type="number" min="2015" max="2030" value="2026"></div>
+        <div><label>Порядок (меньше — выше)</label><input id="f-sort" type="number" value="100"></div>
+      </div>
+      <div class="grid g3" style="margin-bottom:6px">
+        <div><label>Цена под ключ, млн ₽ *</label><input id="f-rub" type="number" step="0.1" min="0" placeholder="4.2">
+          <div class="price-hint">Показывается на карточках: «от 4,2 млн ₽»</div></div>
+        <div><label>Цена в Китае, ¥</label><input id="f-cny" type="number" step="1000" min="0" placeholder="220000">
+          <div class="price-hint">Показывается на странице модели</div></div>
+        <div><label>Цена, $</label><input id="f-usd" type="number" step="500" min="0" placeholder="31000">
+          <div class="price-hint">Необязательно</div></div>
+      </div>
+      <div style="margin:14px 0 18px">
+        <label>Теги (фильтры каталога)</label>
+        <div class="tags" id="f-tags"></div>
+      </div>
+      <div style="margin-bottom:18px">
+        <label>Описание</label>
+        <textarea id="f-desc" placeholder="1–2 предложения: чем хорош автомобиль."></textarea>
+      </div>
+      <div style="margin-bottom:20px">
+        <label>Фото (первое — главное; сжимаются автоматически)</label>
+        <div class="drop" id="drop">Нажмите или перетащите фото сюда (JPG/PNG/WebP)</div>
+        <input type="file" id="file" accept="image/*" multiple hidden>
+        <div class="photos" id="photos"></div>
+      </div>
+      <label class="tags" style="margin-bottom:20px"><label style="margin:0">
+        <input type="checkbox" id="f-hidden"> Скрыть с сайта (черновик)</label></label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn red" id="saveBtn">Сохранить</button>
+        <button class="btn ghost" id="cancelBtn">Отмена</button>
+      </div>
+    </div>
+
+    <!-- СПИСОК -->
+    <table id="list">
+      <thead><tr>
+        <th>Фото</th><th>Модель</th><th>Цена ₽</th><th>¥ / $</th><th>Мощность</th><th>Статус</th><th></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="footer-note">Изменения появляются на сайте сразу после сохранения — обновите страницу сайта.
+      Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.</p>
+  </div>
+</div>
+
+<script>
+const API = location.origin;
+const TAGS = [
+  ['electro','Электро'],['hybrid','Гибрид'],['petrol','Бензин'],['suv','Кроссовер/SUV'],
+  ['sedan','Седан'],['family','Для семьи'],['budget','Бюджетный'],['offroad','Внедорожник'],
+  ['7seats','7 мест'],['awd','Полный привод'],
+];
+let token = localStorage.getItem('inavto_admin_token') || '';
+let cars = [];
+let editing = null;   // slug при редактировании
+let photos = [];
+
+const $ = (id) => document.getElementById(id);
+const msg = (text, ok) => {
+  const m = $('msg');
+  m.textContent = text;
+  m.className = 'msg show' + (ok ? ' ok' : '');
+  clearTimeout(msg.t); msg.t = setTimeout(() => m.classList.remove('show'), 4500);
+};
+const H = () => ({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + token });
+
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { headers: H(), ...opts });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || ('Ошибка ' + r.status));
+  return data;
+}
+
+/* ---------- Вход ---------- */
+async function tryLogin() {
+  try {
+    await api('/api/site-cars/check');
+    $('login').style.display = 'none';
+    $('app').style.display = '';
+    $('who').textContent = 'доступ подтверждён';
+    localStorage.setItem('inavto_admin_token', token);
+    load();
+  } catch (e) {
+    $('login').style.display = '';
+    $('app').style.display = 'none';
+    if (token) msg('Ключ не подошёл: ' + e.message);
+    token = '';
+  }
+}
+$('loginBtn').onclick = () => { token = $('token').value.trim(); tryLogin(); };
+$('token').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('loginBtn').click(); });
+$('logoutBtn').onclick = () => { localStorage.removeItem('inavto_admin_token'); location.reload(); };
+
+/* ---------- Список ---------- */
+const fmtRub = (v) => 'от ' + Number(v).toFixed(1).replace('.', ',') + ' млн ₽';
+async function load() {
+  cars = await api('/api/site-cars/all');
+  $('count').textContent = cars.length + ' поз.';
+  $('importBtn').style.display = cars.length ? 'none' : '';
+  const tb = $('list').querySelector('tbody');
+  tb.innerHTML = cars.map((c) => `
+    <tr>
+      <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : '<div class="thumb empty">нет фото</div>'}</td>
+      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${c.body} · ${c.fuel}</small></td>
+      <td class="num">${fmtRub(c.price)}</td>
+      <td class="num">${c.priceCny ? '¥ ' + c.priceCny.toLocaleString('ru-RU') : '—'}<br>${c.priceUsd ? '$ ' + c.priceUsd.toLocaleString('ru-RU') : ''}</td>
+      <td>${c.power || '—'}</td>
+      <td>${c.hidden ? '<span class="badge hid">скрыт</span>' : '<span class="badge vis">на сайте</span>'}</td>
+      <td><div class="actions">
+        <button class="btn ghost sm" data-edit="${c.slug}">Изменить</button>
+        <button class="btn ghost sm" data-toggle="${c.slug}">${c.hidden ? 'Показать' : 'Скрыть'}</button>
+        <button class="btn ghost sm" data-del="${c.slug}" style="color:var(--red);border-color:var(--red)">Удалить</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+document.addEventListener('click', async (e) => {
+  const t = e.target;
+  if (t.dataset.edit) openForm(cars.find((c) => c.slug === t.dataset.edit));
+  if (t.dataset.toggle) {
+    const c = cars.find((x) => x.slug === t.dataset.toggle);
+    try { await api('/api/site-cars/' + c.slug, { method: 'PUT', body: JSON.stringify({ ...c, price_rub: c.price, hidden: !c.hidden }) });
+      msg(c.hidden ? 'Показан на сайте' : 'Скрыт с сайта', true); load(); } catch (err) { msg(err.message); }
+  }
+  if (t.dataset.del) {
+    const c = cars.find((x) => x.slug === t.dataset.del);
+    if (!confirm('Удалить «' + c.name + '» безвозвратно? Чтобы просто убрать с сайта — используйте «Скрыть».')) return;
+    try { await api('/api/site-cars/' + c.slug, { method: 'DELETE' }); msg('Удалено', true); load(); }
+    catch (err) { msg(err.message); }
+  }
+});
+
+/* ---------- Форма ---------- */
+const translit = (s) => s.toLowerCase()
+  .replace(/[ё]/g,'e').replace(/[а]/g,'a').replace(/[б]/g,'b').replace(/[в]/g,'v').replace(/[г]/g,'g')
+  .replace(/[д]/g,'d').replace(/[е]/g,'e').replace(/[ж]/g,'zh').replace(/[з]/g,'z').replace(/[и]/g,'i')
+  .replace(/[й]/g,'y').replace(/[к]/g,'k').replace(/[л]/g,'l').replace(/[м]/g,'m').replace(/[н]/g,'n')
+  .replace(/[о]/g,'o').replace(/[п]/g,'p').replace(/[р]/g,'r').replace(/[с]/g,'s').replace(/[т]/g,'t')
+  .replace(/[у]/g,'u').replace(/[ф]/g,'f').replace(/[х]/g,'h').replace(/[ц]/g,'ts').replace(/[ч]/g,'ch')
+  .replace(/[ш]/g,'sh').replace(/[щ]/g,'sch').replace(/[ъь]/g,'').replace(/[ы]/g,'y').replace(/[э]/g,'e')
+  .replace(/[ю]/g,'yu').replace(/[я]/g,'ya')
+  .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0, 50);
+
+$('f-tags').innerHTML = TAGS.map(([v, l]) =>
+  `<label><input type="checkbox" value="${v}"> ${l}</label>`).join('');
+
+function openForm(car) {
+  editing = car ? car.slug : null;
+  photos = car ? [...car.photos] : [];
+  $('formTitle').textContent = car ? 'Редактирование: ' + car.name : 'Новый автомобиль';
+  $('f-name').value = car ? car.name : '';
+  $('f-brand').value = car ? car.brand : '';
+  $('f-slug').value = car ? car.slug : '';
+  $('f-slug').disabled = !!car;
+  $('f-body').value = car ? car.body : 'Кроссовер';
+  $('f-fuel').value = car ? car.fuel : 'Бензин';
+  $('f-power').value = car ? car.power : '';
+  $('f-drive').value = car ? car.drive : '';
+  $('f-range').value = car ? car.range : '—';
+  $('f-battery').value = car ? car.battery : '—';
+  $('f-year').value = car ? car.year : 2026;
+  $('f-sort').value = car ? car.sort : 100;
+  $('f-rub').value = car ? car.price : '';
+  $('f-cny').value = car && car.priceCny ? car.priceCny : '';
+  $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
+  $('f-desc').value = car ? car.desc : '';
+  $('f-hidden').checked = car ? car.hidden : false;
+  $('f-tags').querySelectorAll('input').forEach((i) => { i.checked = car ? car.tags.includes(i.value) : false; });
+  renderPhotos();
+  $('form').style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$('addBtn').onclick = () => openForm(null);
+$('cancelBtn').onclick = () => { $('form').style.display = 'none'; };
+$('f-name').addEventListener('input', () => {
+  if (!editing && !$('f-slug').dataset.touched) $('f-slug').value = translit($('f-name').value);
+});
+$('f-slug').addEventListener('input', () => { $('f-slug').dataset.touched = '1'; });
+
+/* ---------- Фото: ресайз в браузере -> webp -> upload ---------- */
+function renderPhotos() {
+  $('photos').innerHTML = photos.map((u, i) => `
+    <div class="ph">
+      <img src="${u}">
+      ${i === 0 ? '<span class="main">главное</span>' : ''}
+      <button data-rm="${i}" title="Удалить">✕</button>
+    </div>`).join('');
+}
+$('photos').addEventListener('click', (e) => {
+  if (e.target.dataset.rm !== undefined) { photos.splice(+e.target.dataset.rm, 1); renderPhotos(); }
+});
+$('drop').onclick = () => $('file').click();
+$('drop').addEventListener('dragover', (e) => e.preventDefault());
+$('drop').addEventListener('drop', (e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); });
+$('file').addEventListener('change', () => handleFiles($('file').files));
+
+async function handleFiles(files) {
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    try {
+      const dataUrl = await resize(f, 1280, 0.82);
+      const r = await api('/api/upload', { method: 'POST',
+        body: JSON.stringify({ type: 'image/webp', data: dataUrl }) });
+      photos.push(r.url);
+      renderPhotos();
+    } catch (err) { msg('Фото не загрузилось: ' + err.message); }
+  }
+  $('file').value = '';
+}
+function resize(file, maxW, q) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxW / img.width);
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k);
+      cv.height = Math.round(img.height * k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      resolve(cv.toDataURL('image/webp', q));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/* ---------- Сохранение ---------- */
+$('saveBtn').onclick = async () => {
+  const payload = {
+    slug: $('f-slug').value.trim().toLowerCase(),
+    name: $('f-name').value.trim(),
+    brand: $('f-brand').value.trim() || $('f-name').value.trim().split(' ')[0],
+    body: $('f-body').value, fuel: $('f-fuel').value,
+    power: $('f-power').value.trim(), drive: $('f-drive').value.trim(),
+    range: $('f-range').value.trim() || '—', battery: $('f-battery').value.trim() || '—',
+    year: +$('f-year').value || 2026, sort: +$('f-sort').value || 100,
+    price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
+    price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
+    desc: $('f-desc').value.trim(),
+    tags: [...$('f-tags').querySelectorAll('input:checked')].map((i) => i.value),
+    photos, hidden: $('f-hidden').checked,
+  };
+  if (!payload.name || !payload.price_rub) { msg('Заполните название и цену в млн ₽'); return; }
+  if (!/^[a-z0-9-]{2,60}$/.test(payload.slug)) { msg('Слаг — латиницей: zeekr-7x'); return; }
+  $('saveBtn').disabled = true;
+  try {
+    if (editing) await api('/api/site-cars/' + editing, { method: 'PUT', body: JSON.stringify(payload) });
+    else await api('/api/site-cars', { method: 'POST', body: JSON.stringify(payload) });
+    msg('Сохранено — уже на сайте', true);
+    $('form').style.display = 'none';
+    load();
+  } catch (err) { msg(err.message); }
+  $('saveBtn').disabled = false;
+};
+
+/* ---------- Импорт стартового каталога ---------- */
+$('importBtn').onclick = async () => {
+  try {
+    const r = await api('/api/site-cars/import', { method: 'POST', body: JSON.stringify({ cars: SEED }) });
+    msg('Импортировано моделей: ' + r.imported, true);
+    load();
+  } catch (err) { msg(err.message); }
+};
+const SEED = [{"slug":"zeekr-001","brand":"Zeekr","name":"Zeekr 001","country":"china","body":"Лифтбек","fuel":"Электро","power":"544 л.с.","drive":"Полный","range":"656 км","battery":"95 кВт·ч","price":4.6,"year":2025,"tags":["electro","awd"],"grad":["#20304c","#0d1524"],"desc":"Флагманский электрический лифтбек Zeekr: динамика спорткара, запас хода 600+ км и премиальный салон. Одна из самых популярных моделей под заказ из Китая."},{"slug":"zeekr-7x","brand":"Zeekr","name":"Zeekr 7X","country":"china","body":"Кроссовер","fuel":"Электро","power":"421 л.с.","drive":"Задний / Полный","range":"705 км","battery":"100 кВт·ч","price":4.2,"year":2025,"tags":["electro","suv"],"grad":["#2c3a55","#111827"],"desc":"Среднеразмерный электрический кроссовер на 800-вольтовой платформе: зарядка 10–80% за 16 минут, богатое оснащение уже в базе."},{"slug":"lixiang-l7","brand":"Li Auto","name":"Lixiang L7","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1315 км (суммарно)","battery":"42,8 кВт·ч","price":4.9,"year":2025,"tags":["hybrid","suv","family"],"grad":["#3a3f4a","#15181f"],"desc":"Пятиместный семейный кроссовер с последовательным гибридом: едет как электромобиль, а бензиновый генератор снимает страх розетки. Хит продаж в Китае."},{"slug":"lixiang-l9","brand":"Li Auto","name":"Lixiang L9","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1412 км (суммарно)","battery":"44,5 кВт·ч","price":6.4,"year":2025,"tags":["hybrid","suv","family","7seats"],"grad":["#2f3542","#101319"],"desc":"Флагман Li Auto: шестиместный салон с креслами-капитанами, три экрана, холодильник — полноценная замена премиальным европейским SUV."},{"slug":"byd-song-plus","brand":"BYD","name":"BYD Song Plus DM-i","country":"china","body":"Кроссовер","fuel":"Гибрид (PHEV)","power":"218 л.с.","drive":"Передний","range":"1200 км (суммарно)","battery":"18,3 кВт·ч","price":2.9,"year":2025,"tags":["hybrid","suv","budget"],"grad":["#37424e","#141a20"],"desc":"Самый массовый гибридный кроссовер Китая: расход 4–5 л на 100 км, просторный салон и лучшая цена в классе."},{"slug":"byd-seal","brand":"BYD","name":"BYD Seal","country":"china","body":"Седан","fuel":"Электро","power":"530 л.с.","drive":"Полный","range":"650 км","battery":"82,5 кВт·ч","price":3.6,"year":2025,"tags":["electro","sedan"],"grad":["#1f3a4d","#0c161e"],"desc":"Спортивный электроседан на платформе e-Platform 3.0 с ячейками Blade Battery: разгон до сотни за 3,8 секунды."},{"slug":"geely-monjaro","brand":"Geely","name":"Geely Monjaro","country":"china","body":"Кроссовер","fuel":"Бензин","power":"238 л.с.","drive":"Полный","range":"—","battery":"—","price":3.3,"year":2025,"tags":["petrol","suv"],"grad":["#41454f","#171a20"],"desc":"Флагманский бензиновый кроссовер Geely на платформе Volvo CMA: 2.0 турбо, полный привод BorgWarner, тихий и богатый салон."},{"slug":"xiaomi-su7","brand":"Xiaomi","name":"Xiaomi SU7","country":"china","body":"Седан","fuel":"Электро","power":"673 л.с.","drive":"Полный","range":"800 км","battery":"101 кВт·ч","price":4.8,"year":2025,"tags":["electro","sedan"],"grad":["#3d3347","#151119"],"desc":"Электроседан от Xiaomi, ставший главной новинкой китайского авторынка: экосистема HyperOS, автопилот и дизайн уровня суперкаров."},{"slug":"aito-m7","brand":"AITO","name":"AITO M7","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1300 км (суммарно)","battery":"40 кВт·ч","price":4.4,"year":2025,"tags":["hybrid","suv","family"],"grad":["#33404c","#121a20"],"desc":"Кроссовер альянса Huawei и Seres: интеллектуальный автопилот ADS, HarmonyOS в салоне и гибридная силовая установка."},{"slug":"avatr-11","brand":"Avatr","name":"Avatr 11","country":"china","body":"Кроссовер-купе","fuel":"Электро","power":"578 л.с.","drive":"Полный","range":"680 км","battery":"116 кВт·ч","price":5.2,"year":2025,"tags":["electro","suv"],"grad":["#403040","#161018"],"desc":"Совместный проект Changan, Huawei и CATL: футуристичный дизайн, батарея 116 кВт·ч и интеллект Huawei на борту."},{"slug":"tank-500","brand":"Tank","name":"Tank 500","country":"china","body":"Внедорожник","fuel":"Гибрид (HEV)","power":"354 л.с.","drive":"Полный","range":"—","battery":"—","price":5,"year":2025,"tags":["hybrid","suv","offroad","7seats"],"grad":["#3a3d38","#141612"],"desc":"Рамный внедорожник премиум-класса: гибрид 2.0T + электромотор, блокировки, семь мест и салон бизнес-уровня."},{"slug":"chery-tiggo-8-pro-max","brand":"Chery","name":"Chery Tiggo 8 Pro Max","country":"china","body":"Кроссовер","fuel":"Бензин","power":"197 л.с.","drive":"Полный","range":"—","battery":"—","price":2.6,"year":2025,"tags":["petrol","suv","budget","7seats"],"grad":["#41404a","#16151c"],"desc":"Семиместный кроссовер с лучшим соотношением цены и оснащения: панорамная крыша, два экрана 12,3\", полный привод."},{"slug":"haval-h6","brand":"Haval","name":"Haval H6","country":"china","body":"Кроссовер","fuel":"Бензин","power":"192 л.с.","drive":"Передний / Полный","range":"—","battery":"—","price":2.3,"year":2025,"tags":["petrol","suv","budget"],"grad":["#39424b","#131a1f"],"desc":"Бестселлер китайского рынка в новом поколении: экономичный турбомотор, просторный салон и цена заметно ниже дилерской в РФ."},{"slug":"voyah-free","brand":"Voyah","name":"Voyah Free","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"694 л.с.","drive":"Полный","range":"1200 км (суммарно)","battery":"43 кВт·ч","price":4.7,"year":2025,"tags":["hybrid","suv"],"grad":["#2e3c4e","#101722"],"desc":"Премиальный кроссовер Dongfeng: пневмоподвеска, 694 л.с. в гибридной версии и богатая базовая комплектация."},{"slug":"hongqi-hs5","brand":"Hongqi","name":"Hongqi HS5","country":"china","body":"Кроссовер","fuel":"Бензин","power":"245 л.с.","drive":"Полный","range":"—","battery":"—","price":3.4,"year":2025,"tags":["petrol","suv"],"grad":["#43323a","#181114"],"desc":"Представительский кроссовер первой автомобильной марки Китая: строгий дизайн, качественные материалы, тихий салон."},{"slug":"geely-galaxy-e8","brand":"Geely","name":"Geely Galaxy E8","country":"china","body":"Седан","fuel":"Электро","power":"475 л.с.","drive":"Полный","range":"665 км","battery":"76 кВт·ч","price":3.5,"year":2025,"tags":["electro","sedan"],"grad":["#243a4e","#0d1622"],"desc":"Электрический флагман линейки Galaxy: экран во всю панель 45\", 800-вольтовая архитектура, отличная управляемость."}];
+
+tryLogin();
+</script>
+</body>
+</html>

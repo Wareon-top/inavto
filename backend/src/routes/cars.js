@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import db from '../db.js'
+import { adminOnly } from '../auth.js'
 
 const router = Router()
 
@@ -22,7 +23,7 @@ router.get('/:id', (req, res) => {
   res.json(formatCar(car, true))
 })
 
-router.post('/', (req, res) => {
+router.post('/', adminOnly, (req, res) => {
   const { brand, model, year, price, mileage = 0, fuel = 'Бензин', engine, transmission, drive, color, vin, delivery_days, description, image, is_new = 0 } = req.body
   if (!brand || !model || !year || !price) return res.status(400).json({ error: 'Missing required fields' })
 
@@ -34,7 +35,7 @@ router.post('/', (req, res) => {
   res.status(201).json({ id: result.lastInsertRowid })
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', adminOnly, (req, res) => {
   const { brand, model, year, price, mileage, fuel, engine, transmission, drive, color, vin, delivery_days, description, image, is_new } = req.body
   db.prepare(`
     UPDATE cars SET brand=?, model=?, year=?, price=?, mileage=?, fuel=?, engine=?, transmission=?, drive=?, color=?, vin=?, delivery_days=?, description=?, image=?, is_new=?
@@ -43,7 +44,7 @@ router.put('/:id', (req, res) => {
   res.json({ ok: true })
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', adminOnly, (req, res) => {
   db.prepare('DELETE FROM cars WHERE id = ?').run(req.params.id)
   res.json({ ok: true })
 })

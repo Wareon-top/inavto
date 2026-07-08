@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import db from '../db.js'
 import { notifyAdmin } from '../bot.js'
+import { adminOnly } from '../auth.js'
 
 const router = Router()
 
@@ -27,12 +28,12 @@ router.post('/', async (req, res) => {
   res.status(201).json({ id: result.lastInsertRowid, ok: true })
 })
 
-router.get('/', (req, res) => {
+router.get('/', adminOnly, (req, res) => {
   const items = db.prepare('SELECT * FROM selections ORDER BY created_at DESC').all()
   res.json(items)
 })
 
-router.put('/:id/status', (req, res) => {
+router.put('/:id/status', adminOnly, (req, res) => {
   const { status } = req.body
   db.prepare('UPDATE selections SET status = ? WHERE id = ?').run(status, req.params.id)
   res.json({ ok: true })

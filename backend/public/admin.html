@@ -75,13 +75,27 @@
   .price-hint { font-size:11px; color:var(--muted2); margin-top:4px; }
   #login { max-width:460px; margin:8vh auto; }
   .footer-note { color:var(--muted2); font-size:12px; margin-top:20px; max-width:78ch; }
+  .langs { display:flex; gap:6px; }
+  .lang { background:transparent; border:1px solid rgba(250,250,250,.4); color:#fafafa; padding:4px 10px;
+    font:inherit; font-size:10.5px; font-weight:700; letter-spacing:.08em; cursor:pointer; text-transform:uppercase; }
+  .lang:hover { border-color:#fafafa; }
+  .lang.on { background:var(--red); border-color:var(--red); }
+  .tablewrap { overflow-x:auto; }
+  .tablewrap table { min-width:680px; }
 </style>
 </head>
 <body>
 
 <header class="bar"><div class="wrap">
   <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small></div>
-  <small id="who"></small>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="langs" role="group" aria-label="Язык">
+      <button type="button" class="lang" data-lang="ru">Рус</button>
+      <button type="button" class="lang" data-lang="zh">中文</button>
+      <button type="button" class="lang" data-lang="en">EN</button>
+    </div>
+    <small id="who"></small>
+  </div>
 </div></header>
 
 <div class="wrap">
@@ -165,12 +179,14 @@
     </div>
 
     <!-- СПИСОК -->
+    <div class="tablewrap">
     <table id="list">
       <thead><tr>
         <th>Фото</th><th>Модель</th><th>Цена ₽</th><th>¥ / $</th><th>Мощность</th><th>Статус</th><th></th>
       </tr></thead>
       <tbody></tbody>
     </table>
+    </div>
     <p class="footer-note">Изменения появляются на сайте сразу после сохранения — обновите страницу сайта.
       Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.</p>
   </div>
@@ -178,6 +194,193 @@
 
 <script>
 const API = location.origin;
+
+/* ---------- Языки админки: Рус / 中文 / EN ---------- */
+let LANG = localStorage.getItem('inavto_admin_lang') || 'ru';
+const DICT = {
+zh: {
+  'Каталог — админка INAVTO ASIA': 'INAVTO ASIA — 车辆目录管理后台',
+  '· админка каталога': '· 目录管理后台',
+  'Вход': '登录',
+  'Введите ключ доступа (ADMIN_TOKEN с сервера). Ключ сохранится в этом браузере.': '请输入访问密钥（服务器上的 ADMIN_TOKEN）。密钥将保存在此浏览器中。',
+  'Ключ доступа': '访问密钥',
+  'Войти': '登录',
+  'доступ подтверждён': '已确认访问权限',
+  'Каталог сайта': '网站车辆目录',
+  'Импортировать 16 моделей сайта': '导入网站的 16 款车型',
+  'Выйти': '退出',
+  '+ Добавить автомобиль': '+ 添加车辆',
+  'Новый автомобиль': '新车辆',
+  'Редактирование: ': '编辑：',
+  'Название (модель) *': '名称（型号）*',
+  'Марка *': '品牌 *',
+  'Слаг (адрес страницы)': 'Slug（页面地址）',
+  'Кузов': '车身类型',
+  'Двигатель': '动力类型',
+  'Мощность': '功率',
+  'Привод': '驱动方式',
+  'Запас хода': '续航里程',
+  'Батарея': '电池',
+  'Год': '年份',
+  'Порядок (меньше — выше)': '排序（数字小在前）',
+  'Цена под ключ, млн ₽ *': '一站式价格，百万卢布 *',
+  'Показывается на карточках: «от 4,2 млн ₽»': '显示在卡片上：如「от 4,2 млн ₽」',
+  'Цена в Китае, ¥': '中国售价，¥',
+  'Показывается на странице модели': '显示在车型页面',
+  'Цена, $': '价格，$',
+  'Необязательно': '选填',
+  'Теги (фильтры каталога)': '标签（目录筛选）',
+  'Описание': '描述',
+  'Фото (первое — главное; сжимаются автоматически)': '照片（第一张为主图；自动压缩）',
+  'Нажмите или перетащите фото сюда (JPG/PNG/WebP)': '点击或拖拽照片到此处（JPG/PNG/WebP）',
+  'Скрыть с сайта (черновик)': '从网站隐藏（草稿）',
+  'Сохранить': '保存',
+  'Отмена': '取消',
+  'Фото': '照片',
+  'Модель': '型号',
+  'Цена ₽': '价格 ₽',
+  'Статус': '状态',
+  'нет фото': '无照片',
+  'скрыт': '已隐藏',
+  'на сайте': '已上线',
+  'Изменить': '编辑',
+  'Показать': '显示',
+  'Скрыть': '隐藏',
+  'Удалить': '删除',
+  'главное': '主图',
+  ' поз.': ' 项',
+  'Показан на сайте': '已在网站显示',
+  'Скрыт с сайта': '已从网站隐藏',
+  'Удалено': '已删除',
+  'Сохранено — уже на сайте': '已保存——网站已更新',
+  'Заполните название и цену в млн ₽': '请填写名称和价格（百万卢布）',
+  'Слаг — латиницей: zeekr-7x': 'Slug 须用拉丁字母：zeekr-7x',
+  'Фото не загрузилось: ': '照片上传失败：',
+  'Импортировано моделей: ': '已导入车型数：',
+  'Ключ не подошёл: ': '密钥不正确：',
+  'Удалить «': '确定永久删除「',
+  '» безвозвратно? Чтобы просто убрать с сайта — используйте «Скрыть».': '」吗？如只需从网站撤下，请用「隐藏」。',
+  'Изменения появляются на сайте сразу после сохранения — обновите страницу сайта. Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.': '保存后更改立即在网站生效——刷新网站页面即可。价格 ₽ 为「一站式」价格，单位百万（例如 4.2）。Slug 是页面地址，用拉丁字母：zeekr-7x。',
+  'Кроссовер': '跨界SUV', 'Внедорожник': '越野车', 'Седан': '轿车', 'Лифтбек': '掀背轿车',
+  'Кроссовер-купе': '轿跑SUV', 'Минивэн': 'MPV', 'Хэтчбек': '两厢车',
+  'Бензин': '汽油', 'Электро': '纯电', 'Гибрид (EREV)': '增程混动 (EREV)',
+  'Гибрид (PHEV)': '插电混动 (PHEV)', 'Гибрид (HEV)': '油电混动 (HEV)',
+  'Гибрид': '混动', 'Кроссовер/SUV': 'SUV', 'Для семьи': '适合家庭', 'Бюджетный': '经济型',
+  '7 мест': '7 座', 'Полный привод': '全轮驱动',
+  '421 л.с.': '421 马力', 'Полный': '全驱', '705 км или —': '705 公里或 —', '100 кВт·ч или —': '100 kWh 或 —',
+  '1–2 предложения: чем хорош автомобиль.': '1–2 句话：这款车的亮点。',
+  'Некорректный слаг (латиница, цифры, дефис)': '无效的 slug（拉丁字母、数字、连字符）',
+  'Нужны название и цена в ₽': '需要名称和卢布价格',
+  'Такой слаг уже есть': '该 slug 已存在',
+  'Не найдено': '未找到',
+  'Пустой список': '列表为空',
+},
+en: {
+  'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
+  '· админка каталога': '· catalog admin',
+  'Вход': 'Sign in',
+  'Введите ключ доступа (ADMIN_TOKEN с сервера). Ключ сохранится в этом браузере.': 'Enter the access key (ADMIN_TOKEN from the server). It will be saved in this browser.',
+  'Ключ доступа': 'Access key',
+  'Войти': 'Sign in',
+  'доступ подтверждён': 'access confirmed',
+  'Каталог сайта': 'Site catalog',
+  'Импортировать 16 моделей сайта': 'Import the 16 site models',
+  'Выйти': 'Log out',
+  '+ Добавить автомобиль': '+ Add a car',
+  'Новый автомобиль': 'New car',
+  'Редактирование: ': 'Editing: ',
+  'Название (модель) *': 'Name (model) *',
+  'Марка *': 'Brand *',
+  'Слаг (адрес страницы)': 'Slug (page address)',
+  'Кузов': 'Body',
+  'Двигатель': 'Powertrain',
+  'Мощность': 'Power',
+  'Привод': 'Drive',
+  'Запас хода': 'Range',
+  'Батарея': 'Battery',
+  'Год': 'Year',
+  'Порядок (меньше — выше)': 'Order (lower = higher)',
+  'Цена под ключ, млн ₽ *': 'Turnkey price, mln ₽ *',
+  'Показывается на карточках: «от 4,2 млн ₽»': 'Shown on cards: “from 4.2 mln ₽”',
+  'Цена в Китае, ¥': 'Price in China, ¥',
+  'Показывается на странице модели': 'Shown on the model page',
+  'Цена, $': 'Price, $',
+  'Необязательно': 'Optional',
+  'Теги (фильтры каталога)': 'Tags (catalog filters)',
+  'Описание': 'Description',
+  'Фото (первое — главное; сжимаются автоматически)': 'Photos (first one is the main; compressed automatically)',
+  'Нажмите или перетащите фото сюда (JPG/PNG/WebP)': 'Click or drag photos here (JPG/PNG/WebP)',
+  'Скрыть с сайта (черновик)': 'Hide from the site (draft)',
+  'Сохранить': 'Save',
+  'Отмена': 'Cancel',
+  'Фото': 'Photo',
+  'Модель': 'Model',
+  'Цена ₽': 'Price ₽',
+  'Статус': 'Status',
+  'нет фото': 'no photo',
+  'скрыт': 'hidden',
+  'на сайте': 'live',
+  'Изменить': 'Edit',
+  'Показать': 'Show',
+  'Скрыть': 'Hide',
+  'Удалить': 'Delete',
+  'главное': 'main',
+  ' поз.': ' items',
+  'Показан на сайте': 'Now visible on the site',
+  'Скрыт с сайта': 'Hidden from the site',
+  'Удалено': 'Deleted',
+  'Сохранено — уже на сайте': 'Saved — already on the site',
+  'Заполните название и цену в млн ₽': 'Fill in the name and the price in mln ₽',
+  'Слаг — латиницей: zeekr-7x': 'Slug must be Latin: zeekr-7x',
+  'Фото не загрузилось: ': 'Photo upload failed: ',
+  'Импортировано моделей: ': 'Models imported: ',
+  'Ключ не подошёл: ': 'The key didn’t work: ',
+  'Удалить «': 'Delete “',
+  '» безвозвратно? Чтобы просто убрать с сайта — используйте «Скрыть».': '” permanently? To just remove it from the site, use “Hide”.',
+  'Изменения появляются на сайте сразу после сохранения — обновите страницу сайта. Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.': 'Changes appear on the site right after saving — refresh the site page. Price ₽ is the turnkey price in millions (e.g. 4.2). Slug is the page address in Latin letters: zeekr-7x.',
+  'Кроссовер': 'Crossover', 'Внедорожник': 'Off-roader', 'Седан': 'Sedan', 'Лифтбек': 'Liftback',
+  'Кроссовер-купе': 'Coupe SUV', 'Минивэн': 'Minivan', 'Хэтчбек': 'Hatchback',
+  'Бензин': 'Petrol', 'Электро': 'Electric', 'Гибрид (EREV)': 'Hybrid (EREV)',
+  'Гибрид (PHEV)': 'Hybrid (PHEV)', 'Гибрид (HEV)': 'Hybrid (HEV)',
+  'Гибрид': 'Hybrid', 'Кроссовер/SUV': 'Crossover/SUV', 'Для семьи': 'For family', 'Бюджетный': 'Budget',
+  '7 мест': '7 seats', 'Полный привод': 'AWD',
+  '421 л.с.': '421 hp', 'Полный': 'AWD', '705 км или —': '705 km or —', '100 кВт·ч или —': '100 kWh or —',
+  '1–2 предложения: чем хорош автомобиль.': '1–2 sentences: what makes this car good.',
+  'Некорректный слаг (латиница, цифры, дефис)': 'Invalid slug (Latin letters, digits, hyphen)',
+  'Нужны название и цена в ₽': 'Name and price in ₽ are required',
+  'Такой слаг уже есть': 'This slug already exists',
+  'Не найдено': 'Not found',
+  'Пустой список': 'The list is empty',
+},
+};
+const t = (s) => (DICT[LANG] && DICT[LANG][s]) || s;
+
+/* Переводим статичную разметку; значения <option> фиксируем по-русски,
+   чтобы в базу и на сайт всегда уходили русские значения. */
+function localize() {
+  document.querySelectorAll('select option').forEach((o) => {
+    if (!o.hasAttribute('value')) o.setAttribute('value', o.textContent.trim());
+  });
+  if (LANG === 'ru') return;
+  const dict = DICT[LANG];
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach((n) => {
+    const s = n.nodeValue.replace(/\s+/g, ' ').trim();
+    if (s && dict[s]) n.nodeValue = dict[s];
+  });
+  document.querySelectorAll('[placeholder]').forEach((el) => {
+    if (dict[el.placeholder]) el.placeholder = dict[el.placeholder];
+  });
+  document.querySelectorAll('select option').forEach((o) => {
+    const s = o.textContent.trim();
+    if (dict[s]) o.textContent = dict[s];
+  });
+  if (dict[document.title]) document.title = dict[document.title];
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : 'en';
+}
+
 const TAGS = [
   ['electro','Электро'],['hybrid','Гибрид'],['petrol','Бензин'],['suv','Кроссовер/SUV'],
   ['sedan','Седан'],['family','Для семьи'],['budget','Бюджетный'],['offroad','Внедорожник'],
@@ -210,13 +413,13 @@ async function tryLogin() {
     await api('/api/site-cars/check');
     $('login').style.display = 'none';
     $('app').style.display = '';
-    $('who').textContent = 'доступ подтверждён';
+    $('who').textContent = t('доступ подтверждён');
     localStorage.setItem('inavto_admin_token', token);
     load();
   } catch (e) {
     $('login').style.display = '';
     $('app').style.display = 'none';
-    if (token) msg('Ключ не подошёл: ' + e.message);
+    if (token) msg(t('Ключ не подошёл: ') + t(e.message));
     token = '';
   }
 }
@@ -228,38 +431,38 @@ $('logoutBtn').onclick = () => { localStorage.removeItem('inavto_admin_token'); 
 const fmtRub = (v) => 'от ' + Number(v).toFixed(1).replace('.', ',') + ' млн ₽';
 async function load() {
   cars = await api('/api/site-cars/all');
-  $('count').textContent = cars.length + ' поз.';
+  $('count').textContent = cars.length + t(' поз.');
   $('importBtn').style.display = cars.length ? 'none' : '';
   const tb = $('list').querySelector('tbody');
   tb.innerHTML = cars.map((c) => `
     <tr>
-      <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : '<div class="thumb empty">нет фото</div>'}</td>
-      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${c.body} · ${c.fuel}</small></td>
+      <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : `<div class="thumb empty">${t('нет фото')}</div>`}</td>
+      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}</small></td>
       <td class="num">${fmtRub(c.price)}</td>
       <td class="num">${c.priceCny ? '¥ ' + c.priceCny.toLocaleString('ru-RU') : '—'}<br>${c.priceUsd ? '$ ' + c.priceUsd.toLocaleString('ru-RU') : ''}</td>
       <td>${c.power || '—'}</td>
-      <td>${c.hidden ? '<span class="badge hid">скрыт</span>' : '<span class="badge vis">на сайте</span>'}</td>
+      <td>${c.hidden ? `<span class="badge hid">${t('скрыт')}</span>` : `<span class="badge vis">${t('на сайте')}</span>`}</td>
       <td><div class="actions">
-        <button class="btn ghost sm" data-edit="${c.slug}">Изменить</button>
-        <button class="btn ghost sm" data-toggle="${c.slug}">${c.hidden ? 'Показать' : 'Скрыть'}</button>
-        <button class="btn ghost sm" data-del="${c.slug}" style="color:var(--red);border-color:var(--red)">Удалить</button>
+        <button class="btn ghost sm" data-edit="${c.slug}">${t('Изменить')}</button>
+        <button class="btn ghost sm" data-toggle="${c.slug}">${c.hidden ? t('Показать') : t('Скрыть')}</button>
+        <button class="btn ghost sm" data-del="${c.slug}" style="color:var(--red);border-color:var(--red)">${t('Удалить')}</button>
       </div></td>
     </tr>`).join('');
 }
 
 document.addEventListener('click', async (e) => {
-  const t = e.target;
-  if (t.dataset.edit) openForm(cars.find((c) => c.slug === t.dataset.edit));
-  if (t.dataset.toggle) {
-    const c = cars.find((x) => x.slug === t.dataset.toggle);
+  const el = e.target;
+  if (el.dataset.edit) openForm(cars.find((c) => c.slug === el.dataset.edit));
+  if (el.dataset.toggle) {
+    const c = cars.find((x) => x.slug === el.dataset.toggle);
     try { await api('/api/site-cars/' + c.slug, { method: 'PUT', body: JSON.stringify({ ...c, price_rub: c.price, hidden: !c.hidden }) });
-      msg(c.hidden ? 'Показан на сайте' : 'Скрыт с сайта', true); load(); } catch (err) { msg(err.message); }
+      msg(c.hidden ? t('Показан на сайте') : t('Скрыт с сайта'), true); load(); } catch (err) { msg(t(err.message)); }
   }
-  if (t.dataset.del) {
-    const c = cars.find((x) => x.slug === t.dataset.del);
-    if (!confirm('Удалить «' + c.name + '» безвозвратно? Чтобы просто убрать с сайта — используйте «Скрыть».')) return;
-    try { await api('/api/site-cars/' + c.slug, { method: 'DELETE' }); msg('Удалено', true); load(); }
-    catch (err) { msg(err.message); }
+  if (el.dataset.del) {
+    const c = cars.find((x) => x.slug === el.dataset.del);
+    if (!confirm(t('Удалить «') + c.name + t('» безвозвратно? Чтобы просто убрать с сайта — используйте «Скрыть».'))) return;
+    try { await api('/api/site-cars/' + c.slug, { method: 'DELETE' }); msg(t('Удалено'), true); load(); }
+    catch (err) { msg(t(err.message)); }
   }
 });
 
@@ -275,12 +478,12 @@ const translit = (s) => s.toLowerCase()
   .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0, 50);
 
 $('f-tags').innerHTML = TAGS.map(([v, l]) =>
-  `<label><input type="checkbox" value="${v}"> ${l}</label>`).join('');
+  `<label><input type="checkbox" value="${v}"> ${t(l)}</label>`).join('');
 
 function openForm(car) {
   editing = car ? car.slug : null;
   photos = car ? [...car.photos] : [];
-  $('formTitle').textContent = car ? 'Редактирование: ' + car.name : 'Новый автомобиль';
+  $('formTitle').textContent = car ? t('Редактирование: ') + car.name : t('Новый автомобиль');
   $('f-name').value = car ? car.name : '';
   $('f-brand').value = car ? car.brand : '';
   $('f-slug').value = car ? car.slug : '';
@@ -315,8 +518,8 @@ function renderPhotos() {
   $('photos').innerHTML = photos.map((u, i) => `
     <div class="ph">
       <img src="${u}">
-      ${i === 0 ? '<span class="main">главное</span>' : ''}
-      <button data-rm="${i}" title="Удалить">✕</button>
+      ${i === 0 ? `<span class="main">${t('главное')}</span>` : ''}
+      <button data-rm="${i}" title="${t('Удалить')}">✕</button>
     </div>`).join('');
 }
 $('photos').addEventListener('click', (e) => {
@@ -336,7 +539,7 @@ async function handleFiles(files) {
         body: JSON.stringify({ type: 'image/webp', data: dataUrl }) });
       photos.push(r.url);
       renderPhotos();
-    } catch (err) { msg('Фото не загрузилось: ' + err.message); }
+    } catch (err) { msg(t('Фото не загрузилось: ') + t(err.message)); }
   }
   $('file').value = '';
 }
@@ -373,16 +576,16 @@ $('saveBtn').onclick = async () => {
     tags: [...$('f-tags').querySelectorAll('input:checked')].map((i) => i.value),
     photos, hidden: $('f-hidden').checked,
   };
-  if (!payload.name || !payload.price_rub) { msg('Заполните название и цену в млн ₽'); return; }
-  if (!/^[a-z0-9-]{2,60}$/.test(payload.slug)) { msg('Слаг — латиницей: zeekr-7x'); return; }
+  if (!payload.name || !payload.price_rub) { msg(t('Заполните название и цену в млн ₽')); return; }
+  if (!/^[a-z0-9-]{2,60}$/.test(payload.slug)) { msg(t('Слаг — латиницей: zeekr-7x')); return; }
   $('saveBtn').disabled = true;
   try {
     if (editing) await api('/api/site-cars/' + editing, { method: 'PUT', body: JSON.stringify(payload) });
     else await api('/api/site-cars', { method: 'POST', body: JSON.stringify(payload) });
-    msg('Сохранено — уже на сайте', true);
+    msg(t('Сохранено — уже на сайте'), true);
     $('form').style.display = 'none';
     load();
-  } catch (err) { msg(err.message); }
+  } catch (err) { msg(t(err.message)); }
   $('saveBtn').disabled = false;
 };
 
@@ -390,12 +593,18 @@ $('saveBtn').onclick = async () => {
 $('importBtn').onclick = async () => {
   try {
     const r = await api('/api/site-cars/import', { method: 'POST', body: JSON.stringify({ cars: SEED }) });
-    msg('Импортировано моделей: ' + r.imported, true);
+    msg(t('Импортировано моделей: ') + r.imported, true);
     load();
-  } catch (err) { msg(err.message); }
+  } catch (err) { msg(t(err.message)); }
 };
 const SEED = [{"slug":"zeekr-001","brand":"Zeekr","name":"Zeekr 001","country":"china","body":"Лифтбек","fuel":"Электро","power":"544 л.с.","drive":"Полный","range":"656 км","battery":"95 кВт·ч","price":4.6,"year":2025,"tags":["electro","awd"],"grad":["#20304c","#0d1524"],"desc":"Флагманский электрический лифтбек Zeekr: динамика спорткара, запас хода 600+ км и премиальный салон. Одна из самых популярных моделей под заказ из Китая."},{"slug":"zeekr-7x","brand":"Zeekr","name":"Zeekr 7X","country":"china","body":"Кроссовер","fuel":"Электро","power":"421 л.с.","drive":"Задний / Полный","range":"705 км","battery":"100 кВт·ч","price":4.2,"year":2025,"tags":["electro","suv"],"grad":["#2c3a55","#111827"],"desc":"Среднеразмерный электрический кроссовер на 800-вольтовой платформе: зарядка 10–80% за 16 минут, богатое оснащение уже в базе."},{"slug":"lixiang-l7","brand":"Li Auto","name":"Lixiang L7","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1315 км (суммарно)","battery":"42,8 кВт·ч","price":4.9,"year":2025,"tags":["hybrid","suv","family"],"grad":["#3a3f4a","#15181f"],"desc":"Пятиместный семейный кроссовер с последовательным гибридом: едет как электромобиль, а бензиновый генератор снимает страх розетки. Хит продаж в Китае."},{"slug":"lixiang-l9","brand":"Li Auto","name":"Lixiang L9","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1412 км (суммарно)","battery":"44,5 кВт·ч","price":6.4,"year":2025,"tags":["hybrid","suv","family","7seats"],"grad":["#2f3542","#101319"],"desc":"Флагман Li Auto: шестиместный салон с креслами-капитанами, три экрана, холодильник — полноценная замена премиальным европейским SUV."},{"slug":"byd-song-plus","brand":"BYD","name":"BYD Song Plus DM-i","country":"china","body":"Кроссовер","fuel":"Гибрид (PHEV)","power":"218 л.с.","drive":"Передний","range":"1200 км (суммарно)","battery":"18,3 кВт·ч","price":2.9,"year":2025,"tags":["hybrid","suv","budget"],"grad":["#37424e","#141a20"],"desc":"Самый массовый гибридный кроссовер Китая: расход 4–5 л на 100 км, просторный салон и лучшая цена в классе."},{"slug":"byd-seal","brand":"BYD","name":"BYD Seal","country":"china","body":"Седан","fuel":"Электро","power":"530 л.с.","drive":"Полный","range":"650 км","battery":"82,5 кВт·ч","price":3.6,"year":2025,"tags":["electro","sedan"],"grad":["#1f3a4d","#0c161e"],"desc":"Спортивный электроседан на платформе e-Platform 3.0 с ячейками Blade Battery: разгон до сотни за 3,8 секунды."},{"slug":"geely-monjaro","brand":"Geely","name":"Geely Monjaro","country":"china","body":"Кроссовер","fuel":"Бензин","power":"238 л.с.","drive":"Полный","range":"—","battery":"—","price":3.3,"year":2025,"tags":["petrol","suv"],"grad":["#41454f","#171a20"],"desc":"Флагманский бензиновый кроссовер Geely на платформе Volvo CMA: 2.0 турбо, полный привод BorgWarner, тихий и богатый салон."},{"slug":"xiaomi-su7","brand":"Xiaomi","name":"Xiaomi SU7","country":"china","body":"Седан","fuel":"Электро","power":"673 л.с.","drive":"Полный","range":"800 км","battery":"101 кВт·ч","price":4.8,"year":2025,"tags":["electro","sedan"],"grad":["#3d3347","#151119"],"desc":"Электроседан от Xiaomi, ставший главной новинкой китайского авторынка: экосистема HyperOS, автопилот и дизайн уровня суперкаров."},{"slug":"aito-m7","brand":"AITO","name":"AITO M7","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"449 л.с.","drive":"Полный","range":"1300 км (суммарно)","battery":"40 кВт·ч","price":4.4,"year":2025,"tags":["hybrid","suv","family"],"grad":["#33404c","#121a20"],"desc":"Кроссовер альянса Huawei и Seres: интеллектуальный автопилот ADS, HarmonyOS в салоне и гибридная силовая установка."},{"slug":"avatr-11","brand":"Avatr","name":"Avatr 11","country":"china","body":"Кроссовер-купе","fuel":"Электро","power":"578 л.с.","drive":"Полный","range":"680 км","battery":"116 кВт·ч","price":5.2,"year":2025,"tags":["electro","suv"],"grad":["#403040","#161018"],"desc":"Совместный проект Changan, Huawei и CATL: футуристичный дизайн, батарея 116 кВт·ч и интеллект Huawei на борту."},{"slug":"tank-500","brand":"Tank","name":"Tank 500","country":"china","body":"Внедорожник","fuel":"Гибрид (HEV)","power":"354 л.с.","drive":"Полный","range":"—","battery":"—","price":5,"year":2025,"tags":["hybrid","suv","offroad","7seats"],"grad":["#3a3d38","#141612"],"desc":"Рамный внедорожник премиум-класса: гибрид 2.0T + электромотор, блокировки, семь мест и салон бизнес-уровня."},{"slug":"chery-tiggo-8-pro-max","brand":"Chery","name":"Chery Tiggo 8 Pro Max","country":"china","body":"Кроссовер","fuel":"Бензин","power":"197 л.с.","drive":"Полный","range":"—","battery":"—","price":2.6,"year":2025,"tags":["petrol","suv","budget","7seats"],"grad":["#41404a","#16151c"],"desc":"Семиместный кроссовер с лучшим соотношением цены и оснащения: панорамная крыша, два экрана 12,3\", полный привод."},{"slug":"haval-h6","brand":"Haval","name":"Haval H6","country":"china","body":"Кроссовер","fuel":"Бензин","power":"192 л.с.","drive":"Передний / Полный","range":"—","battery":"—","price":2.3,"year":2025,"tags":["petrol","suv","budget"],"grad":["#39424b","#131a1f"],"desc":"Бестселлер китайского рынка в новом поколении: экономичный турбомотор, просторный салон и цена заметно ниже дилерской в РФ."},{"slug":"voyah-free","brand":"Voyah","name":"Voyah Free","country":"china","body":"Кроссовер","fuel":"Гибрид (EREV)","power":"694 л.с.","drive":"Полный","range":"1200 км (суммарно)","battery":"43 кВт·ч","price":4.7,"year":2025,"tags":["hybrid","suv"],"grad":["#2e3c4e","#101722"],"desc":"Премиальный кроссовер Dongfeng: пневмоподвеска, 694 л.с. в гибридной версии и богатая базовая комплектация."},{"slug":"hongqi-hs5","brand":"Hongqi","name":"Hongqi HS5","country":"china","body":"Кроссовер","fuel":"Бензин","power":"245 л.с.","drive":"Полный","range":"—","battery":"—","price":3.4,"year":2025,"tags":["petrol","suv"],"grad":["#43323a","#181114"],"desc":"Представительский кроссовер первой автомобильной марки Китая: строгий дизайн, качественные материалы, тихий салон."},{"slug":"geely-galaxy-e8","brand":"Geely","name":"Geely Galaxy E8","country":"china","body":"Седан","fuel":"Электро","power":"475 л.с.","drive":"Полный","range":"665 км","battery":"76 кВт·ч","price":3.5,"year":2025,"tags":["electro","sedan"],"grad":["#243a4e","#0d1622"],"desc":"Электрический флагман линейки Galaxy: экран во всю панель 45\", 800-вольтовая архитектура, отличная управляемость."}];
 
+/* Переключатель языков */
+document.querySelectorAll('.lang').forEach((b) => {
+  if (b.dataset.lang === LANG) b.classList.add('on');
+  b.onclick = () => { localStorage.setItem('inavto_admin_lang', b.dataset.lang); location.reload(); };
+});
+localize();
 tryLogin();
 </script>
 </body>

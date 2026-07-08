@@ -552,6 +552,126 @@
   }
   A.initParallax = initParallax;
 
+  /* ---------- Count Up: числа набегают при появлении ---------- */
+  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 4);
+
+  function animateText(el, dur) {
+    // находит числа в тексте элемента и анимирует каждое от 0 до цели, сохраняя формат
+    const original = el.textContent;
+    const re = /(\d[\d\s ]*(?:[.,]\d+)?)/g;
+    const parts = [];
+    let last = 0, m;
+    while ((m = re.exec(original)) !== null) {
+      parts.push({ text: original.slice(last, m.index) });
+      const tok = m[1];
+      const dec = (tok.match(/[.,](\d+)$/) || [, ''])[1].length;
+      parts.push({
+        target: parseFloat(tok.replace(/[\s ]/g, '').replace(',', '.')),
+        dec,
+        grouped: /[\s ]/.test(tok.replace(/[.,]\d+$/, '')),
+        sep: tok.includes(',') ? ',' : '.',
+      });
+      last = m.index + tok.length;
+    }
+    parts.push({ text: original.slice(last) });
+    if (!parts.some((p) => p.target !== undefined)) return;
+
+    const fmt = (p, v) => {
+      let str = v.toFixed(p.dec);
+      let [int, frac] = str.split('.');
+      if (p.grouped) int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      return frac ? int + p.sep + frac : int;
+    };
+    const start = performance.now();
+    (function frame(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const k = easeOut(t);
+      el.textContent = parts.map((p) =>
+        p.target === undefined ? p.text : fmt(p, p.target * k)).join('');
+      if (t < 1) requestAnimationFrame(frame);
+      else el.textContent = original;
+    })(start);
+  }
+
+  function initCountUp() {
+    if (reducedMotion()) return;
+    const els = document.querySelectorAll('.hero-stats b');
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        animateText(en.target, 1200);
+      });
+    }, { threshold: 0.6 });
+    els.forEach((el) => io.observe(el));
+  }
+
+  /* Плавное перетекание числа (итог калькулятора) */
+  A.tweenNumber = function (el, from, to, fmtFn) {
+    if (reducedMotion() || !isFinite(from) || from === to) { el.textContent = fmtFn(to); return; }
+    const start = performance.now(), dur = 350;
+    (function frame(now) {
+      const t = Math.min(1, (now - start) / dur);
+      el.textContent = fmtFn(from + (to - from) * easeOut(t));
+      if (t < 1) requestAnimationFrame(frame);
+    })(start);
+  };
+
+  /* ---------- Магнитные CTA-кнопки ---------- */
+  function initMagnetic() {
+    if (!window.matchMedia('(pointer: fine)').matches || reducedMotion()) return;
+    let active = null;
+    document.addEventListener('mousemove', (e) => {
+      const b = e.target.closest ? e.target.closest('.btn-red') : null;
+      if (active && active !== b) { active.style.transform = ''; active = null; }
+      if (!b) return;
+      const r = b.getBoundingClientRect();
+      const clamp = (v) => Math.max(-8, Math.min(8, v));
+      const dx = clamp((e.clientX - (r.left + r.width / 2)) * 0.16);
+      const dy = clamp((e.clientY - (r.top + r.height / 2)) * 0.28);
+      b.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      active = b;
+    }, { passive: true });
+    document.addEventListener('mouseout', (e) => {
+      const b = e.target.closest ? e.target.closest('.btn-red') : null;
+      if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) {
+        b.style.transform = '';
+        if (active === b) active = null;
+      }
+    }, { passive: true });
+  }
+
+  /* ---------- Пословное раскрытие заголовка ---------- */
+  function initHeroReveal() {
+    if (reducedMotion()) return;
+    const h = document.querySelector('.hero .h1, .page-hero .h1');
+    if (!h) return;
+    let idx = 0;
+    const splitNode = (node) => {
+      if (node.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        node.nodeValue.split(/(\s+)/).forEach((piece) => {
+          if (!piece) return;
+          if (/^\s+$/.test(piece)) { frag.appendChild(document.createTextNode(piece)); return; }
+          const w = document.createElement('span');
+          w.className = 'wrd';
+          const i = document.createElement('i');
+          i.style.transitionDelay = (idx++ * 60) + 'ms';
+          i.textContent = piece;
+          w.appendChild(i);
+          frag.appendChild(w);
+        });
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === 1) {
+        Array.from(node.childNodes).forEach(splitNode);
+      }
+    };
+    Array.from(h.childNodes).forEach(splitNode);
+    requestAnimationFrame(() => requestAnimationFrame(() => h.classList.add('h1-revealed')));
+  }
+
   /* ---------- Старт ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     renderHeader();
@@ -563,5 +683,8 @@
     initFaq();
     initCursor();
     initParallax();
+    initCountUp();
+    initMagnetic();
+    initHeroReveal();
   });
 })();

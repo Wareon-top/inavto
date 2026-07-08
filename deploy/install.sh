@@ -17,6 +17,14 @@ PORT=3000
 say()  { echo -e "\n\033[1;31m[INAVTO]\033[0m $*"; }
 fail() { echo -e "\n\033[1;31mОШИБКА:\033[0m $*"; exit 1; }
 
+# Веб-консоли при вставке добавляют невидимый мусор (^[[200~ … ^[[201~) —
+# вычищаем его из ответов на вопросы, чтобы ключи записались чистыми.
+clean() {
+  local v="$1"
+  v=${v//$'\e[200~'/}; v=${v//$'\e[201~'/}
+  printf '%s' "$v" | tr -cd 'A-Za-z0-9._:@-'
+}
+
 [ "$(id -u)" = 0 ] || fail "запустите от root:  sudo bash $0"
 [ -d "$APP/backend" ] && [ -d "$APP/site" ] || fail "код не найден в $APP.
 Сначала клонируйте репозиторий:
@@ -65,17 +73,20 @@ else
   say "Первичная настройка."
   echo    "Вопрос 1/3. Ключ админ-панели (длинная строка, которую вы вводите на /admin)."
   read -rp "Вставьте ключ (или просто Enter — сгенерирую новый): " ADMIN_TOKEN < /dev/tty || ADMIN_TOKEN=""
+  ADMIN_TOKEN=$(clean "$ADMIN_TOKEN")
   [ -n "$ADMIN_TOKEN" ] || ADMIN_TOKEN=$(openssl rand -hex 24)
 
   echo
   echo    "Вопрос 2/3. Токен Telegram-бота для заявок (из @BotFather)."
   read -rp "Токен бота (Enter — пропустить, добавите позже): " BOT_TOKEN < /dev/tty || BOT_TOKEN=""
+  BOT_TOKEN=$(clean "$BOT_TOKEN")
 
   ADMIN_CHAT_ID=""
   if [ -n "$BOT_TOKEN" ]; then
     echo
     echo    "Вопрос 3/3. Ваш Telegram ID — куда слать заявки (узнать: напишите боту @userinfobot)."
     read -rp "Telegram ID: " ADMIN_CHAT_ID < /dev/tty || ADMIN_CHAT_ID=""
+    ADMIN_CHAT_ID=$(printf '%s' "$(clean "$ADMIN_CHAT_ID")" | tr -cd '0-9-')
   fi
 
   {

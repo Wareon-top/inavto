@@ -682,7 +682,10 @@
 
   /* ---------- Каталог с сервера (админка) с фолбэком на data.js ---------- */
   async function loadRemoteCatalog() {
-    if (!window.INAVTO_API) return;   // чистая статика — работаем от data.js
+    // Адрес API задаёт window.INAVTO_API; если он не задан, но сайт открыт
+    // по http(s) — пробуем тот же домен (на VPS nginx проксирует /api на бэкенд).
+    // Открыт как файл (file://) — работаем только от встроенного data.js.
+    if (!window.INAVTO_API && !/^https?:$/.test(location.protocol)) return;
     A.STATIC_SLUGS = new Set(A.CARS.map((c) => c.slug));
     try {
       const ctrl = new AbortController();

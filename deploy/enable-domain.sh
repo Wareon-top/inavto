@@ -39,7 +39,8 @@ say "Ставлю certbot и выпускаю сертификат…"
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -y -qq certbot python3-certbot-nginx >/dev/null
 if [ -n "$EMAIL" ]; then MAILOPT=(-m "$EMAIL"); else MAILOPT=(--register-unsafely-without-email); fi
-certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --redirect --agree-tos --no-eff-email -n "${MAILOPT[@]}"
+# --keep-until-expiring: повторный запуск безопасен — сертификат переиспользуется
+certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --redirect --agree-tos --no-eff-email -n --keep-until-expiring "${MAILOPT[@]}"
 
 say "ГОТОВО!"
 echo "  Сайт:    https://$DOMAIN/"

@@ -179,6 +179,15 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t >/dev/null
 systemctl reload nginx
 
+# Если домен и HTTPS уже подключались — восстанавливаем их автоматически
+# (конфиг выше пишется заново, и настройка certbot из него пропадает)
+CERT_DOM=$(ls /etc/letsencrypt/live 2>/dev/null | grep -v README | head -1 || true)
+if [ -n "$CERT_DOM" ]; then
+  say "Нашёл сертификат для $CERT_DOM — восстанавливаю HTTPS…"
+  bash "$APP/deploy/enable-domain.sh" "$CERT_DOM" || \
+    echo "Автоматически не вышло. Выполните вручную: bash $APP/deploy/enable-domain.sh $CERT_DOM ваш@email"
+fi
+
 # ---------- 10. Файрвол (если включён) ----------
 if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: active"; then
   ufw allow OpenSSH >/dev/null || true

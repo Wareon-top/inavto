@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
-const DOMAIN = 'https://inavto.asia' // заменить на реальный домен перед запуском
+const DOMAIN = 'https://inavtoasia.ru' // боевой домен
 
 const win = {}
 new Function('window', fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8'))(win)

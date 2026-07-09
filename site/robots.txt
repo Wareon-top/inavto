@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /car.html
-Sitemap: https://inavto.asia/sitemap.xml
+Sitemap: https://inavtoasia.ru/sitemap.xml

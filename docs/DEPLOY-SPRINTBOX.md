@@ -99,15 +99,14 @@ bash /opt/inavto/deploy/update.sh
 
 ## Когда появится домен
 
-1. У регистратора домена создайте **A-запись** на IP сервера (`@` → IP и `www` → IP).
-2. Скажите разработчику — он пропишет домен в SEO-разметке сайта.
-3. Включите HTTPS (бесплатный сертификат Let's Encrypt):
+1. У регистратора домена создайте **A-записи** на IP сервера: `@` → IP и `www` → IP.
+2. Скажите разработчику — он пропишет домен в SEO-разметке сайта (для inavtoasia.ru уже сделано).
+3. Подождите 15–60 минут (DNS) и выполните на сервере:
    ```bash
-   apt-get install -y certbot python3-certbot-nginx
-   sed -i 's/server_name _;/server_name ВАШ_ДОМЕН www.ВАШ_ДОМЕН;/' /etc/nginx/sites-available/inavto
-   nginx -t && systemctl reload nginx
-   certbot --nginx -d ВАШ_ДОМЕН -d www.ВАШ_ДОМЕН
+   bash /opt/inavto/deploy/update.sh
+   bash /opt/inavto/deploy/enable-domain.sh ВАШ_ДОМЕН ваш@email
    ```
+   Скрипт сам проверит DNS, пропишет домен в nginx, выпустит бесплатный сертификат Let's Encrypt и включит https с автопродлением. Если DNS ещё не разошёлся — скрипт скажет об этом, просто запустите его позже ещё раз.
 
 ## Если что-то пошло не так / частые вопросы
 

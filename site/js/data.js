@@ -8,7 +8,7 @@ window.INAVTO.CONTACTS = {
   phoneHref: 'tel:+79676463629',
   telegram: 'https://t.me/Dilshat1985',
   whatsapp: 'https://wa.me/79676463629',
-  email: 'info@inavto.asia',
+  email: 'info@inavtoasia.ru',   // заглушка: почту на домене ещё предстоит завести
 };
 
 window.INAVTO.CARS = [

@@ -165,9 +165,11 @@ server {
     location ^~ /uploads/ { proxy_pass http://127.0.0.1:3000; }
     location = /admin     { proxy_pass http://127.0.0.1:3000; }
 
-    # Картинки, шрифты, PDF — кэш подольше; CSS/JS — покороче (чтобы обновления доезжали)
+    # Картинки, шрифты, PDF — кэш подольше.
     location ~* \.(webp|png|jpe?g|svg|ico|woff2?|pdf)$ { expires 14d; add_header Cache-Control "public"; }
-    location ~* \.(css|js)$ { expires 1h; add_header Cache-Control "public, must-revalidate"; }
+    # CSS/JS: браузер каждый раз сверяется с сервером (304, если не менялось) —
+    # обновления дизайна доезжают мгновенно, без «слипшихся кнопок» из старого кэша.
+    location ~* \.(css|js)$ { add_header Cache-Control "no-cache"; }
 
     location / { try_files $uri $uri/ =404; }
 }

@@ -26,6 +26,8 @@ const rowToCar = (r) => ({
   photos: JSON.parse(r.photos || '[]'),
   hidden: Boolean(r.hidden),
   sort: r.sort,
+  cond: r.cond === 'used' ? 'used' : 'new',
+  mileage: r.mileage || 0,
 })
 
 /* Публично: каталог для сайта (только видимые) */
@@ -44,7 +46,8 @@ router.get('/all', adminOnly, (req, res) => {
 })
 
 const FIELDS = ['brand', 'name', 'body', 'fuel', 'power', 'drive', 'range', 'battery',
-  'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden']
+  'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden',
+  'cond', 'mileage']
 
 function carPayload(body) {
   const p = {}
@@ -66,6 +69,8 @@ function carPayload(body) {
   p.photos = JSON.stringify(Array.isArray(body.photos) ? body.photos : [])
   p.sort = Math.round(Number(body.sort) || 100)
   p.hidden = body.hidden ? 1 : 0
+  p.cond = body.cond === 'used' ? 'used' : 'new'
+  p.mileage = Math.max(0, Math.round(Number(body.mileage) || 0))
   return p
 }
 

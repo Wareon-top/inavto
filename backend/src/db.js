@@ -64,6 +64,8 @@ db.exec(`
     photos TEXT DEFAULT '[]',
     sort INTEGER DEFAULT 100,
     hidden INTEGER DEFAULT 0,
+    cond TEXT DEFAULT 'new',
+    mileage INTEGER DEFAULT 0,
     updated_at TEXT DEFAULT (datetime('now')),
     created_at TEXT DEFAULT (datetime('now'))
   );
@@ -80,6 +82,12 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 `)
+
+/* Миграция баз, созданных до появления «нового/с пробегом»:
+   ALTER TABLE в SQLite падает, если колонка уже есть, — глушим. */
+for (const col of ["cond TEXT DEFAULT 'new'", 'mileage INTEGER DEFAULT 0']) {
+  try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
+}
 
 // Seed demo cars if empty
 const count = db.prepare('SELECT COUNT(*) as c FROM cars').get()

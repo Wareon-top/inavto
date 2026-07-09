@@ -42,7 +42,8 @@
       const from = 'из Китая';
       const catUrl = 'catalog.html';
       const catName = 'Авто из Китая';
-      const stateNote = 'новый автомобиль';
+      const used = car.cond === 'used';
+      const stateNote = used ? 'с пробегом' : 'новый автомобиль';
 
       document.title = car.name + ' купить под заказ ' + from + ' — цена под ключ | INAVTO ASIA';
       document.getElementById('crumbs').innerHTML =
@@ -54,6 +55,7 @@
       ];
       if (car.range !== '—') specs.push(['Запас хода', car.range]);
       if (car.battery !== '—') specs.push(['Батарея', car.battery]);
+      if (used && car.mileage) specs.push(['Пробег', Number(car.mileage).toLocaleString('ru-RU') + ' км']);
       if (car.priceCny) specs.push(['Цена в Китае', '¥ ' + car.priceCny.toLocaleString('ru-RU')]);
       if (car.priceUsd) specs.push(['Цена в долларах', '$ ' + car.priceUsd.toLocaleString('ru-RU')]);
       specs.push(['Состояние', stateNote]);

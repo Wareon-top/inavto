@@ -146,8 +146,13 @@
         <div><label>Привод</label><input id="f-drive" placeholder="Полный"></div>
         <div><label>Запас хода</label><input id="f-range" placeholder="705 км или —"></div>
         <div><label>Батарея</label><input id="f-battery" placeholder="100 кВт·ч или —"></div>
-        <div><label>Год</label><input id="f-year" type="number" min="2015" max="2030" value="2026"></div>
+        <div><label>Год</label><input id="f-year" type="number" min="2005" max="2030" value="2026"></div>
         <div><label>Порядок (меньше — выше)</label><input id="f-sort" type="number" value="100"></div>
+        <div><label>Состояние</label><select id="f-cond">
+          <option value="new">Новый</option><option value="used">С пробегом</option>
+        </select></div>
+        <div><label>Пробег, км</label><input id="f-mileage" type="number" min="0" step="1000" placeholder="15000">
+          <div class="price-hint">Только для авто с пробегом</div></div>
       </div>
       <div class="grid g3" style="margin-bottom:6px">
         <div><label>Цена под ключ, млн ₽ *</label><input id="f-rub" type="number" step="0.1" min="0" placeholder="4.2">
@@ -269,6 +274,8 @@ zh: {
   'Гибрид': '混动', 'Кроссовер/SUV': 'SUV', 'Для семьи': '适合家庭', 'Бюджетный': '经济型',
   '7 мест': '7 座', 'Полный привод': '全轮驱动',
   '421 л.с.': '421 马力', 'Полный': '全驱', '705 км или —': '705 公里或 —', '100 кВт·ч или —': '100 kWh 或 —',
+  'Состояние': '车况', 'Новый': '新车', 'С пробегом': '二手车', 'с пробегом': '二手',
+  'Пробег, км': '里程，公里', 'Только для авто с пробегом': '仅二手车填写', 'км': '公里',
   '1–2 предложения: чем хорош автомобиль.': '1–2 句话：这款车的亮点。',
   'Некорректный слаг (латиница, цифры, дефис)': '无效的 slug（拉丁字母、数字、连字符）',
   'Нужны название и цена в ₽': '需要名称和卢布价格',
@@ -346,6 +353,8 @@ en: {
   'Гибрид': 'Hybrid', 'Кроссовер/SUV': 'Crossover/SUV', 'Для семьи': 'For family', 'Бюджетный': 'Budget',
   '7 мест': '7 seats', 'Полный привод': 'AWD',
   '421 л.с.': '421 hp', 'Полный': 'AWD', '705 км или —': '705 km or —', '100 кВт·ч или —': '100 kWh or —',
+  'Состояние': 'Condition', 'Новый': 'New', 'С пробегом': 'Used', 'с пробегом': 'used',
+  'Пробег, км': 'Mileage, km', 'Только для авто с пробегом': 'For used cars only', 'км': 'km',
   '1–2 предложения: чем хорош автомобиль.': '1–2 sentences: what makes this car good.',
   'Некорректный слаг (латиница, цифры, дефис)': 'Invalid slug (Latin letters, digits, hyphen)',
   'Нужны название и цена в ₽': 'Name and price in ₽ are required',
@@ -438,7 +447,7 @@ async function load() {
   tb.innerHTML = cars.map((c) => `
     <tr>
       <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : `<div class="thumb empty">${t('нет фото')}</div>`}</td>
-      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}</small></td>
+      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}${c.cond === 'used' ? ' · ' + t('с пробегом') + (c.mileage ? ' ' + c.mileage.toLocaleString('ru-RU') + ' ' + t('км') : '') : ''}</small></td>
       <td class="num">${fmtRub(c.price)}</td>
       <td class="num">${c.priceCny ? '¥ ' + c.priceCny.toLocaleString('ru-RU') : '—'}<br>${c.priceUsd ? '$ ' + c.priceUsd.toLocaleString('ru-RU') : ''}</td>
       <td>${c.power || '—'}</td>
@@ -497,6 +506,8 @@ function openForm(car) {
   $('f-battery').value = car ? car.battery : '—';
   $('f-year').value = car ? car.year : 2026;
   $('f-sort').value = car ? car.sort : 100;
+  $('f-cond').value = car && car.cond === 'used' ? 'used' : 'new';
+  $('f-mileage').value = car && car.mileage ? car.mileage : '';
   $('f-rub').value = car ? car.price : '';
   $('f-cny').value = car && car.priceCny ? car.priceCny : '';
   $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
@@ -571,6 +582,8 @@ $('saveBtn').onclick = async () => {
     power: $('f-power').value.trim(), drive: $('f-drive').value.trim(),
     range: $('f-range').value.trim() || '—', battery: $('f-battery').value.trim() || '—',
     year: +$('f-year').value || 2026, sort: +$('f-sort').value || 100,
+    cond: $('f-cond').value === 'used' ? 'used' : 'new',
+    mileage: +$('f-mileage').value || 0,
     price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
     price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
     desc: $('f-desc').value.trim(),

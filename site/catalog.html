@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Каталог новых авто из Китая под заказ — цены под ключ | INAVTO ASIA</title>
-  <meta name="description" content="Каталог новых автомобилей из Китая под заказ: Zeekr, Li Auto (Lixiang), BYD, Geely, Xiaomi, AITO, Avatr, Tank и другие. Цены под ключ с доставкой и растаможкой в Россию.">
+  <title>Каталог авто из Китая под заказ — новые и с пробегом | INAVTO ASIA</title>
+  <meta name="description" content="Каталог автомобилей из Китая под заказ — новые и с пробегом: Zeekr, Li Auto (Lixiang), BYD, Geely, Xiaomi, AITO, Avatr, Tank и другие. Цены под ключ с доставкой и растаможкой в Россию.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
   <section class="page-hero">
     <div class="container">
       <div class="breadcrumbs"><a href="index.html">Главная</a> / Авто из Китая</div>
-      <h1 class="h1">Новые авто из Китая</h1>
+      <h1 class="h1">Авто из Китая</h1>
       <p class="lead" style="margin-top:14px;max-width:680px">Цены указаны «под ключ» — с логистикой, таможней, утильсбором, СБКТС и нашей комиссией. Не нашли модель? Привезём почти любую с рынка Китая — <button class="btn btn-red btn-sm" data-quiz-open style="vertical-align:middle">оставьте заявку</button></p>
     </div>
   </section>
@@ -34,8 +34,15 @@
         <span>Вам поделились подборкой автомобилей. Понравилось — жмите ♥, чтобы сохранить себе.</span>
         <div class="fav-bar-actions"><a class="btn btn-ghost btn-sm" href="catalog.html">Весь каталог</a></div>
       </div>
+      <!-- 1. Состояние: новый / с пробегом -->
+      <div class="cond-tabs" id="cond-tabs">
+        <button type="button" class="cond-tab active" data-cond="new">Новые</button>
+        <button type="button" class="cond-tab" data-cond="used">С пробегом</button>
+      </div>
+      <!-- 2. Фильтр бренда -->
+      <div class="pills brand-pills" id="brand-pills"></div>
+      <!-- 3. Остальные фильтры -->
       <div class="filters">
-        <select id="f-brand"><option value="">Все марки</option></select>
         <select id="f-body">
           <option value="">Любой кузов</option>
           <option>Кроссовер</option>
@@ -65,6 +72,10 @@
       </div>
       <div class="cars-grid" id="cars"></div>
       <div class="empty-note" id="empty" style="display:none">По выбранным фильтрам ничего не нашлось — попробуйте изменить условия или <button class="btn btn-ghost btn-sm" data-quiz-open>закажите подбор</button></div>
+      <div class="empty-note" id="empty-used" style="display:none">
+        <p style="max-width:56ch;margin:0 auto 16px">Автомобили с пробегом привозим под заказ: расскажите, что ищете, — подберём проверенные варианты с прозрачной историей и полным отчётом по состоянию.</p>
+        <button class="btn btn-red" data-quiz-open>Заказать подбор</button>
+      </div>
     </div>
   </section>
 
@@ -93,14 +104,42 @@
       const empty = document.getElementById('empty');
       const $ = id => document.getElementById(id);
 
-      const brands = [...new Set(cars.map(c => c.brand))].sort();
-      $('f-brand').innerHTML += brands.map(b => '<option>' + b + '</option>').join('');
+      /* 1. Состояние (новый / с пробегом), 2. бренд, 3. остальные фильтры */
+      let cond = 'new';
+      let brand = '';
+      const emptyUsed = $('empty-used');
+      const condOf = c => c.cond === 'used' ? 'used' : 'new';
+
+      function renderBrandPills() {
+        const brands = [...new Set(cars.filter(c => condOf(c) === cond).map(c => c.brand))].sort();
+        if (brand && !brands.includes(brand)) brand = '';
+        $('brand-pills').innerHTML =
+          '<button type="button" class="pill' + (brand ? '' : ' active') + '" data-brand="">Все марки</button>' +
+          brands.map(b => '<button type="button" class="pill' + (b === brand ? ' active' : '') + '" data-brand="' + b + '">' + b + '</button>').join('');
+      }
+      $('brand-pills').addEventListener('click', (e) => {
+        const p = e.target.closest('[data-brand]');
+        if (!p) return;
+        brand = p.dataset.brand;
+        renderBrandPills();
+        apply();
+      });
+      $('cond-tabs').addEventListener('click', (e) => {
+        const tabBtn = e.target.closest('[data-cond]');
+        if (!tabBtn || tabBtn.dataset.cond === cond) return;
+        cond = tabBtn.dataset.cond;
+        document.querySelectorAll('.cond-tab').forEach(x => x.classList.toggle('active', x.dataset.cond === cond));
+        renderBrandPills();
+        apply();
+        A.goal('cond_' + cond);
+      });
 
       function apply() {
-        let list = cars.slice();
-        const b = $('f-brand').value, body = $('f-body').value, fuel = $('f-fuel').value,
+        let list = cars.filter(c => condOf(c) === cond);
+        const noneOfCond = list.length === 0;
+        const body = $('f-body').value, fuel = $('f-fuel').value,
               price = $('f-price').value, sort = $('f-sort').value;
-        if (b) list = list.filter(c => c.brand === b);
+        if (brand) list = list.filter(c => c.brand === brand);
         if (body) list = list.filter(c => c.body.includes(body));
         if (fuel) list = list.filter(c => c.tags.includes(fuel));
         if (price) {
@@ -110,10 +149,13 @@
         if (sort === 'asc') list.sort((x, y) => x.price - y.price);
         if (sort === 'desc') list.sort((x, y) => y.price - x.price);
         grid.innerHTML = list.map(A.carCard).join('');
-        empty.style.display = list.length ? 'none' : 'block';
+        /* в разделе «С пробегом» пока пусто — приглашаем на подбор, иначе обычная заглушка */
+        emptyUsed.style.display = (!list.length && cond === 'used' && noneOfCond) ? 'block' : 'none';
+        empty.style.display = (!list.length && emptyUsed.style.display === 'none') ? 'block' : 'none';
         A.initReveal();
       }
-      ['f-brand', 'f-body', 'f-fuel', 'f-price', 'f-sort'].forEach(id => $(id).addEventListener('change', apply));
+      renderBrandPills();
+      ['f-body', 'f-fuel', 'f-price', 'f-sort'].forEach(id => $(id).addEventListener('change', apply));
 
       /* ---------- Избранное: бар, фильтр, шаринг ---------- */
       let favOnly = false;
@@ -133,6 +175,7 @@
           const list = cars.filter(c => favs.includes(c.slug));
           grid.innerHTML = list.map(A.carCard).join('');
           empty.style.display = list.length ? 'none' : 'block';
+          emptyUsed.style.display = 'none';
           A.initReveal();
         } else {
           baseApply();
@@ -166,6 +209,8 @@
         if (slugs.length) {
           $('shared-bar').style.display = '';
           document.querySelector('.filters').style.display = 'none';
+          $('cond-tabs').style.display = 'none';
+          $('brand-pills').style.display = 'none';
           grid.innerHTML = cars.filter(c => slugs.includes(c.slug)).map(A.carCard).join('');
           empty.style.display = 'none';
           A.initReveal();

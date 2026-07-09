@@ -224,7 +224,8 @@
     : 'car.html?slug=' + car.slug;
 
   A.carCard = function (car) {
-    const priceNote = 'новый, под ключ';
+    const used = car.cond === 'used';
+    const priceNote = used ? 'с пробегом, под ключ' : 'новый, под ключ';
     const fav = A.favs.has(car.slug);
     return `<article class="car-card reveal">
       <a href="${A.carUrl(car)}">${A.carVisual(car)}</a>
@@ -236,7 +237,7 @@
         <div class="car-sub">${car.body} · ${car.fuel}</div>
         <ul class="car-specs">
           <li><span>Мощность</span><b>${car.power}</b></li>
-          <li><span>Привод</span><b>${car.drive}</b></li>
+          ${used && car.mileage ? `<li><span>Пробег</span><b>${Number(car.mileage).toLocaleString('ru-RU')} км</b></li>` : `<li><span>Привод</span><b>${car.drive}</b></li>`}
           ${car.range !== '—' ? `<li><span>Запас хода</span><b>${car.range}</b></li>` : `<li><span>Год</span><b>${car.year}</b></li>`}
         </ul>
         <div class="car-price-row">

@@ -22,7 +22,8 @@ function pageHTML(car) {
   const from = 'из Китая'
   const catUrl = 'catalog.html'
   const catName = 'Авто из Китая'
-  const stateNote = 'новый автомобиль'
+  const used = car.cond === 'used'
+  const stateNote = used ? 'с пробегом' : 'новый автомобиль'
   const title = `${car.name} купить под заказ ${from} — цена под ключ | INAVTO ASIA`
   const desc = `${car.name} (${car.body.toLowerCase()}, ${car.fuel.toLowerCase()}, ${car.power}) под заказ ${from} с доставкой под ключ в Россию: от ${fmtPrice(car.price)} млн ₽ с растаможкой, СБКТС и гарантиями по договору. Срок 30–60 дней.`
 
@@ -31,6 +32,7 @@ function pageHTML(car) {
   ]
   if (car.range !== '—') specs.push(['Запас хода', car.range])
   if (car.battery !== '—') specs.push(['Батарея', car.battery])
+  if (used && car.mileage) specs.push(['Пробег', Number(car.mileage).toLocaleString('ru-RU') + ' км'])
   specs.push(['Состояние', stateNote])
 
   const jsonLd = {
@@ -45,6 +47,7 @@ function pageHTML(car) {
       priceCurrency: 'RUB',
       price: priceRub(car.price),
       priceValidUntil: '2026-12-31',
+      itemCondition: used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
       availability: 'https://schema.org/PreOrder',
       url: `${DOMAIN}/cars/${car.slug}.html`,
     },

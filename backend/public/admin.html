@@ -120,6 +120,9 @@
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn ghost sm" id="importBtn" style="display:none">Импортировать 16 моделей сайта</button>
+        <button class="btn ghost sm" id="csvTplBtn" title="Скачать шаблон таблицы">Шаблон CSV</button>
+        <button class="btn ghost sm" id="csvBtn">Импорт из CSV</button>
+        <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
         <button class="btn ghost sm" id="logoutBtn">Выйти</button>
         <button class="btn red" id="addBtn">+ Добавить автомобиль</button>
       </div>
@@ -276,6 +279,13 @@ zh: {
   '421 л.с.': '421 马力', 'Полный': '全驱', '705 км или —': '705 公里或 —', '100 кВт·ч или —': '100 kWh 或 —',
   'Состояние': '车况', 'Новый': '新车', 'С пробегом': '二手车', 'с пробегом': '二手',
   'Пробег, км': '里程，公里', 'Только для авто с пробегом': '仅二手车填写', 'км': '公里',
+  'Шаблон CSV': 'CSV 模板', 'Импорт из CSV': '从 CSV 导入',
+  'Скачать шаблон таблицы': '下载表格模板',
+  'В файле нет строк с машинами': '文件中没有车辆数据行',
+  'Импортировать машин: ': '要导入的车辆数：',
+  'Без цены (будут пропущены): ': '缺少价格（将被跳过）：',
+  'Машины с совпадающим слагом будут обновлены.': '相同 slug 的车辆将被更新。',
+  'Не удалось разобрать файл: ': '无法解析文件：',
   '1–2 предложения: чем хорош автомобиль.': '1–2 句话：这款车的亮点。',
   'Некорректный слаг (латиница, цифры, дефис)': '无效的 slug（拉丁字母、数字、连字符）',
   'Нужны название и цена в ₽': '需要名称和卢布价格',
@@ -355,6 +365,13 @@ en: {
   '421 л.с.': '421 hp', 'Полный': 'AWD', '705 км или —': '705 km or —', '100 кВт·ч или —': '100 kWh or —',
   'Состояние': 'Condition', 'Новый': 'New', 'С пробегом': 'Used', 'с пробегом': 'used',
   'Пробег, км': 'Mileage, km', 'Только для авто с пробегом': 'For used cars only', 'км': 'km',
+  'Шаблон CSV': 'CSV template', 'Импорт из CSV': 'Import from CSV',
+  'Скачать шаблон таблицы': 'Download the spreadsheet template',
+  'В файле нет строк с машинами': 'No car rows in the file',
+  'Импортировать машин: ': 'Cars to import: ',
+  'Без цены (будут пропущены): ': 'Without a price (will be skipped): ',
+  'Машины с совпадающим слагом будут обновлены.': 'Cars with a matching slug will be updated.',
+  'Не удалось разобрать файл: ': 'Failed to parse the file: ',
   '1–2 предложения: чем хорош автомобиль.': '1–2 sentences: what makes this car good.',
   'Некорректный слаг (латиница, цифры, дефис)': 'Invalid slug (Latin letters, digits, hyphen)',
   'Нужны название и цена в ₽': 'Name and price in ₽ are required',
@@ -602,6 +619,86 @@ $('saveBtn').onclick = async () => {
   } catch (err) { msg(t(err.message)); }
   $('saveBtn').disabled = false;
 };
+
+/* ---------- Импорт из CSV (выгрузка поставщика / Excel) ---------- */
+const CSV_HEADERS = 'slug;name;brand;body;fuel;power;drive;range;battery;price_rub;price_cny;price_usd;year;cond;mileage;tags;desc';
+$('csvTplBtn').onclick = () => {
+  const rows = [
+    CSV_HEADERS,
+    ';Zeekr 7X;Zeekr;Кроссовер;Электро;421 л.с.;Полный;705 км;100 кВт·ч;4,2;220000;31000;2026;new;;electro,suv;Пример новой машины — эту строку можно удалить',
+    ';BYD Song Plus DM-i;BYD;Кроссовер;Гибрид (PHEV);218 л.с.;Передний;1200 км (суммарно);18,3 кВт·ч;2,9;150000;;2024;used;25000;hybrid,suv;Пример машины с пробегом — эту строку можно удалить',
+  ];
+  const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'inavto-catalog-template.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+function parseCsvLine(line, delim) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) {
+      if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === delim) { out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map((s) => s.trim());
+}
+
+async function csvToCars(file) {
+  const buf = await file.arrayBuffer();
+  let text = new TextDecoder('utf-8').decode(buf);
+  if (text.includes('�')) text = new TextDecoder('windows-1251').decode(buf); // CSV из русского Excel
+  text = text.replace(/^\uFEFF/, '');
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() && !/^sep=/i.test(l));
+  if (lines.length < 2) throw new Error(t('В файле нет строк с машинами'));
+  const delim = lines[0].split(';').length >= lines[0].split(',').length ? ';' : ',';
+  const head = parseCsvLine(lines[0], delim).map((h) => h.toLowerCase().replace(/\s/g, ''));
+  const num = (v) => parseFloat(String(v || '').replace(/\s/g, '').replace(',', '.')) || 0;
+  return lines.slice(1).map((line) => {
+    const v = parseCsvLine(line, delim);
+    const g = (k) => v[head.indexOf(k)] || '';
+    if (!g('name')) return null;
+    return {
+      slug: (g('slug') || translit(g('name'))).toLowerCase(),
+      name: g('name'), brand: g('brand') || g('name').split(' ')[0],
+      body: g('body') || 'Кроссовер', fuel: g('fuel') || 'Бензин',
+      power: g('power'), drive: g('drive'),
+      range: g('range') || '—', battery: g('battery') || '—',
+      price: num(g('price_rub')), price_cny: Math.round(num(g('price_cny'))),
+      price_usd: Math.round(num(g('price_usd'))), year: Math.round(num(g('year'))) || 2026,
+      cond: /б\/?у|проб|used/i.test(g('cond')) ? 'used' : 'new',
+      mileage: Math.round(num(g('mileage'))),
+      tags: g('tags').split(/[,;|]/).map((s) => s.trim()).filter(Boolean),
+      desc: g('desc'),
+    };
+  }).filter(Boolean);
+}
+
+$('csvBtn').onclick = () => $('csvFile').click();
+$('csvFile').addEventListener('change', async () => {
+  const f = $('csvFile').files[0];
+  $('csvFile').value = '';
+  if (!f) return;
+  try {
+    const list = await csvToCars(f);
+    const bad = list.filter((c) => !c.price);
+    if (!list.length) { msg(t('В файле нет строк с машинами')); return; }
+    if (!confirm(t('Импортировать машин: ') + list.length +
+      (bad.length ? '\n' + t('Без цены (будут пропущены): ') + bad.length : '') +
+      '\n' + t('Машины с совпадающим слагом будут обновлены.'))) return;
+    const r = await api('/api/site-cars/import', { method: 'POST',
+      body: JSON.stringify({ cars: list.filter((c) => c.price) }) });
+    msg(t('Импортировано моделей: ') + r.imported, true);
+    load();
+  } catch (err) { msg(t('Не удалось разобрать файл: ') + t(err.message)); }
+});
 
 /* ---------- Импорт стартового каталога ---------- */
 $('importBtn').onclick = async () => {

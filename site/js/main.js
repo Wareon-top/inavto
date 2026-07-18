@@ -694,7 +694,14 @@
       clearTimeout(t);
       if (!r.ok) return;
       const list = await r.json();
-      if (Array.isArray(list) && list.length) A.CARS = list;
+      if (Array.isArray(list) && list.length) {
+        // фото приходят путями вида /uploads/…: если API на другом домене — делаем абсолютными
+        if (API_BASE) list.forEach((c) => {
+          if (Array.isArray(c.photos)) c.photos = c.photos.map((p) =>
+            (typeof p === 'string' && p.startsWith('/')) ? API_BASE + p : p);
+        });
+        A.CARS = list;
+      }
     } catch (e) { /* сервер молчит — показываем встроенный каталог */ }
   }
 

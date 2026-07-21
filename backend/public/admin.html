@@ -123,6 +123,8 @@
         <button class="btn ghost sm" id="csvTplBtn" title="Скачать шаблон таблицы">Шаблон CSV</button>
         <button class="btn ghost sm" id="csvBtn">Импорт из CSV</button>
         <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+        <button class="btn ghost sm" id="photoCsvBtn" title="Загрузить фото по ссылкам (images.csv)">Импорт фото по ссылкам</button>
+        <input type="file" id="photoCsvFile" accept=".csv,text/csv" hidden>
         <button class="btn ghost sm" id="logoutBtn">Выйти</button>
         <button class="btn red" id="addBtn">+ Добавить автомобиль</button>
       </div>
@@ -286,6 +288,18 @@ zh: {
   'Без цены (будут пропущены): ': '缺少价格（将被跳过）：',
   'Машины с совпадающим слагом будут обновлены.': '相同 slug 的车辆将被更新。',
   'Не удалось разобрать файл: ': '无法解析文件：',
+  'Импорт фото по ссылкам': '按链接导入照片',
+  'Загрузить фото по ссылкам (images.csv)': '按链接批量导入照片（images.csv）',
+  'В файле нет строк со ссылками на фото': '文件中没有照片链接',
+  'Загрузить фото для машин: ': '为车辆导入照片：',
+  'шт.': '张',
+  'Сервер сам скачает изображения по ссылкам — это может занять до нескольких минут.': '服务器将自动按链接下载图片——可能需要几分钟。',
+  'Загружаю фото… не закрывайте страницу': '正在下载照片……请勿关闭页面',
+  'Готово. Загружено фото: ': '完成。已下载照片：',
+  'пропущено дублей: ': '跳过重复：',
+  'не удалось скачать: ': '下载失败：',
+  'Нет таких машин в каталоге: ': '目录中没有这些车辆：',
+  'Не удалось: ': '失败：',
   '1–2 предложения: чем хорош автомобиль.': '1–2 句话：这款车的亮点。',
   'Некорректный слаг (латиница, цифры, дефис)': '无效的 slug（拉丁字母、数字、连字符）',
   'Нужны название и цена в ₽': '需要名称和卢布价格',
@@ -372,6 +386,18 @@ en: {
   'Без цены (будут пропущены): ': 'Without a price (will be skipped): ',
   'Машины с совпадающим слагом будут обновлены.': 'Cars with a matching slug will be updated.',
   'Не удалось разобрать файл: ': 'Failed to parse the file: ',
+  'Импорт фото по ссылкам': 'Import photos by URL',
+  'Загрузить фото по ссылкам (images.csv)': 'Bulk-import photos by URL (images.csv)',
+  'В файле нет строк со ссылками на фото': 'No photo-URL rows in the file',
+  'Загрузить фото для машин: ': 'Import photos for cars: ',
+  'шт.': 'pcs',
+  'Сервер сам скачает изображения по ссылкам — это может занять до нескольких минут.': 'The server will download the images by URL — this may take a few minutes.',
+  'Загружаю фото… не закрывайте страницу': 'Downloading photos… keep this page open',
+  'Готово. Загружено фото: ': 'Done. Photos downloaded: ',
+  'пропущено дублей: ': 'duplicates skipped: ',
+  'не удалось скачать: ': 'failed to download: ',
+  'Нет таких машин в каталоге: ': 'No such cars in the catalog: ',
+  'Не удалось: ': 'Failed: ',
   '1–2 предложения: чем хорош автомобиль.': '1–2 sentences: what makes this car good.',
   'Некорректный слаг (латиница, цифры, дефис)': 'Invalid slug (Latin letters, digits, hyphen)',
   'Нужны название и цена в ₽': 'Name and price in ₽ are required',
@@ -698,6 +724,40 @@ $('csvFile').addEventListener('change', async () => {
     msg(t('Импортировано моделей: ') + r.imported, true);
     load();
   } catch (err) { msg(t('Не удалось разобрать файл: ') + t(err.message)); }
+});
+
+/* ---------- Импорт фото по ссылкам (images.csv: slug;url;url) ---------- */
+$('photoCsvBtn').onclick = () => $('photoCsvFile').click();
+$('photoCsvFile').addEventListener('change', async () => {
+  const f = $('photoCsvFile').files[0];
+  $('photoCsvFile').value = '';
+  if (!f) return;
+  try {
+    const buf = await f.arrayBuffer();
+    let text = new TextDecoder('utf-8').decode(buf);
+    if (text.includes('�')) text = new TextDecoder('windows-1251').decode(buf);
+    text = text.replace(/^﻿/, '');
+    const delimOf = (l) => (l.split(';').length >= l.split(',').length ? ';' : ',');
+    const items = text.split(/\r?\n/).filter((l) => l.trim())
+      .map((l) => parseCsvLine(l, delimOf(l)))
+      .filter((v) => v.length >= 2 && v[0].toLowerCase() !== 'slug')
+      .map((v) => ({ slug: v[0].trim().toLowerCase(), urls: v.slice(1).map((s) => s.trim()).filter(Boolean) }))
+      .filter((it) => it.slug && it.urls.length);
+    if (!items.length) { msg(t('В файле нет строк со ссылками на фото')); return; }
+    const totalUrls = items.reduce((n, it) => n + it.urls.length, 0);
+    if (!confirm(t('Загрузить фото для машин: ') + items.length + ' (' + totalUrls + ' ' + t('шт.') + ')\n' +
+      t('Сервер сам скачает изображения по ссылкам — это может занять до нескольких минут.'))) return;
+    $('photoCsvBtn').disabled = true;
+    msg(t('Загружаю фото… не закрывайте страницу'), true);
+    const r = await api('/api/site-cars/import-photos', { method: 'POST', body: JSON.stringify({ items }) });
+    let m = t('Готово. Загружено фото: ') + r.downloaded;
+    if (r.skipped) m += ', ' + t('пропущено дублей: ') + r.skipped;
+    if (r.failed) m += ', ' + t('не удалось скачать: ') + r.failed;
+    if (r.missing && r.missing.length) m += '. ' + t('Нет таких машин в каталоге: ') + r.missing.join(', ');
+    msg(m, true);
+    load();
+  } catch (err) { msg(t('Не удалось: ') + t(err.message)); }
+  $('photoCsvBtn').disabled = false;
 });
 
 /* ---------- Импорт стартового каталога ---------- */

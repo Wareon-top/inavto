@@ -1,9 +1,17 @@
 /* Каталог сайта INAVTO ASIA: публичное чтение, изменения — только из админки */
 import { Router } from 'express'
+import fs from 'fs'
+import path from 'path'
 import db from '../db.js'
 import { adminOnly } from '../auth.js'
+import { UPLOAD_DIR } from './upload.js'
+import { toWebp, sha256 } from '../imageimport/optimizer.mjs'
 
 const router = Router()
+
+const IMG_W = parseInt(process.env.IMAGES_WIDTH || '1600', 10)
+const IMG_Q = parseInt(process.env.IMAGES_QUALITY || '85', 10)
+const IMG_MAX = parseInt(process.env.IMAGES_MAX_PER_CAR || '20', 10)
 
 const rowToCar = (r) => ({
   slug: r.slug,
@@ -98,6 +106,58 @@ router.put('/:slug', adminOnly, (req, res) => {
 router.delete('/:slug', adminOnly, (req, res) => {
   db.prepare('DELETE FROM site_cars WHERE slug = ?').run(req.params.slug)
   res.json({ ok: true })
+})
+
+/* Массовая загрузка фото по ссылкам (из админки).
+   Тело: { items: [{ slug, urls: [...] }] } — скачивает сервер, не браузер.
+   Разрешённый источник: ссылки, которые прислал администратор. */
+router.post('/import-photos', adminOnly, async (req, res) => {
+  const items = Array.isArray(req.body.items) ? req.body.items : []
+  if (!items.length) return res.status(400).json({ error: 'Пустой список' })
+  const carsDir = path.join(UPLOAD_DIR, 'cars')
+  const out = { ok: true, cars: 0, downloaded: 0, skipped: 0, failed: 0, missing: [] }
+
+  for (const item of items) {
+    const slug = String(item.slug || '').trim().toLowerCase()
+    if (!/^[a-z0-9-]{2,60}$/.test(slug)) continue
+    if (!db.prepare('SELECT slug FROM site_cars WHERE slug = ?').get(slug)) { out.missing.push(slug); continue }
+    const urls = (Array.isArray(item.urls) ? item.urls : [])
+      .filter((u) => /^https?:\/\//i.test(u)).slice(0, IMG_MAX)
+    if (!urls.length) { out.missing.push(slug); continue }
+
+    const dir = path.join(carsDir, slug)
+    fs.mkdirSync(dir, { recursive: true })
+    const hp = path.join(dir, '.hashes.json')
+    let hashes = {}
+    try { hashes = JSON.parse(fs.readFileSync(hp, 'utf-8')) } catch { /* первый импорт */ }
+
+    for (const url of urls) {
+      try {
+        const r = await fetch(url, { redirect: 'follow' })
+        if (!r.ok) { out.failed++; continue }
+        const raw = Buffer.from(await r.arrayBuffer())
+        const h = sha256(raw)
+        if (hashes[h]) { out.skipped++; continue }
+        const n = Object.keys(hashes).length
+        const fname = n === 0 ? 'main.webp' : `gallery-${n}.webp`
+        fs.writeFileSync(path.join(dir, fname), await toWebp(raw, { width: IMG_W, quality: IMG_Q }))
+        hashes[h] = fname
+        out.downloaded++
+      } catch { out.failed++ }
+    }
+    fs.writeFileSync(hp, JSON.stringify(hashes, null, 1))
+
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'))
+    files.sort((a, b) => {
+      const w = (f) => (f === 'main.webp' ? -1 : parseInt(f.replace(/\D/g, ''), 10) || 0)
+      return w(a) - w(b)
+    })
+    const photos = files.map((f) => `/uploads/cars/${slug}/${f}`)
+    db.prepare(`UPDATE site_cars SET photos = ?, updated_at = datetime('now') WHERE slug = ?`)
+      .run(JSON.stringify(photos), slug)
+    out.cars++
+  }
+  res.json(out)
 })
 
 /* Первичное наполнение: массив машин в формате data.js */

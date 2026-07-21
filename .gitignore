@@ -14,9 +14,14 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# SQLite runtime data
-backend/*.db
+# SQLite runtime data (в любом месте — тестовые и локальные базы)
+*.db
+*.db-shm
+*.db-wal
+data/
 backend/data/
+uploads/
+media-in/
 
 # Editor
 .vscode/

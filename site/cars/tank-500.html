@@ -28,17 +28,13 @@
     <div class="container">
       <div class="calc-layout">
         <div>
-          <div data-car-visual="tank-500"></div>
-          <h1 class="h2" style="margin:22px 0 8px">Tank 500 под заказ из Китая</h1>
-          <p class="lead" style="font-size:16px">Рамный внедорожник премиум-класса: гибрид 2.0T + электромотор, блокировки, семь мест и салон бизнес-уровня.</p>
-          <div class="calc-panel" style="margin-top:22px">
-            <div class="calc-row"><span>Кузов</span><b>Внедорожник</b></div>
-            <div class="calc-row"><span>Двигатель</span><b>Гибрид (HEV)</b></div>
-            <div class="calc-row"><span>Мощность</span><b>354 л.с.</b></div>
-            <div class="calc-row"><span>Привод</span><b>Полный</b></div>
-            <div class="calc-row"><span>Состояние</span><b>новый автомобиль</b></div>
-          </div>
-          <div style="margin-top:28px">
+          <div data-car-gallery="tank-500"><div class="car-gallery" data-gallery><div class="cg-main" style="background:linear-gradient(155deg, #3a3d38, #141612)"><span class="cg-brand">Tank</span><span class="cg-flag">China</span></div></div></div>
+          <h1 class="h2" style="margin:22px 0 4px">Tank 500 под заказ из Китая</h1>
+          <div class="car-pills"><span>Внедорожник</span><span>Гибрид (HEV)</span><span>2025</span><span class="state-new">Новый</span></div>
+          <p class="lead" style="font-size:16px;margin-top:12px">Рамный внедорожник премиум-класса: гибрид 2.0T + электромотор, блокировки, семь мест и салон бизнес-уровня.</p>
+          <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
+          <div class="spec-grid"><div class="spec-item"><span>Мощность</span><b>354 л.с.</b></div><div class="spec-item"><span>Привод</span><b>Полный</b></div><div class="spec-item"><span>Год</span><b>2025</b></div></div>
+          <div style="margin-top:32px">
             <div class="faq-item"><button class="faq-q">Сколько стоит Tank 500 под ключ?</button><div class="faq-a">От 5,0 млн ₽ — уже с логистикой, таможенной пошлиной, утильсбором, СБКТС/ЭПТС и нашей комиссией. Точная цена зависит от комплектации и вашего города — пришлём расчёт по заявке в течение дня.</div></div>
             <div class="faq-item"><button class="faq-q">Какой срок доставки Tank 500 из Китая?</button><div class="faq-a">Полный цикл — 40–60 дней: выкуп и проверка, доставка автовозом/ж-д или морем, растаможка, СБКТС и выдача. Срок фиксируется в договоре.</div></div>
             <div class="faq-item"><button class="faq-q">Какие гарантии при заказе?</button><div class="faq-a">Договор с фиксацией цены и сроков, оплата продавцу по банковскому инвойсу, проверка автомобиля до выкупа с фото/видео-отчётом, страхование груза на весь путь.</div></div>
@@ -48,7 +44,8 @@
           <div class="badge badge-green" style="margin-bottom:14px">доступен к заказу</div>
           <div class="muted" style="font-size:13.5px">Цена «под ключ» с доставкой и растаможкой</div>
           <div class="calc-total" style="padding-top:6px"><span></span><b>от 5,0 млн ₽</b></div>
-          <div class="calc-row"><span>Срок доставки</span><b>30–60 дней</b></div>
+          
+          <div class="calc-row" style="margin-top:14px"><span>Срок доставки</span><b>30–60 дней</b></div>
           <div class="calc-row"><span>Фиксация цены</span><b>в договоре</b></div>
           <div class="calc-row" style="border:none"><span>Оплата</span><b>по инвойсу через банк</b></div>
           <form class="form-grid" data-lead-form="Заявка на Tank 500" data-brand="Tank 500" style="margin-top:18px">
@@ -57,6 +54,11 @@
             <button class="btn btn-red btn-block" type="submit">Узнать точную цену</button>
             <div class="form-note">Пришлём актуальный расчёт с учётом комплектации и вашего города. Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
           </form>
+          <div class="price-trust">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Договор с фиксацией цены и сроков</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Страхование груза на весь путь</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Проверка автомобиля до оплаты</span>
+          </div>
         </div>
       </div>
     </div>
@@ -69,9 +71,9 @@
   <script>
     window.INAVTO_PAGE_INIT = function () {
       var A = window.INAVTO;
-      document.querySelectorAll('[data-car-visual]').forEach(function (el) {
-        var car = A.CARS.find(function (c) { return c.slug === el.dataset.carVisual; });
-        if (car) el.outerHTML = A.carVisual(car);
+      document.querySelectorAll('[data-car-gallery]').forEach(function (el) {
+        var car = A.CARS.find(function (c) { return c.slug === el.dataset.carGallery; });
+        if (car) el.outerHTML = A.carGallery(car);
       });
       var sim = document.querySelector('[data-similar]');
       if (sim) sim.innerHTML = sim.dataset.similar.split(',')

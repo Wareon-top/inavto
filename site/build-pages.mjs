@@ -18,6 +18,25 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const priceRub = (m) => Math.round(m * 1_000_000)
 const fmtPrice = (m) => m.toFixed(1).replace('.', ',')
 
+const CHEV_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
+const CHEV_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'
+
+/* Статичная галерея для SEO/до загрузки JS. JS затем заменит её на A.carGallery
+   (подхватит актуальные фото из каталога-API). Совпадает по разметке с A.carGallery. */
+function galleryStaticHTML(car) {
+  const grad = `linear-gradient(155deg, ${car.grad[0]}, ${car.grad[1]})`
+  const photos = Array.isArray(car.photos) ? car.photos : []
+  const main = photos.length ? `<img class="cg-main-img" src="${photos[0]}" alt="${esc(car.name)}">` : ''
+  const multi = photos.length > 1
+  const nav = multi
+    ? `<button class="cg-nav cg-prev" data-gallery-prev aria-label="Предыдущее фото">${CHEV_L}</button><button class="cg-nav cg-next" data-gallery-next aria-label="Следующее фото">${CHEV_R}</button><span class="cg-count"><b>1</b> / ${photos.length}</span>`
+    : ''
+  const thumbs = multi
+    ? '<div class="cg-thumbs">' + photos.map((p, i) => `<button class="cg-thumb${i === 0 ? ' active' : ''}" data-gallery-thumb="${i}" style="background-image:url('${p}')" aria-label="Фото ${i + 1}"></button>`).join('') + '</div>'
+    : ''
+  return `<div class="car-gallery" data-gallery><div class="cg-main" style="background:${grad}"><span class="cg-brand">${esc(car.brand)}</span><span class="cg-flag">China</span>${main}${nav}</div>${thumbs}</div>`
+}
+
 function pageHTML(car) {
   const from = 'из Китая'
   const catUrl = 'catalog.html'
@@ -27,13 +46,16 @@ function pageHTML(car) {
   const title = `${car.name} купить под заказ ${from} — цена под ключ | INAVTO ASIA`
   const desc = `${car.name} (${car.body.toLowerCase()}, ${car.fuel.toLowerCase()}, ${car.power}) под заказ ${from} с доставкой под ключ в Россию: от ${fmtPrice(car.price)} млн ₽ с растаможкой, СБКТС и гарантиями по договору. Срок 30–60 дней.`
 
-  const specs = [
-    ['Кузов', car.body], ['Двигатель', car.fuel], ['Мощность', car.power], ['Привод', car.drive],
-  ]
+  const specs = [['Мощность', car.power], ['Привод', car.drive]]
   if (car.range !== '—') specs.push(['Запас хода', car.range])
   if (car.battery !== '—') specs.push(['Батарея', car.battery])
   if (used && car.mileage) specs.push(['Пробег', Number(car.mileage).toLocaleString('ru-RU') + ' км'])
-  specs.push(['Состояние', stateNote])
+  specs.push(['Год', String(car.year)])
+
+  const pills = `<div class="car-pills"><span>${esc(car.body)}</span><span>${esc(car.fuel)}</span><span>${car.year}</span><span class="${used ? 'state-used' : 'state-new'}">${used ? 'С пробегом' : 'Новый'}</span></div>`
+  const specGrid = '<div class="spec-grid">' + specs.map(([k, v]) => `<div class="spec-item"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('') + '</div>'
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+  const cnyLine = car.priceCny ? `<div class="price-cny">≈ ¥ ${car.priceCny.toLocaleString('ru-RU')} цена в Китае</div>` : ''
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -112,13 +134,13 @@ function pageHTML(car) {
     <div class="container">
       <div class="calc-layout">
         <div>
-          <div data-car-visual="${car.slug}"></div>
-          <h1 class="h2" style="margin:22px 0 8px">${esc(car.name)} под заказ ${from}</h1>
-          <p class="lead" style="font-size:16px">${esc(car.desc)}</p>
-          <div class="calc-panel" style="margin-top:22px">
-            ${specs.map(([k, v]) => `<div class="calc-row"><span>${k}</span><b>${esc(v)}</b></div>`).join('\n            ')}
-          </div>
-          <div style="margin-top:28px">
+          <div data-car-gallery="${car.slug}">${galleryStaticHTML(car)}</div>
+          <h1 class="h2" style="margin:22px 0 4px">${esc(car.name)} под заказ ${from}</h1>
+          ${pills}
+          <p class="lead" style="font-size:16px;margin-top:12px">${esc(car.desc)}</p>
+          <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
+          ${specGrid}
+          <div style="margin-top:32px">
             ${faq.map(([q, a]) => `<div class="faq-item"><button class="faq-q">${esc(q)}</button><div class="faq-a">${esc(a)}</div></div>`).join('\n            ')}
           </div>
         </div>
@@ -126,7 +148,8 @@ function pageHTML(car) {
           <div class="badge badge-green" style="margin-bottom:14px">доступен к заказу</div>
           <div class="muted" style="font-size:13.5px">Цена «под ключ» с доставкой и растаможкой</div>
           <div class="calc-total" style="padding-top:6px"><span></span><b>от ${fmtPrice(car.price)} млн ₽</b></div>
-          <div class="calc-row"><span>Срок доставки</span><b>30–60 дней</b></div>
+          ${cnyLine}
+          <div class="calc-row" style="margin-top:14px"><span>Срок доставки</span><b>30–60 дней</b></div>
           <div class="calc-row"><span>Фиксация цены</span><b>в договоре</b></div>
           <div class="calc-row" style="border:none"><span>Оплата</span><b>по инвойсу через банк</b></div>
           <form class="form-grid" data-lead-form="Заявка на ${esc(car.name)}" data-brand="${esc(car.name)}" style="margin-top:18px">
@@ -135,6 +158,11 @@ function pageHTML(car) {
             <button class="btn btn-red btn-block" type="submit">Узнать точную цену</button>
             <div class="form-note">Пришлём актуальный расчёт с учётом комплектации и вашего города. Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
           </form>
+          <div class="price-trust">
+            <span>${CHECK}Договор с фиксацией цены и сроков</span>
+            <span>${CHECK}Страхование груза на весь путь</span>
+            <span>${CHECK}Проверка автомобиля до оплаты</span>
+          </div>
         </div>
       </div>
     </div>
@@ -152,9 +180,9 @@ function pageHTML(car) {
   <script>
     window.INAVTO_PAGE_INIT = function () {
       var A = window.INAVTO;
-      document.querySelectorAll('[data-car-visual]').forEach(function (el) {
-        var car = A.CARS.find(function (c) { return c.slug === el.dataset.carVisual; });
-        if (car) el.outerHTML = A.carVisual(car);
+      document.querySelectorAll('[data-car-gallery]').forEach(function (el) {
+        var car = A.CARS.find(function (c) { return c.slug === el.dataset.carGallery; });
+        if (car) el.outerHTML = A.carGallery(car);
       });
       var sim = document.querySelector('[data-similar]');
       if (sim) sim.innerHTML = sim.dataset.similar.split(',')

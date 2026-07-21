@@ -218,6 +218,64 @@
     </div>`;
   };
 
+  /* ---------- Галерея фото на странице модели ---------- */
+  const CHEV_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  const CHEV_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+  A.carGallery = function (car) {
+    const photos = (car.photos && car.photos.length) ? car.photos : [];
+    const grad = `linear-gradient(155deg, ${car.grad[0]}, ${car.grad[1]})`;
+    const main = photos.length
+      ? `<img class="cg-main-img" src="${photos[0]}" alt="${car.name}">`
+      : CAR_SILHOUETTE;
+    const multi = photos.length > 1;
+    const nav = multi
+      ? `<button class="cg-nav cg-prev" data-gallery-prev aria-label="Предыдущее фото">${CHEV_L}</button>
+         <button class="cg-nav cg-next" data-gallery-next aria-label="Следующее фото">${CHEV_R}</button>
+         <span class="cg-count"><b>1</b> / ${photos.length}</span>`
+      : '';
+    const thumbs = multi
+      ? '<div class="cg-thumbs">' + photos.map((p, i) =>
+          `<button class="cg-thumb${i === 0 ? ' active' : ''}" data-gallery-thumb="${i}" style="background-image:url('${p}')" aria-label="Фото ${i + 1}"></button>`).join('') + '</div>'
+      : '';
+    return `<div class="car-gallery" data-gallery>
+      <div class="cg-main" style="background:${grad}"><span class="cg-brand">${car.brand}</span><span class="cg-flag">China</span>${main}${nav}</div>
+      ${thumbs}
+    </div>`;
+  };
+  function galleryGo(gal, idx) {
+    const thumbs = gal.querySelectorAll('.cg-thumb');
+    if (!thumbs.length) return;
+    idx = (idx + thumbs.length) % thumbs.length;
+    const url = thumbs[idx].style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+    const img = gal.querySelector('.cg-main-img');
+    if (img) img.src = url;
+    thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
+    const c = gal.querySelector('.cg-count b');
+    if (c) c.textContent = idx + 1;
+  }
+  document.addEventListener('click', (e) => {
+    const th = e.target.closest('[data-gallery-thumb]');
+    if (th) { galleryGo(th.closest('[data-gallery]'), +th.dataset.galleryThumb); return; }
+    const arrow = e.target.closest('[data-gallery-prev], [data-gallery-next]');
+    if (arrow) {
+      const gal = arrow.closest('[data-gallery]');
+      const cur = [...gal.querySelectorAll('.cg-thumb')].findIndex((t) => t.classList.contains('active'));
+      galleryGo(gal, cur + (arrow.hasAttribute('data-gallery-next') ? 1 : -1));
+    }
+  });
+
+  A.carPills = function (car) {
+    const used = car.cond === 'used';
+    return `<div class="car-pills">
+      <span>${car.body}</span><span>${car.fuel}</span><span>${car.year}</span>
+      <span class="${used ? 'state-used' : 'state-new'}">${used ? 'С пробегом' : 'Новый'}</span>
+    </div>`;
+  };
+  A.specGrid = function (specs) {
+    return '<div class="spec-grid">' + specs.map(s =>
+      `<div class="spec-item"><span>${s[0]}</span><b>${s[1]}</b></div>`).join('') + '</div>';
+  };
+
   /* ---------- Карточка авто ---------- */
   A.carUrl = (car) => (A.STATIC_SLUGS && A.STATIC_SLUGS.has(car.slug))
     ? 'cars/' + car.slug + '.html'

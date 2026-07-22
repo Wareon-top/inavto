@@ -17,7 +17,7 @@
     <div class="container">
       <div class="breadcrumbs"><a href="index.html">Главная</a> / Калькулятор</div>
       <h1 class="h1">Калькулятор цены «под ключ»</h1>
-      <p class="lead" style="margin-top:14px;max-width:720px">Предварительный расчёт для физических лиц: пошлина, утильсбор, логистика, оформление и наша комиссия. Точную смету по конкретному автомобилю пришлёт менеджер — бесплатно.</p>
+      <p class="lead" style="margin-top:14px;max-width:720px">Предварительный расчёт для себя (личное пользование) и для перепродажи (юрлицо): пошлина, акциз и НДС, утильсбор, логистика, оформление и наша комиссия. Точную смету по конкретному автомобилю пришлёт менеджер — бесплатно.</p>
     </div>
   </section>
 
@@ -26,6 +26,14 @@
       <div class="calc-layout">
         <div class="calc-panel">
           <div class="form-grid">
+            <div class="form-field">
+              <label>Кто ввозит автомобиль</label>
+              <select id="c-purpose">
+                <option value="personal">Для себя (личное пользование)</option>
+                <option value="commercial">Для перепродажи (юрлицо / коммерческий ввоз)</option>
+              </select>
+              <div class="form-note" id="c-purpose-note" style="margin-top:6px">Льготный утильсбор, единая ставка пошлины.</div>
+            </div>
             <div class="calc-price-grid">
               <div class="form-field">
                 <label>Цена автомобиля</label>
@@ -163,6 +171,37 @@
         return 73860;
       }
 
+      /* --- Коммерческий ввоз (юрлицо, для перепродажи) --- */
+      /* Акциз по мощности, ₽/л.с. (ставки 2025, ст. 193 НК РФ) */
+      function excise(power) {
+        if (power <= 90) return 0;
+        if (power <= 150) return power * 61;
+        if (power <= 200) return power * 583;
+        if (power <= 300) return power * 955;
+        if (power <= 400) return power * 1628;
+        if (power <= 500) return power * 1685;
+        return power * 1740;
+      }
+      /* Пошлина для юрлица: новые/электро — 15%, старше — €/см³ по возрасту */
+      function commercialDuty(price, vol, age, fuel, eur) {
+        if (fuel === 'ev' || age === 'new') return Math.max(price * 0.15, vol * 0.36 * eur);
+        const table = age === 'mid'
+          ? [[1000, 1.5], [1500, 1.7], [1800, 2.5], [2300, 2.7], [3000, 3.0], [Infinity, 3.6]]
+          : [[1000, 3.0], [1500, 3.2], [1800, 3.5], [2300, 4.8], [3000, 5.0], [Infinity, 5.7]];
+        return vol * table.find(r => vol <= r[0])[1] * eur;
+      }
+      /* Полный (не льготный) утильсбор для юрлица, база 20 000 ₽ × коэффициент по объёму */
+      function commercialUtil(vol, fuel, age) {
+        const base = 20000, nw = age === 'new';
+        let k;
+        if (fuel === 'ev' || vol <= 1000) k = nw ? 9.01 : 23.01;
+        else if (vol <= 2000) k = nw ? 33.37 : 63.95;
+        else if (vol <= 3000) k = nw ? 53.65 : 98.19;
+        else if (vol <= 3500) k = nw ? 74.29 : 123.76;
+        else k = nw ? 81.19 : 137.36;
+        return Math.round(base * k);
+      }
+
       function recalc() {
         const rawPrice = +$('c-price').value || 0;
         const cur = $('c-cur').value;
@@ -175,36 +214,60 @@
         const power = +$('c-power').value || 0;
         const age = $('c-age').value;
         const eur = +$('c-eur').value || 100;
+        const commercial = $('c-purpose').value === 'commercial';
 
         $('c-vol-wrap').style.display = fuel === 'ev' ? 'none' : '';
         $('c-cny-wrap').style.display = cur === 'cny' ? '' : 'none';
         $('c-usd-wrap').style.display = cur === 'usd' ? '' : 'none';
+        $('c-purpose-note').textContent = commercial
+          ? 'Пошлина 15% + акциз по мощности + НДС 20% + полный утильсбор.'
+          : 'Льготный утильсбор, единая ставка пошлины.';
 
         const logistics = 260000;
-        const d = duty(price, vol, age, fuel, eur);
-        const cFee = customsFee(price);
-        const util = utilFee(power, age, fuel);
-        const customs = d + cFee + util;
         const paperwork = 95000;   // брокер, СВХ, СБКТС, ЭПТС
         const fee = 70000;         // фиксированная комиссия INAVTO ASIA
         const delivery = logistics + paperwork + fee;
-        const total = price + customs + delivery;
+        const cFee = customsFee(price);
 
         const row = (name, val, eq) =>
           '<div class="calc-row"><span>' + name + '</span><b class="num">' +
           (eq ? '<i class="calc-eq num">' + eq + '</i>' : '') + fmt(val) + '</b></div>';
         const group = (name, val) =>
           '<div class="calc-group-head"><span>' + name + '</span><b class="num">' + fmt(val) + '</b></div>';
-
         const priceEq = cur === 'cny' ? rawPrice.toLocaleString('ru-RU') + ' ¥'
           : cur === 'usd' ? rawPrice.toLocaleString('ru-RU') + ' $' : '';
+
+        let customs, rowsHtml;
+        if (commercial) {
+          const cd = commercialDuty(price, vol, age, fuel, eur);
+          const exc = excise(power);
+          const vat = (price + cd + exc) * 0.20;
+          const util = commercialUtil(vol, fuel, age);
+          customs = cd + exc + vat + cFee + util;
+          rowsHtml =
+            group('Таможня и утильсбор (юрлицо)', customs) +
+            '<div class="calc-sub">Коммерческий ввоз для перепродажи · ставки 2025–2026</div>' +
+            row('Пошлина', cd, age === 'new' || fuel === 'ev' ? '15%' : Math.round(cd / eur).toLocaleString('ru-RU') + ' €') +
+            row('Акциз', exc, power + ' л.с.') +
+            row('НДС 20%', vat) +
+            row('Таможенный сбор', cFee) +
+            row('Утильсбор', util);
+        } else {
+          const d = duty(price, vol, age, fuel, eur);
+          const util = utilFee(power, age, fuel);
+          customs = d + cFee + util;
+          rowsHtml =
+            group('Пошлина и сборы на физлицо', customs) +
+            '<div class="calc-sub">Личное пользование · ставки от 01.01.2026</div>' +
+            row('Пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d, fuel === 'ev' ? '' : Math.round(d / eur).toLocaleString('ru-RU') + ' €') +
+            row('Таможенный сбор', cFee) +
+            row('Утильсбор', util);
+        }
+
+        const total = price + customs + delivery;
         $('c-rows').innerHTML =
           row('Автомобиль', price, priceEq) +
-          group('Пошлина и сборы на физлицо', customs) +
-          '<div class="calc-sub">Ставки и коэффициенты от 01.01.2026</div>' +
-          row('Пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d, fuel === 'ev' ? '' : Math.round(d / eur).toLocaleString('ru-RU') + ' €') +
-          row('Таможенный сбор', cFee) +
-          row('Утильсбор', util) +
+          rowsHtml +
           group('Доставка и оформление', delivery) +
           row('Логистика и страхование', logistics) +
           row('Брокер, СВХ, СБКТС, ЭПТС', paperwork) +
@@ -214,7 +277,7 @@
 
         const lead = document.getElementById('calc-lead');
         if (lead && lead.dataset) {
-          lead.dataset.brand = 'Расчёт: Китай, ' +
+          lead.dataset.brand = 'Расчёт (' + (commercial ? 'юрлицо' : 'физлицо') + '): Китай, ' +
             (cur === 'rub' ? price.toLocaleString('ru-RU') + ' ₽'
               : rawPrice.toLocaleString('ru-RU') + (cur === 'cny' ? ' ¥ (' : ' $ (') + price.toLocaleString('ru-RU') + ' ₽)') +
             ', ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
@@ -223,11 +286,12 @@
 
       /* Черновик: возвращаем пользователя к его расчёту */
       const CALC_KEY = 'inavto_calc_draft';
-      const fields = ['c-price', 'c-cur', 'c-cny', 'c-usd', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
+      const fields = ['c-purpose', 'c-price', 'c-cur', 'c-cny', 'c-usd', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
       try {
         const draft = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
         if (draft) {
           if (draft['c-cur'] == null) draft['c-cur'] = 'rub';  // старые черновики хранили цену в рублях
+          if (draft['c-purpose'] == null) draft['c-purpose'] = 'personal';
           fields.forEach(id => { if (draft[id] != null) $(id).value = draft[id]; });
         }
       } catch (e) { /* приватный режим */ }

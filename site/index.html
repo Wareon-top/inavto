@@ -13,12 +13,11 @@
 </head>
 <body data-page="home">
 
-  <!-- HERO -->
-  <section class="hero">
+  <!-- HERO: баннер во всю ширину -->
+  <h1 class="sr-only">Оформление авто из Китая под ключ — INAVTO ASIA</h1>
+  <section class="hero-banner">
+    <img class="hero-banner-img" src="img/hero-banner.webp" alt="Оформление авто из Китая под ключ — INAVTO ASIA. Новые электромобили, гибриды и бензиновые модели с рынка Китая, доставка в любой город России за 30–60 дней" fetchpriority="high">
     <div class="container">
-      <div class="hero-tag"><i></i>Китай · Доставка под ключ в Россию</div>
-      <h1 class="h1">Авто из Китая <span class="accent">под заказ</span></h1>
-      <p class="lead">Новые электромобили, гибриды и бензиновые модели с рынка Китая. Фиксируем цену и сроки в договоре, привозим и растаможиваем «под ключ» в любой город России за 30–60 дней.</p>
       <div class="hero-actions">
         <button class="btn btn-red" data-quiz-open>Подобрать автомобиль</button>
         <a class="btn btn-ghost" href="calculator.html">Рассчитать цену под ключ</a>
@@ -28,10 +27,6 @@
         <div><b class="num">до 1,5 млн ₽</b><span>экономия против дилера РФ</span></div>
         <div><b class="num">16+ моделей</b><span>в каталоге — привезём любую</span></div>
       </div>
-      <div class="hero-photo reveal" id="hero-photo">
-        <img src="img/hero-car.webp" alt="Белый электроседан BYD — вид сбоку" fetchpriority="high">
-      </div>
-      <a class="hero-floor reveal" href="catalog.html"><span>BYD · электроседан · от 3,6 млн ₽ под ключ</span><span>Весь каталог →</span></a>
     </div>
   </section>
 
@@ -216,29 +211,6 @@
     window.INAVTO_PAGE_INIT = function () {
       const A = window.INAVTO, I = A.ICONS;
 
-      /* Hero-фото: пока файл не загружен — чертёжная схема в инженерном стиле */
-      const heroImg = document.querySelector('#hero-photo img');
-      const heroFallback = () => {
-        document.getElementById('hero-photo').innerHTML =
-          '<div class="hero-blueprint">' +
-          '<span class="bp-label">Fig. 01 — Sedan / вид сбоку</span>' +
-          '<svg viewBox="0 0 560 210" fill="none" stroke="#050505" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">' +
-          '<line x1="24" y1="184" x2="536" y2="184" stroke-width="1" stroke-dasharray="4 6" opacity="0.5"/>' +
-          '<path d="M62 152 L74 152 A32 32 0 0 1 138 152 L346 152 A32 32 0 0 1 410 152 L472 152 C502 150 518 140 516 124 C514 111 500 103 480 98 L444 89 C422 65 394 49 360 41 C314 31 248 29 192 37 C148 43 116 61 92 93 L62 99 C46 103 37 111 35 123 C33 139 45 151 62 152 Z"/>' +
-          '<path d="M152 48 C192 42 260 42 308 49 C328 54 344 64 356 78 L144 79 C145 66 148 55 152 48 Z" stroke-width="1.2"/>' +
-          '<path d="M254 45 L254 79 M266 79 L266 150 M356 79 L360 150" stroke-width="1"/>' +
-          '<path d="M290 92 L322 92 M474 102 L502 108" stroke-width="1.2"/>' +
-          '<circle cx="106" cy="152" r="30"/><circle cx="106" cy="152" r="12" stroke-width="1"/>' +
-          '<circle cx="378" cy="152" r="30"/><circle cx="378" cy="152" r="12" stroke-width="1"/>' +
-          '<path d="M106 140 L106 122 M116 158 L132 167 M96 158 L80 167 M94 145 L77 139 M118 145 L135 139" stroke-width="1"/>' +
-          '<path d="M378 140 L378 122 M388 158 L404 167 M368 158 L352 167 M366 145 L349 139 M390 145 L407 139" stroke-width="1"/>' +
-          '<path d="M35 16 L516 16 M35 10 L35 22 M516 10 L516 22" stroke-width="1"/>' +
-          '<text x="276" y="12" text-anchor="middle" font-size="10" letter-spacing="2" stroke="none" fill="#4a4a4a" font-family="inherit">4 980 MM</text>' +
-          '<path d="M544 41 L544 184 M538 41 L550 41 M538 184 L550 184" stroke-width="1"/>' +
-          '</svg></div>';
-      };
-      if (heroImg.complete && heroImg.naturalWidth === 0) heroFallback();
-      else heroImg.addEventListener('error', heroFallback);
 
       /* Чипы */
       const chips = [

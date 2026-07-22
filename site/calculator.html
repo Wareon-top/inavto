@@ -17,7 +17,7 @@
     <div class="container">
       <div class="breadcrumbs"><a href="index.html">Главная</a> / Калькулятор</div>
       <h1 class="h1">Калькулятор цены «под ключ»</h1>
-      <p class="lead" style="margin-top:14px;max-width:720px">Предварительный расчёт для себя (личное пользование) и для перепродажи (юрлицо): пошлина, акциз и НДС, утильсбор, логистика, оформление и наша комиссия. Точную смету по конкретному автомобилю пришлёт менеджер — бесплатно.</p>
+      <p class="lead" style="margin-top:14px;max-width:720px">Расчёт для трёх случаев: физлицо для себя, физлицо для перепродажи и юрлицо. Пошлина, акциз и НДС, утильсбор, логистика, оформление и наша комиссия — по актуальным ставкам. Точную смету по конкретному автомобилю пришлёт менеджер — бесплатно.</p>
     </div>
   </section>
 
@@ -29,10 +29,11 @@
             <div class="form-field">
               <label>Кто ввозит автомобиль</label>
               <select id="c-purpose">
-                <option value="personal">Для себя (личное пользование)</option>
-                <option value="commercial">Для перепродажи (юрлицо / коммерческий ввоз)</option>
+                <option value="personal">Физлицо — для себя (личное пользование)</option>
+                <option value="resale">Физлицо — для перепродажи</option>
+                <option value="legal">Юрлицо / компания</option>
               </select>
-              <div class="form-note" id="c-purpose-note" style="margin-top:6px">Льготный утильсбор, единая ставка пошлины.</div>
+              <div class="form-note" id="c-purpose-note" style="margin-top:6px">Единая ставка пошлины, льготный утильсбор.</div>
             </div>
             <div class="calc-price-grid">
               <div class="form-field">
@@ -70,16 +71,23 @@
               <input id="c-vol" type="number" min="600" max="7000" step="100" value="1500">
             </div>
             <div class="form-field">
-              <label>Мощность, л.с.</label>
-              <input id="c-power" type="number" min="50" max="1200" step="10" value="150">
-              <div class="form-note" style="margin-top:6px">Для гибридов указывайте суммарную мощность ДВС и электромоторов.</div>
+              <label>Мощность двигателя</label>
+              <div class="calc-price-grid">
+                <input id="c-power" type="number" min="20" max="2000" step="10" value="150">
+                <select id="c-power-unit">
+                  <option value="ls">л.с.</option>
+                  <option value="kw">кВт</option>
+                </select>
+              </div>
+              <div class="form-note" style="margin-top:6px">Для гибридов — суммарную мощность ДВС и электромоторов.</div>
             </div>
             <div class="form-field">
               <label>Возраст автомобиля</label>
               <select id="c-age">
                 <option value="new">Новый / до 3 лет</option>
-                <option value="mid">От 3 до 5 лет</option>
-                <option value="old">Старше 5 лет</option>
+                <option value="y35">От 3 до 5 лет</option>
+                <option value="y57">От 5 до 7 лет</option>
+                <option value="y7">Старше 7 лет</option>
               </select>
             </div>
             <div class="form-field">
@@ -123,40 +131,61 @@
       const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
       let prevTotal = NaN;
 
-      /* Пошлина для физлиц (ЕТТ ЕАЭС, упрощённо). Возвращает ₽. */
-      function duty(priceRub, vol, age, fuel, eur) {
-        const priceEur = priceRub / eur;
-        if (fuel === 'ev') {
-          // Электромобили: пошлина 15% + НДС 20% (для физлиц с 2024 г. — через ставку как для юрлиц)
-          const d = priceRub * 0.15;
-          const vat = (priceRub + d) * 0.20;
-          return d + vat;
-        }
+      /* Пошлина для физлица — единая ставка (ЕТС, таблицы ФТС / calcus). Возвращает ₽.
+         Для физлица возраст 5–7 и старше 7 считаются как «старше 5 лет». */
+      function etsDuty(priceRub, vol, age, fuel, eur) {
+        if (fuel === 'ev') { const d = priceRub * 0.15; return d + (priceRub + d) * 0.20; }
         if (age === 'new') {
-          let pct = 0.48, minPerCm3 = 3.5;
-          if (priceEur <= 8500) { pct = 0.54; minPerCm3 = 2.5; }
-          else if (priceEur <= 16700) { minPerCm3 = 3.5; }
-          else if (priceEur <= 42300) { minPerCm3 = 5.5; }
-          else if (priceEur <= 84500) { minPerCm3 = 7.5; }
-          else if (priceEur <= 169000) { minPerCm3 = 15; }
-          else { minPerCm3 = 20; }
-          return Math.max(priceEur * pct, vol * minPerCm3) * eur;
+          const priceEur = priceRub / eur;
+          let pct = 0.48, min = 3.5;
+          if (priceEur <= 8500) { pct = 0.54; min = 2.5; }
+          else if (priceEur <= 16700) min = 3.5;
+          else if (priceEur <= 42300) min = 5.5;
+          else if (priceEur <= 84500) min = 7.5;
+          else if (priceEur <= 169000) min = 15;
+          else min = 20;
+          return Math.max(priceEur * pct, vol * min) * eur;
         }
-        const table = age === 'mid'
+        const table = age === 'y35'
           ? [[1000, 1.5], [1500, 1.7], [1800, 2.5], [2300, 2.7], [3000, 3.0], [Infinity, 3.6]]
           : [[1000, 3.0], [1500, 3.2], [1800, 3.5], [2300, 4.8], [3000, 5.0], [Infinity, 5.7]];
-        const rate = table.find(r => vol <= r[0])[1];
-        return vol * rate * eur;
+        return vol * table.find(r => vol <= r[0])[1] * eur;
       }
 
-      /* Утильсбор (упрощённо, для личного пользования; с учётом привязки льготы к мощности) */
-      function utilFee(power, age, fuel) {
-        if (power <= 160) return age === 'new' ? 3400 : 5200;
-        // свыше 160 л.с. — коммерческие ставки, зависят от мощности (ориентировочно)
-        if (power <= 250) return 850000;
-        if (power <= 320) return 1300000;
-        if (power <= 450) return 1900000;
-        return 2600000;
+      /* Пошлина для юрлица (таможенная пошлина ЕТТ по объёму и возрасту). */
+      function legalDuty(priceRub, vol, age, fuel, eur) {
+        if (fuel === 'ev') return priceRub * 0.15;
+        if (age === 'new') return priceRub * (vol <= 2800 ? 0.15 : 0.125);
+        if (age === 'y7') {
+          const t = [[1000, 1.4], [1500, 1.5], [1800, 1.6], [2300, 2.2], [3000, 2.2], [Infinity, 3.2]];
+          return vol * t.find(r => vol <= r[0])[1] * eur;
+        }
+        const t = [[1000, 0.36], [1500, 0.4], [1800, 0.36], [2300, 0.44], [3000, 0.44], [Infinity, 0.8]];
+        return Math.max(priceRub * 0.20, vol * t.find(r => vol <= r[0])[1] * eur);
+      }
+
+      /* Акциз по мощности, ₽/л.с. (ставки 2025, ст. 193 НК РФ) */
+      function excise(ls) {
+        if (ls <= 90) return 0;
+        if (ls <= 150) return ls * 64;
+        if (ls <= 200) return ls * 613;
+        if (ls <= 300) return ls * 1004;
+        if (ls <= 400) return ls * 1711;
+        if (ls <= 500) return ls * 1771;
+        return ls * 1829;
+      }
+
+      /* Утильсбор: льготный (личное пользование) и полный (перепродажа / юрлицо) */
+      function personalUtil(age) { return age === 'new' ? 3400 : 5200; }
+      function fullUtil(vol, fuel, age) {
+        const base = 20000, nw = age === 'new';
+        let k;
+        if (fuel === 'ev' || vol <= 1000) k = nw ? 9.01 : 23.01;
+        else if (vol <= 2000) k = nw ? 33.37 : 63.95;
+        else if (vol <= 3000) k = nw ? 53.65 : 98.19;
+        else if (vol <= 3500) k = nw ? 74.29 : 123.76;
+        else k = nw ? 81.19 : 137.36;
+        return Math.round(base * k);
       }
 
       /* Таможенный сбор за оформление (пост. № 1638, ставки с 01.01.2026) */
@@ -171,37 +200,6 @@
         return 73860;
       }
 
-      /* --- Коммерческий ввоз (юрлицо, для перепродажи) --- */
-      /* Акциз по мощности, ₽/л.с. (ставки 2025, ст. 193 НК РФ) */
-      function excise(power) {
-        if (power <= 90) return 0;
-        if (power <= 150) return power * 61;
-        if (power <= 200) return power * 583;
-        if (power <= 300) return power * 955;
-        if (power <= 400) return power * 1628;
-        if (power <= 500) return power * 1685;
-        return power * 1740;
-      }
-      /* Пошлина для юрлица: новые/электро — 15%, старше — €/см³ по возрасту */
-      function commercialDuty(price, vol, age, fuel, eur) {
-        if (fuel === 'ev' || age === 'new') return Math.max(price * 0.15, vol * 0.36 * eur);
-        const table = age === 'mid'
-          ? [[1000, 1.5], [1500, 1.7], [1800, 2.5], [2300, 2.7], [3000, 3.0], [Infinity, 3.6]]
-          : [[1000, 3.0], [1500, 3.2], [1800, 3.5], [2300, 4.8], [3000, 5.0], [Infinity, 5.7]];
-        return vol * table.find(r => vol <= r[0])[1] * eur;
-      }
-      /* Полный (не льготный) утильсбор для юрлица, база 20 000 ₽ × коэффициент по объёму */
-      function commercialUtil(vol, fuel, age) {
-        const base = 20000, nw = age === 'new';
-        let k;
-        if (fuel === 'ev' || vol <= 1000) k = nw ? 9.01 : 23.01;
-        else if (vol <= 2000) k = nw ? 33.37 : 63.95;
-        else if (vol <= 3000) k = nw ? 53.65 : 98.19;
-        else if (vol <= 3500) k = nw ? 74.29 : 123.76;
-        else k = nw ? 81.19 : 137.36;
-        return Math.round(base * k);
-      }
-
       function recalc() {
         const rawPrice = +$('c-price').value || 0;
         const cur = $('c-cur').value;
@@ -211,17 +209,20 @@
           : cur === 'usd' ? Math.round(rawPrice * usd) : rawPrice;
         const fuel = $('c-fuel').value;
         const vol = fuel === 'ev' ? 0 : (+$('c-vol').value || 0);
-        const power = +$('c-power').value || 0;
+        const powerRaw = +$('c-power').value || 0;
+        const ls = $('c-power-unit').value === 'kw' ? Math.round(powerRaw * 1.3596) : powerRaw;
         const age = $('c-age').value;
         const eur = +$('c-eur').value || 100;
-        const commercial = $('c-purpose').value === 'commercial';
+        const purpose = $('c-purpose').value;   // personal | resale | legal
+        const legal = purpose === 'legal';
 
         $('c-vol-wrap').style.display = fuel === 'ev' ? 'none' : '';
         $('c-cny-wrap').style.display = cur === 'cny' ? '' : 'none';
         $('c-usd-wrap').style.display = cur === 'usd' ? '' : 'none';
-        $('c-purpose-note').textContent = commercial
-          ? 'Пошлина 15% + акциз по мощности + НДС 20% + полный утильсбор.'
-          : 'Льготный утильсбор, единая ставка пошлины.';
+        $('c-purpose-note').textContent =
+          legal ? 'Пошлина по ЕТТ + акциз по мощности + НДС 20% + полный утильсбор.'
+          : purpose === 'resale' ? 'Единая ставка пошлины, но полный (не льготный) утильсбор.'
+          : 'Единая ставка пошлины, льготный утильсбор.';
 
         const logistics = 260000;
         const paperwork = 95000;   // брокер, СВХ, СБКТС, ЭПТС
@@ -238,27 +239,31 @@
           : cur === 'usd' ? rawPrice.toLocaleString('ru-RU') + ' $' : '';
 
         let customs, rowsHtml;
-        if (commercial) {
-          const cd = commercialDuty(price, vol, age, fuel, eur);
-          const exc = excise(power);
-          const vat = (price + cd + exc) * 0.20;
-          const util = commercialUtil(vol, fuel, age);
-          customs = cd + exc + vat + cFee + util;
+        if (legal) {
+          const d = legalDuty(price, vol, age, fuel, eur);
+          const exc = excise(ls);
+          const vat = (price + d + exc) * 0.20;
+          const util = fullUtil(vol, fuel, age);
+          customs = d + exc + vat + cFee + util;
+          const dutyEq = fuel === 'ev' ? '15%'
+            : age === 'new' ? (vol <= 2800 ? '15%' : '12,5%')
+            : Math.round(d / eur).toLocaleString('ru-RU') + ' €';
           rowsHtml =
-            group('Таможня и утильсбор (юрлицо)', customs) +
-            '<div class="calc-sub">Коммерческий ввоз для перепродажи · ставки 2025–2026</div>' +
-            row('Пошлина', cd, age === 'new' || fuel === 'ev' ? '15%' : Math.round(cd / eur).toLocaleString('ru-RU') + ' €') +
-            row('Акциз', exc, power + ' л.с.') +
+            group('Таможня, акциз и утильсбор (юрлицо)', customs) +
+            '<div class="calc-sub">Коммерческий ввоз · ставки 2025–2026</div>' +
+            row('Пошлина', d, dutyEq) +
+            row('Акциз', exc, ls + ' л.с.') +
             row('НДС 20%', vat) +
             row('Таможенный сбор', cFee) +
             row('Утильсбор', util);
         } else {
-          const d = duty(price, vol, age, fuel, eur);
-          const util = utilFee(power, age, fuel);
+          const resale = purpose === 'resale';
+          const d = etsDuty(price, vol, age, fuel, eur);
+          const util = resale ? fullUtil(vol, fuel, age) : personalUtil(age);
           customs = d + cFee + util;
           rowsHtml =
-            group('Пошлина и сборы на физлицо', customs) +
-            '<div class="calc-sub">Личное пользование · ставки от 01.01.2026</div>' +
+            group('Пошлина и сборы (физлицо' + (resale ? ', перепродажа' : '') + ')', customs) +
+            '<div class="calc-sub">' + (resale ? 'Перепродажа: полный утильсбор' : 'Личное пользование: льготный утильсбор') + ' · ставки 2025–2026</div>' +
             row('Пошлина' + (fuel === 'ev' ? ' и НДС' : ''), d, fuel === 'ev' ? '' : Math.round(d / eur).toLocaleString('ru-RU') + ' €') +
             row('Таможенный сбор', cFee) +
             row('Утильсбор', util);
@@ -277,21 +282,26 @@
 
         const lead = document.getElementById('calc-lead');
         if (lead && lead.dataset) {
-          lead.dataset.brand = 'Расчёт (' + (commercial ? 'юрлицо' : 'физлицо') + '): Китай, ' +
+          const who = legal ? 'юрлицо' : purpose === 'resale' ? 'физлицо, перепродажа' : 'физлицо';
+          lead.dataset.brand = 'Расчёт (' + who + '): Китай, ' +
             (cur === 'rub' ? price.toLocaleString('ru-RU') + ' ₽'
               : rawPrice.toLocaleString('ru-RU') + (cur === 'cny' ? ' ¥ (' : ' $ (') + price.toLocaleString('ru-RU') + ' ₽)') +
-            ', ' + fuel + ', ' + power + ' л.с., итого ~' + fmt(total);
+            ', ' + fuel + ', ' + ls + ' л.с., итого ~' + fmt(total);
         }
       }
 
       /* Черновик: возвращаем пользователя к его расчёту */
       const CALC_KEY = 'inavto_calc_draft';
-      const fields = ['c-purpose', 'c-price', 'c-cur', 'c-cny', 'c-usd', 'c-fuel', 'c-vol', 'c-power', 'c-age', 'c-eur'];
+      const fields = ['c-purpose', 'c-price', 'c-cur', 'c-cny', 'c-usd', 'c-fuel', 'c-vol', 'c-power', 'c-power-unit', 'c-age', 'c-eur'];
       try {
         const draft = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
         if (draft) {
           if (draft['c-cur'] == null) draft['c-cur'] = 'rub';  // старые черновики хранили цену в рублях
+          // миграция старых значений на новую схему полей
+          if (draft['c-purpose'] === 'commercial') draft['c-purpose'] = 'legal';
           if (draft['c-purpose'] == null) draft['c-purpose'] = 'personal';
+          if (draft['c-age'] === 'mid') draft['c-age'] = 'y35';
+          if (draft['c-age'] === 'old') draft['c-age'] = 'y57';
           fields.forEach(id => { if (draft[id] != null) $(id).value = draft[id]; });
         }
       } catch (e) { /* приватный режим */ }

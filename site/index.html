@@ -152,6 +152,32 @@
     </div>
   </section>
 
+  <!-- ВИДЕО-ШОУРИЛ -->
+  <section class="section" id="reel" style="padding-top:0">
+    <div class="container">
+      <div class="video-reel reveal">
+        <div class="reel-copy">
+          <div class="divider-label">Как это выглядит вживую</div>
+          <h2 class="h2">Не рендеры — реальные автомобили</h2>
+          <p class="lead">Снимаем машины, которые привозим: экстерьер, салон, мультимедиа. Показываем без прикрас — то, что получит клиент.</p>
+          <div class="reel-actions">
+            <button class="btn btn-red" data-quiz-open>Подобрать такой автомобиль</button>
+          </div>
+        </div>
+        <div class="reel-frame">
+          <video id="reel-video" class="reel-video" poster="video/reel-poster.webp" muted loop playsinline preload="none" aria-label="Видео: автомобили INAVTO ASIA">
+            <source src="video/inavto-reel.mp4" type="video/mp4">
+          </video>
+          <button class="reel-sound" id="reel-sound" type="button" aria-label="Включить звук">
+            <svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            <svg class="ic-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <span>Звук</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ТРЕКЕР -->
   <section class="section">
     <div class="container">
@@ -415,6 +441,27 @@
           }, form);
           form.innerHTML = A.successHTML('Заявка принята!',
             'Подберём варианты и вернёмся с расчётом «под ключ» в ближайшее рабочее время (ежедневно 9:00–21:00 мск).');
+        });
+      })();
+
+      /* Видео-шоурил: автозапуск без звука при появлении, кнопка звука */
+      (function () {
+        const v = document.getElementById('reel-video');
+        const btn = document.getElementById('reel-sound');
+        if (!v) return;
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) v.play().catch(() => {});
+            else v.pause();
+          });
+        }, { threshold: 0.4 });
+        io.observe(v);
+        btn.addEventListener('click', () => {
+          v.muted = !v.muted;
+          btn.classList.toggle('on', !v.muted);
+          btn.setAttribute('aria-label', v.muted ? 'Включить звук' : 'Выключить звук');
+          btn.querySelector('span').textContent = v.muted ? 'Звук' : 'Без звука';
+          if (!v.muted) v.play().catch(() => {});
         });
       })();
 

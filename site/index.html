@@ -64,6 +64,65 @@
     </div>
   </section>
 
+  <!-- ВИЗИТКА: заявка на подбор с квалификацией -->
+  <section class="section" id="lead" style="padding-top:0">
+    <div class="container">
+      <div class="lead-card reveal">
+        <div class="lead-card-info">
+          <div class="divider-label">Бесплатный подбор</div>
+          <h2 class="h2">Подберём и привезём ваш автомобиль под ключ</h2>
+          <p class="lead">Оставьте заявку — за один рабочий день пришлём 3–5 подходящих вариантов с честным расчётом «под ключ»: цена авто, логистика, таможня, утильсбор и наша комиссия. Никаких «цена по запросу».</p>
+          <!-- Изображение владельца добавим сюда позже:
+               <img class="lead-card-illo" src="img/lead-illo.webp" alt="INAVTO ASIA — подбор авто из Китая"> -->
+          <ul class="lead-trust">
+            <li>Договор с фиксацией цены и сроков</li>
+            <li>Оплата по инвойсу через банк — деньги идут продавцу, а не «менеджеру на карту»</li>
+            <li>Проверка и осмотр автомобиля до оплаты</li>
+            <li>Сопровождение сделки и фотоотчёты на каждом этапе пути</li>
+          </ul>
+        </div>
+        <form class="lead-form" id="lead-form" novalidate>
+          <div class="lead-form-row">
+            <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Как к вам обращаться" autocomplete="name"></div>
+            <div class="form-field"><label>Номер телефона</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
+          </div>
+          <div class="form-field"><label>Какой автомобиль интересует</label><input name="car" placeholder="Марка и модель или «пока выбираю»"></div>
+
+          <div class="lead-q">
+            <span class="lead-q-label">Когда планируете покупку?</span>
+            <div class="lead-chips" data-single data-name="timing">
+              <button type="button" class="lead-chip" data-val="В ближайшее время">В ближайшее время</button>
+              <button type="button" class="lead-chip" data-val="В течение полугода">В течение полугода</button>
+              <button type="button" class="lead-chip" data-val="Пока присматриваюсь">Пока присматриваюсь</button>
+            </div>
+          </div>
+
+          <div class="lead-q">
+            <span class="lead-q-label">Планируемый бюджет</span>
+            <div class="lead-chips" data-single data-name="budget">
+              <button type="button" class="lead-chip" data-val="до 1,5 млн ₽">до 1,5 млн ₽</button>
+              <button type="button" class="lead-chip" data-val="1,5–2,5 млн ₽">1,5–2,5 млн ₽</button>
+              <button type="button" class="lead-chip" data-val="2,5–4 млн ₽">2,5–4 млн ₽</button>
+              <button type="button" class="lead-chip" data-val="от 4 млн ₽">от 4 млн ₽</button>
+            </div>
+          </div>
+
+          <div class="lead-q">
+            <span class="lead-q-label">Удобный способ связи <em>(можно выбрать несколько)</em></span>
+            <div class="lead-chips" data-name="contact">
+              <button type="button" class="lead-chip" data-val="Позвонить">Позвонить</button>
+              <button type="button" class="lead-chip" data-val="Telegram">Telegram</button>
+              <button type="button" class="lead-chip" data-val="WhatsApp">WhatsApp</button>
+            </div>
+          </div>
+
+          <button class="btn btn-red lead-submit" type="submit">Получить подборку и расчёт</button>
+          <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>. Ваши данные защищены и не передаются третьим лицам.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <!-- ПОЧЕМУ МЫ -->
   <section class="section" style="background:var(--bg-2)">
     <div class="container">
@@ -299,6 +358,48 @@
         document.getElementById('delivered-home-grid').innerHTML =
           A.DELIVERED.slice(0, 3).map(d => A.deliveredCard(d, false)).join('');
       }
+
+      /* Визитка: заявка на подбор с квалификацией */
+      (function () {
+        const form = document.getElementById('lead-form');
+        A.attachPhoneMask(form.querySelector('input[name=phone]'));
+        form.querySelectorAll('.lead-chips').forEach((group) => {
+          const single = group.hasAttribute('data-single');
+          group.addEventListener('click', (e) => {
+            const b = e.target.closest('.lead-chip');
+            if (!b) return;
+            if (single) group.querySelectorAll('.lead-chip').forEach((x) => { if (x !== b) x.classList.remove('active'); });
+            b.classList.toggle('active');
+          });
+        });
+        const picked = (name) => Array.from(
+          form.querySelectorAll('.lead-chips[data-name="' + name + '"] .lead-chip.active')
+        ).map((x) => x.dataset.val);
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const phone = form.phone.value.trim();
+          if (!A.validPhone(phone)) { form.phone.classList.add('error'); form.phone.focus(); return; }
+          const car = (form.car.value || '').trim();
+          const timing = picked('timing')[0] || '';
+          const contact = picked('contact');
+          const note = [
+            timing ? 'Срок покупки: ' + timing : '',
+            contact.length ? 'Связь: ' + contact.join(', ') : '',
+          ].filter(Boolean).join(' · ');
+          await A.submitLead({
+            name: form.name.value.trim() || '—',
+            phone,
+            city: '',
+            budget: picked('budget')[0] || '',
+            brand: car || 'не определился',
+            body: '',
+            fuel: '',
+            note,
+          }, form);
+          form.innerHTML = A.successHTML('Заявка принята!',
+            'Подберём варианты и вернёмся с расчётом «под ключ» в ближайшее рабочее время (ежедневно 9:00–21:00 мск).');
+        });
+      })();
 
       /* PDF-гайд за контакт */
       const pf = document.getElementById('pdf-form');

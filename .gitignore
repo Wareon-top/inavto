@@ -26,3 +26,6 @@ media-in/
 # Editor
 .vscode/
 .idea/
+
+# рабочие файлы Claude (скрипты, скриншоты) — не в репозиторий
+scratchpad/

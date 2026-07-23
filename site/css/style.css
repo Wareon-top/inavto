@@ -885,6 +885,68 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .cta-banner .btn-ghost:hover { background: #ffffff; color: var(--ink); border-color: #ffffff; }
 .cta-banner-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 
+/* ---------- Визитка: заявка на подбор с квалификацией ---------- */
+.lead-card {
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  border-radius: calc(var(--radius) + 6px);
+  padding: clamp(28px, 5vw, 56px);
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+  color: #f4f5f6;
+  box-shadow: var(--shadow);
+}
+.lead-card-info .divider-label { color: var(--gold); }
+.lead-card-info .divider-label::after { background: rgba(244, 245, 246, 0.2); }
+.lead-card-info .h2 { color: #ffffff; margin-top: 14px; }
+.lead-card-info .lead { color: rgba(244, 245, 246, 0.66); margin-top: 14px; }
+.lead-card-illo { width: 100%; height: auto; display: block; margin-top: 26px; border-radius: var(--radius); }
+.lead-trust { list-style: none; margin: 26px 0 0; display: grid; gap: 12px; }
+.lead-trust li { position: relative; padding-left: 30px; font-size: 14px; color: rgba(244, 245, 246, 0.84); line-height: 1.5; }
+.lead-trust li::before {
+  content: '✓';
+  position: absolute; left: 0; top: 1px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(214, 41, 30, 0.18); color: #ff6a5f;
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 700;
+}
+.lead-form {
+  background: #ffffff;
+  border-radius: var(--radius);
+  padding: clamp(22px, 3vw, 30px);
+  display: grid;
+  gap: 16px;
+  box-shadow: 0 24px 60px rgba(10, 16, 30, 0.4);
+}
+.lead-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lead-q { display: grid; gap: 10px; }
+.lead-q-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.lead-q-label em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--muted-2); font-weight: 500; margin-left: 4px; }
+.lead-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.lead-chip {
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 9px 15px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.lead-chip:hover { border-color: var(--ink); }
+.lead-chip.active { background: var(--red); border-color: var(--red); color: #ffffff; box-shadow: 0 6px 16px rgba(214, 41, 30, 0.28); }
+.lead-submit { width: 100%; margin-top: 4px; }
+@media (max-width: 900px) {
+  .lead-card { grid-template-columns: 1fr; }
+  .lead-form-row { grid-template-columns: 1fr; }
+}
+
 /* ---------- Страничный hero ---------- */
 .page-hero {
   padding: clamp(140px, 17vw, 200px) 0 clamp(36px, 5vw, 64px);

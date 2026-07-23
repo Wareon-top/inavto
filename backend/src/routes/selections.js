@@ -6,24 +6,29 @@ import { adminOnly } from '../auth.js'
 const router = Router()
 
 router.post('/', async (req, res) => {
-  const { budget, brand, body, fuel, name, phone, city, tg_user_id } = req.body
+  const { budget, brand, body, fuel, name, phone, city, note, tg_user_id } = req.body
   if (!name || !phone) return res.status(400).json({ error: 'name and phone required' })
 
   const result = db.prepare(`
-    INSERT INTO selections (budget, brand, body, fuel, name, phone, city, tg_user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(budget, brand, body, fuel, name, phone, city, tg_user_id || null)
+    INSERT INTO selections (budget, brand, body, fuel, name, phone, city, note, tg_user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(budget, brand, body, fuel, name, phone, city, note || null, tg_user_id || null)
 
-  await notifyAdmin(
-    `🚗 <b>Новая заявка на подбор</b> #${result.lastInsertRowid}\n\n` +
-    `👤 <b>Клиент:</b> ${name}\n` +
-    `📞 <b>Контакт:</b> ${phone}\n` +
-    `🏙 <b>Город:</b> ${city || 'не указан'}\n\n` +
-    `💰 <b>Бюджет:</b> ${budget}\n` +
-    `🏷 <b>Марка:</b> ${brand}\n` +
-    `🚙 <b>Кузов:</b> ${body}\n` +
-    `⛽ <b>Двигатель:</b> ${fuel}`
-  )
+  const lines = [
+    `🚗 <b>Новая заявка на подбор</b> #${result.lastInsertRowid}`,
+    ``,
+    `👤 <b>Клиент:</b> ${name}`,
+    `📞 <b>Контакт:</b> ${phone}`,
+  ]
+  if (city) lines.push(`🏙 <b>Город:</b> ${city}`)
+  lines.push(``)
+  if (budget) lines.push(`💰 <b>Бюджет:</b> ${budget}`)
+  if (brand) lines.push(`🏷 <b>Интересует:</b> ${brand}`)
+  if (body) lines.push(`🚙 <b>Кузов:</b> ${body}`)
+  if (fuel) lines.push(`⛽ <b>Двигатель:</b> ${fuel}`)
+  if (note) lines.push(`📝 <b>Детали:</b> ${note}`)
+
+  await notifyAdmin(lines.join('\n'))
 
   res.status(201).json({ id: result.lastInsertRowid, ok: true })
 })

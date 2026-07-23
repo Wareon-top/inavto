@@ -64,61 +64,75 @@
     </div>
   </section>
 
-  <!-- ВИЗИТКА: заявка на подбор с квалификацией -->
+  <!-- ВИЗИТКА: заявка на подбор с квалификацией + фирменная иллюстрация -->
   <section class="section" id="lead" style="padding-top:0">
     <div class="container">
-      <div class="lead-card reveal">
-        <div class="lead-card-info">
-          <div class="divider-label">Бесплатный подбор</div>
-          <h2 class="h2">Подберём и привезём ваш автомобиль под ключ</h2>
-          <p class="lead">Оставьте заявку — за один рабочий день пришлём 3–5 подходящих вариантов с честным расчётом «под ключ»: цена авто, логистика, таможня, утильсбор и наша комиссия. Никаких «цена по запросу».</p>
-          <!-- Изображение владельца добавим сюда позже:
-               <img class="lead-card-illo" src="img/lead-illo.webp" alt="INAVTO ASIA — подбор авто из Китая"> -->
-          <ul class="lead-trust">
-            <li>Договор с фиксацией цены и сроков</li>
-            <li>Оплата по инвойсу через банк — деньги идут продавцу, а не «менеджеру на карту»</li>
-            <li>Проверка и осмотр автомобиля до оплаты</li>
-            <li>Сопровождение сделки и фотоотчёты на каждом этапе пути</li>
-          </ul>
+      <div class="lead-visitka reveal">
+
+        <div class="lv-body">
+          <!-- Левая колонна: иллюстрация-герой во всю высоту -->
+          <div class="lv-illo">
+            <img src="img/lead-illo.webp" width="944" height="1108" loading="lazy" decoding="async"
+                 alt="Специалист INAVTO ASIA в тёмно-синем ханьфу с компасом-лопань у чёрного кроссовера с номером INAVTO ASIA на фоне гор Хуаншань">
+            <!-- Надзаголовок+заголовок+подзаголовок поверх спокойного неба со скрим-градиентом -->
+            <div class="lv-header">
+              <span class="divider-label">Бесплатный подбор</span>
+              <h2 class="h2">Подберём и привезём ваш автомобиль под ключ</h2>
+              <p class="lv-sub">За один рабочий день пришлём 3–5 подходящих вариантов с честным расчётом «под ключ».</p>
+            </div>
+          </div>
+
+          <!-- Правая колонна: форма-заявка -->
+          <div class="lv-form-col">
+            <form class="lead-form" id="lead-form" novalidate>
+              <div class="lead-form-row">
+                <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Как к вам обращаться" autocomplete="name"></div>
+                <div class="form-field"><label>Номер телефона</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
+              </div>
+              <div class="form-field"><label>Какой автомобиль интересует</label><input name="car" placeholder="Марка и модель или «пока выбираю»"></div>
+
+              <div class="lead-q">
+                <span class="lead-q-label">Когда планируете покупку?</span>
+                <div class="lead-chips" data-single data-name="timing">
+                  <button type="button" class="lead-chip" data-val="В ближайшее время">В ближайшее время</button>
+                  <button type="button" class="lead-chip" data-val="В течение полугода">В течение полугода</button>
+                  <button type="button" class="lead-chip" data-val="Пока присматриваюсь">Пока присматриваюсь</button>
+                </div>
+              </div>
+
+              <div class="lead-q">
+                <span class="lead-q-label">Планируемый бюджет</span>
+                <div class="lead-chips" data-single data-name="budget">
+                  <button type="button" class="lead-chip" data-val="до 1,5 млн ₽">до 1,5 млн ₽</button>
+                  <button type="button" class="lead-chip" data-val="1,5–2,5 млн ₽">1,5–2,5 млн ₽</button>
+                  <button type="button" class="lead-chip" data-val="2,5–4 млн ₽">2,5–4 млн ₽</button>
+                  <button type="button" class="lead-chip" data-val="от 4 млн ₽">от 4 млн ₽</button>
+                </div>
+              </div>
+
+              <div class="lead-q">
+                <span class="lead-q-label">Удобный способ связи <em>(можно выбрать несколько)</em></span>
+                <div class="lead-chips" data-name="contact">
+                  <button type="button" class="lead-chip" data-val="Позвонить">Позвонить</button>
+                  <button type="button" class="lead-chip" data-val="Telegram">Telegram</button>
+                  <button type="button" class="lead-chip" data-val="WhatsApp">WhatsApp</button>
+                </div>
+              </div>
+
+              <button class="btn btn-red lead-submit" type="submit">Получить подборку и расчёт</button>
+              <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>. Ваши данные защищены и не передаются третьим лицам.</p>
+            </form>
+          </div>
         </div>
-        <form class="lead-form" id="lead-form" novalidate>
-          <div class="lead-form-row">
-            <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Как к вам обращаться" autocomplete="name"></div>
-            <div class="form-field"><label>Номер телефона</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
-          </div>
-          <div class="form-field"><label>Какой автомобиль интересует</label><input name="car" placeholder="Марка и модель или «пока выбираю»"></div>
 
-          <div class="lead-q">
-            <span class="lead-q-label">Когда планируете покупку?</span>
-            <div class="lead-chips" data-single data-name="timing">
-              <button type="button" class="lead-chip" data-val="В ближайшее время">В ближайшее время</button>
-              <button type="button" class="lead-chip" data-val="В течение полугода">В течение полугода</button>
-              <button type="button" class="lead-chip" data-val="Пока присматриваюсь">Пока присматриваюсь</button>
-            </div>
-          </div>
+        <!-- Нижняя лента-бейджи гарантий во всю ширину под колонками -->
+        <ul class="lv-trust">
+          <li>Договор: цена и сроки зафиксированы</li>
+          <li>Оплата по инвойсу через банк</li>
+          <li>Осмотр автомобиля до оплаты</li>
+          <li>Фотоотчёты на каждом этапе</li>
+        </ul>
 
-          <div class="lead-q">
-            <span class="lead-q-label">Планируемый бюджет</span>
-            <div class="lead-chips" data-single data-name="budget">
-              <button type="button" class="lead-chip" data-val="до 1,5 млн ₽">до 1,5 млн ₽</button>
-              <button type="button" class="lead-chip" data-val="1,5–2,5 млн ₽">1,5–2,5 млн ₽</button>
-              <button type="button" class="lead-chip" data-val="2,5–4 млн ₽">2,5–4 млн ₽</button>
-              <button type="button" class="lead-chip" data-val="от 4 млн ₽">от 4 млн ₽</button>
-            </div>
-          </div>
-
-          <div class="lead-q">
-            <span class="lead-q-label">Удобный способ связи <em>(можно выбрать несколько)</em></span>
-            <div class="lead-chips" data-name="contact">
-              <button type="button" class="lead-chip" data-val="Позвонить">Позвонить</button>
-              <button type="button" class="lead-chip" data-val="Telegram">Telegram</button>
-              <button type="button" class="lead-chip" data-val="WhatsApp">WhatsApp</button>
-            </div>
-          </div>
-
-          <button class="btn btn-red lead-submit" type="submit">Получить подборку и расчёт</button>
-          <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>. Ваши данные защищены и не передаются третьим лицам.</p>
-        </form>
       </div>
     </div>
   </section>

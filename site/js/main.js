@@ -574,30 +574,6 @@
   }
   A.initFaq = initFaq;
 
-  /* ---------- Кастомный курсор (только точный указатель) ---------- */
-  function initCursor() {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const dot = document.createElement('div');
-    dot.className = 'cursor-dot';
-    dot.style.opacity = '0';
-    document.body.append(dot);
-    let x = 0, y = 0, cx = 0, cy = 0, seen = false;
-    document.addEventListener('mousemove', (e) => {
-      x = e.clientX; y = e.clientY;
-      if (!seen) { seen = true; cx = x; cy = y; dot.style.opacity = '1'; }
-      const t = e.target;
-      const interactive = t.closest && t.closest('a, button, select, input, textarea, .faq-q, .pill, .quiz-option');
-      dot.classList.toggle('grow', !!interactive);
-    });
-    (function loop() {
-      cx += (x - cx) * 0.22;
-      cy += (y - cy) * 0.22;
-      dot.style.transform = `translate(${cx - 0}px, ${cy - 0}px) translate(-50%, -50%)`;
-      requestAnimationFrame(loop);
-    })();
-  }
-
   /* ---------- Параллакс силуэтов авто ---------- */
   function initParallax() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -773,7 +749,6 @@
     bindLeadForms();
     initReveal();
     initFaq();
-    initCursor();
     initParallax();
     initCountUp();
     initMagnetic();

@@ -1172,23 +1172,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 
-/* ---------- Кастомный курсор ---------- */
-@media (pointer: fine) {
-  .cursor-dot {
-    position: fixed;
-    top: 0; left: 0;
-    width: 10px; height: 10px;
-    background: #fff;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 999;
-    mix-blend-mode: difference;
-    transform: translate(-50%, -50%);
-    transition: width 0.25s ease, height 0.25s ease;
-  }
-  .cursor-dot.grow { width: 44px; height: 44px; }
-}
-
 /* ---------- Схема поэтапной оплаты ---------- */
 .payflow { border-left: 1px solid var(--line-2); margin-left: 12px; display: grid; gap: 38px; padding: 10px 0; }
 .pay-step { display: flex; gap: 24px; }

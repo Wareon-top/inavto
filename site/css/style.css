@@ -50,11 +50,6 @@ html { scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   background-color: var(--bg);
-  /* чертёжная сетка на всём холсте */
-  background-image:
-    linear-gradient(rgba(23, 35, 59, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 35, 59, 0.05) 1px, transparent 1px);
-  background-size: 72px 72px;
   color: var(--text);
   line-height: 1.6;
   font-size: 15.5px;
@@ -502,10 +497,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .bento .cell p { color: var(--muted); font-size: 13.5px; line-height: 1.65; }
 .bento .cell-dark {
   background: var(--ink);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
   color: #f4f5f6;
 }
 .bento .cell-dark:hover { background-color: var(--dark-2); }
@@ -861,10 +852,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 /* ---------- CTA-баннер: тёмная панель с чертёжной сеткой ---------- */
 .cta-banner {
   background-color: var(--ink);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
-  background-size: 64px 64px;
   border: none;
   border-radius: calc(var(--radius) + 6px);
   padding: clamp(36px, 6vw, 72px);
@@ -889,10 +876,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .lead-visitka {
   position: relative;
   background-color: var(--ink);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 64px 64px;
   border-radius: calc(var(--radius) + 6px);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -974,10 +957,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 /* ---------- Видео-шоурил: тёмно-синяя панель с видео ---------- */
 .video-reel {
   background-color: var(--ink);
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 64px 64px;
   border-radius: calc(var(--radius) + 6px);
   padding: clamp(28px, 5vw, 56px);
   display: grid;

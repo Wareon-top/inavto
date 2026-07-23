@@ -1,4 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#D6291E"/>
-  <text x="32" y="45" font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">IA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="fRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E9503F"/><stop offset="0.6" stop-color="#C61E12"/><stop offset="1" stop-color="#9C130A"/>
+    </linearGradient>
+    <linearGradient id="fBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B86DD"/><stop offset="1" stop-color="#0F3F7E"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="13" fill="#17233b"/>
+  <g transform="translate(3.4,14.3) scale(0.52)">
+    <path d="M6,66 Q52,20 100,38 Q54,32 6,66 Z" fill="url(#fBlue)"/>
+    <path d="M10,56 Q56,-4 104,26 C110,30 108,38 100,40 Q60,18 10,56 Z" fill="url(#fRed)"/>
+    <path d="M10,56 Q56,-4 104,26 Q58,4 10,56 Z" fill="#FFFFFF" opacity="0.22"/>
+    <g fill="#F7C325">
+      <polygon transform="translate(38,32) scale(7.5) rotate(-14)" points="0,-1 0.225,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.309"/>
+      <polygon transform="translate(58,26) scale(5.6) rotate(-4)" points="0,-1 0.225,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.309"/>
+      <polygon transform="translate(76,24.5) scale(4.4) rotate(6)" points="0,-1 0.225,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.309"/>
+    </g>
+    <path d="M22,72 Q54,52 92,60" stroke="#9AA0AB" stroke-width="5" stroke-linecap="round" fill="none"/>
+  </g>
 </svg>

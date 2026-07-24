@@ -29,10 +29,19 @@ rsync -a --delete "$APP/site/" "$WWW/"
 say "Перезапускаю бэкенд…"
 systemctl restart inavto
 
-sleep 1
-if curl -fsS "http://127.0.0.1:3000/api/health" >/dev/null 2>&1; then
+# Ждём, пока бэкенд поднимется. На тарифе 512 МБ холодный старт бывает
+# медленным (несколько секунд), поэтому опрашиваем health до ~24 секунд,
+# а не одну секунду — иначе бывает ложное «не ответил».
+ok=0
+for _ in $(seq 1 12); do
+  if curl -fsS "http://127.0.0.1:3000/api/health" >/dev/null 2>&1; then ok=1; break; fi
+  sleep 2
+done
+
+if [ "$ok" = 1 ]; then
   say "Готово: сайт и бэкенд обновлены."
 else
-  say "Внимание: бэкенд не ответил. Логи:  journalctl -u inavto -n 50"
+  say "Внимание: бэкенд не ответил за 24 сек."
+  say "Проверьте:  systemctl status inavto --no-pager   и   journalctl -u inavto -n 50 --no-pager"
   exit 1
 fi

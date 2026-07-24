@@ -113,6 +113,16 @@ function pageHTML(car) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${DOMAIN}/cars/${car.slug}.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="INAVTO ASIA">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(desc)}">
+  <meta property="og:url" content="${DOMAIN}/cars/${car.slug}.html">
+  <meta property="og:image" content="${DOMAIN}/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -310,6 +320,16 @@ function geoHTML(city, i) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${DOMAIN}/gorod/${slug}.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="INAVTO ASIA">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(desc)}">
+  <meta property="og:url" content="${DOMAIN}/gorod/${slug}.html">
+  <meta property="og:image" content="${DOMAIN}/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">

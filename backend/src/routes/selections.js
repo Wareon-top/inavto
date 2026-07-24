@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import db from '../db.js'
 import { notifyAdmin } from '../bot.js'
-import { adminOnly } from '../auth.js'
+import { adminOnly, roleOf } from '../auth.js'
 
 const router = Router()
 
@@ -13,6 +13,11 @@ router.post('/', async (req, res) => {
     INSERT INTO selections (budget, brand, body, fuel, name, phone, city, note, tg_user_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(budget, brand, body, fuel, name, phone, city, note || null, tg_user_id || null)
+
+  /* Заявку добавил менеджер из CRM — в Telegram не дублируем */
+  if (roleOf(req) === 'admin') {
+    return res.status(201).json({ id: result.lastInsertRowid, ok: true })
+  }
 
   const lines = [
     `🚗 <b>Новая заявка на подбор</b> #${result.lastInsertRowid}`,

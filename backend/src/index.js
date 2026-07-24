@@ -8,6 +8,7 @@ import carsRouter from './routes/cars.js'
 import selectionsRouter from './routes/selections.js'
 import ordersRouter from './routes/orders.js'
 import siteCarsRouter from './routes/siteCars.js'
+import dealsRouter from './routes/deals.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 
 const app = express()
@@ -21,6 +22,7 @@ app.use('/api/cars', carsRouter)
 app.use('/api/selections', selectionsRouter)
 app.use('/api/orders', ordersRouter)
 app.use('/api/site-cars', siteCarsRouter)
+app.use('/api/deals', dealsRouter)
 app.use('/api/upload', uploadRouter)
 
 /* Админка и загруженные фото */

@@ -6,3 +6,20 @@ export function adminOnly(req, res, next) {
   if (got !== token) return res.status(401).json({ error: 'Unauthorized' })
   next()
 }
+
+/* Роль по токену: admin (ADMIN_TOKEN) или staff (STAFF_TOKEN — китайский представитель). */
+export function roleOf(req) {
+  const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  if (process.env.ADMIN_TOKEN && got === process.env.ADMIN_TOKEN) return 'admin'
+  if (process.env.STAFF_TOKEN && got === process.env.STAFF_TOKEN) return 'staff'
+  return null
+}
+
+/* Журнал сделок: пускаем и админа, и представителя; роль кладём в req.role. */
+export function staffOnly(req, res, next) {
+  if (!process.env.ADMIN_TOKEN) return res.status(503).json({ error: 'ADMIN_TOKEN is not configured on the server' })
+  const role = roleOf(req)
+  if (!role) return res.status(401).json({ error: 'Unauthorized' })
+  req.role = role
+  next()
+}

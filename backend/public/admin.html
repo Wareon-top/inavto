@@ -109,6 +109,23 @@
   .crm-contact .wa { display:inline-block; margin-top:3px; font-size:11px; color:var(--green); font-weight:700; letter-spacing:.04em; }
   .crm-req b { display:block; }
   .crm-req small { color:var(--muted2); display:block; max-width:320px; }
+  /* ---- Журнал сделок ---- */
+  #deal-list tbody tr { cursor:pointer; }
+  .tablewrap #deal-list { min-width:860px; }
+  .dstatus { display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:12px; white-space:nowrap; }
+  .dstatus .dot { width:9px; height:9px; border-radius:50%; flex:none; display:inline-block; }
+  .deal-flow { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 4px; }
+  .dchip { border:1px solid var(--line2); background:var(--card); padding:7px 11px; font:inherit; font-size:11.5px;
+    font-weight:700; cursor:pointer; display:inline-flex; gap:6px; align-items:center; }
+  .dchip.done-step { border-color:var(--green); color:var(--green); }
+  .dchip.cur { background:var(--ink); border-color:var(--ink); color:#fafafa; }
+  .deal-info { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px 22px; margin:14px 0 4px; }
+  .deal-info .fi { font-size:10px; color:var(--muted2); text-transform:uppercase; letter-spacing:.1em; font-weight:700; }
+  .deal-info .fi b { display:block; font-size:14px; color:var(--ink); text-transform:none; letter-spacing:0; margin-top:2px; }
+  .dlog { border-left:2px solid var(--line2); margin:10px 0 16px; display:grid; gap:11px; padding-left:14px; max-height:340px; overflow:auto; }
+  .dlog .li { font-size:13px; }
+  .dlog .li small { color:var(--muted2); display:block; font-size:11px; }
+  .deal-sec { margin-top:20px; }
 </style>
 </head>
 <body>
@@ -143,6 +160,7 @@
     <div class="tabs">
       <button type="button" class="tab on" data-view="catalog">Каталог</button>
       <button type="button" class="tab" data-view="crm">CRM · Заявки <span class="tab-badge" id="crm-badge" style="display:none"></span></button>
+      <button type="button" class="tab" data-view="deals">Журнал сделок</button>
     </div>
 
     <div id="view-catalog">
@@ -246,8 +264,27 @@
           <input type="search" id="crm-search" placeholder="Поиск: имя, телефон, авто">
           <button class="btn ghost sm" id="crm-export">Выгрузить CSV</button>
           <button class="btn ghost sm" id="crm-refresh">Обновить</button>
+          <button class="btn red" id="leadAddBtn">+ Добавить заявку</button>
         </div>
       </div>
+
+      <!-- Ручное добавление заявки (звонок, знакомый, переписка) -->
+      <div class="panel" id="lead-add" style="display:none">
+        <h2>Новая заявка</h2>
+        <div class="grid g3" style="margin-bottom:16px">
+          <div><label>Имя *</label><input id="la-name" placeholder="Иван"></div>
+          <div><label>Телефон *</label><input id="la-phone" placeholder="+7 (___) ___-__-__"></div>
+          <div><label>Город</label><input id="la-city" placeholder="Москва"></div>
+          <div><label>Интересующее авто</label><input id="la-brand" placeholder="Zeekr 7X"></div>
+          <div><label>Бюджет / источник</label><input id="la-budget" placeholder="2,5–4 млн ₽ · звонок"></div>
+          <div><label>Детали</label><input id="la-note" placeholder="Срок покупки, пожелания…"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn red" id="leadSaveBtn">Сохранить заявку</button>
+          <button class="btn ghost" id="leadCancelBtn">Отмена</button>
+        </div>
+      </div>
+
       <div class="crm-stats" id="crm-stats"></div>
       <div class="tablewrap">
         <table id="crm-list">
@@ -258,6 +295,32 @@
         </table>
       </div>
       <p class="footer-note">Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.</p>
+    </div>
+
+    <!-- ЖУРНАЛ СДЕЛОК -->
+    <div id="view-deals" style="display:none">
+      <div class="toolbar">
+        <div>
+          <h1>Журнал сделок</h1>
+          <span class="muted" id="deals-count"></span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input type="search" id="deal-search" placeholder="Поиск: клиент, авто, VIN">
+          <button class="btn ghost sm" id="deal-refresh">Обновить</button>
+          <button class="btn red" id="dealAddBtn">+ Добавить сделку</button>
+        </div>
+      </div>
+      <div class="crm-stats" id="deal-stats"></div>
+      <div class="panel" id="deal-card" style="display:none"></div>
+      <div class="tablewrap" id="deal-listwrap">
+        <table id="deal-list">
+          <thead><tr>
+            <th>Статус</th><th>Клиент</th><th>Автомобиль</th><th>VIN</th><th>Китай</th><th>Россия</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="footer-note">Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.</p>
     </div>
 
   </div>
@@ -394,6 +457,74 @@ zh: {
   ' безвозвратно?': '，且无法恢复？',
   'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': '暂无申请——客户在网站留下联系方式后，会立即显示在这里。',
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': '网站的所有申请都会进入这里：测验、页面表单、计算器和 PDF 指南。状态和备注即时保存——团队随时掌握最新情况。电话可点击：一键拨号或 WhatsApp。',
+  '+ Добавить заявку': '+ 添加申请',
+  'Новая заявка': '新增申请',
+  'Имя *': '姓名 *',
+  'Телефон *': '电话 *',
+  'Город': '城市',
+  'Интересующее авто': '感兴趣的车型',
+  'Бюджет / источник': '预算 / 来源',
+  'Детали': '详情',
+  'Сохранить заявку': '保存申请',
+  'Нужны имя и телефон': '需要姓名和电话',
+  'Заявка добавлена': '申请已添加',
+  'Журнал сделок': '交易台账',
+  'Поиск: клиент, авто, VIN': '搜索：客户、车型、VIN',
+  '+ Добавить сделку': '+ 添加交易',
+  'машин: ': '车辆数：',
+  'Автомобиль': '车辆',
+  'Китай': '中国',
+  'Россия': '俄罗斯',
+  'Поиск': '寻车',
+  'Выкуплен': '已购入',
+  'Экспорт оформлен': '出口已办理',
+  'В пути': '运输中',
+  'Таможенный пост': '海关口岸',
+  'Лаборатория': '检测实验室',
+  'ЭПТС': '电子护照 EPTS',
+  'Выдан клиенту': '已交付客户',
+  'отправка': '发运',
+  'прибытие': '到达',
+  'Новая сделка': '新交易',
+  'Данные новой сделки': '新交易信息',
+  'Изменить данные сделки': '编辑交易信息',
+  'Информация': '信息',
+  'Марка и модель': '品牌和型号',
+  'Комплектация': '配置',
+  'Цвет': '颜色',
+  'Цена в Китае': '中国价格',
+  'ФИО': '姓名',
+  'Телефон': '电话',
+  'Комментарий по клиенту': '客户备注',
+  'Логистика': '物流',
+  'Город отправки': '发运城市',
+  'Дата отправки': '发运日期',
+  'Перевозчик': '承运商',
+  'Контейнер / автовоз': '集装箱 / 板车号',
+  'Ожидаемое прибытие': '预计到达',
+  'Город выдачи': '交付城市',
+  'Китайский представитель': '中国代表',
+  'Создать сделку': '创建交易',
+  'Удалить сделку': '删除交易',
+  'Журнал': '日志',
+  'Комментарий': '备注',
+  'Добавить комментарий': '添加备注',
+  'К списку': '返回列表',
+  'Офис': '办公室',
+  'Представитель': '代表',
+  'Статус: ': '状态：',
+  'Загружено фото: ': '已上传照片：',
+  'Сделка создана': '交易已创建',
+  'Записей пока нет': '暂无记录',
+  'Сменить статус на ': '将状态改为 ',
+  'Сохранено': '已保存',
+  'Удалить сделку №': '删除交易 №',
+  'Сделка удалена': '交易已删除',
+  'Фото загружены': '照片已上传',
+  'Например: автомобиль передан на оформление экспорта': '例如：车辆已移交办理出口手续',
+  'Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.': '暂无交易——有第一位客户时，请点击「+ 添加交易」。',
+  'режим представителя': '代表模式',
+  'Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.': '每一行代表一辆车。点击行即可打开卡片：状态、物流、照片和事件日志。中国代表使用自己的密钥登录，只能看到此台账——可以更改状态、写备注和上传照片。',
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
@@ -520,6 +651,74 @@ en: {
   ' безвозвратно?': ' permanently?',
   'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': 'No leads yet — as soon as a customer leaves their contact on the site, it will appear here.',
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': 'All site leads land here: the quiz, page forms, the calculator and the PDF guide. Status and note are saved instantly, so the team always sees the current picture. The phone is clickable — call or WhatsApp in one tap.',
+  '+ Добавить заявку': '+ Add lead',
+  'Новая заявка': 'New lead',
+  'Имя *': 'Name *',
+  'Телефон *': 'Phone *',
+  'Город': 'City',
+  'Интересующее авто': 'Car of interest',
+  'Бюджет / источник': 'Budget / source',
+  'Детали': 'Details',
+  'Сохранить заявку': 'Save lead',
+  'Нужны имя и телефон': 'Name and phone are required',
+  'Заявка добавлена': 'Lead added',
+  'Журнал сделок': 'Deals journal',
+  'Поиск: клиент, авто, VIN': 'Search: client, car, VIN',
+  '+ Добавить сделку': '+ Add deal',
+  'машин: ': 'cars: ',
+  'Автомобиль': 'Car',
+  'Китай': 'China',
+  'Россия': 'Russia',
+  'Поиск': 'Search',
+  'Выкуплен': 'Purchased',
+  'Экспорт оформлен': 'Export cleared',
+  'В пути': 'In transit',
+  'Таможенный пост': 'Customs post',
+  'Лаборатория': 'Lab inspection',
+  'ЭПТС': 'EPTS',
+  'Выдан клиенту': 'Delivered to client',
+  'отправка': 'shipped',
+  'прибытие': 'arrival',
+  'Новая сделка': 'New deal',
+  'Данные новой сделки': 'New deal details',
+  'Изменить данные сделки': 'Edit deal details',
+  'Информация': 'Information',
+  'Марка и модель': 'Make & model',
+  'Комплектация': 'Trim',
+  'Цвет': 'Color',
+  'Цена в Китае': 'Price in China',
+  'ФИО': 'Full name',
+  'Телефон': 'Phone',
+  'Комментарий по клиенту': 'Client note',
+  'Логистика': 'Logistics',
+  'Город отправки': 'Departure city',
+  'Дата отправки': 'Ship date',
+  'Перевозчик': 'Carrier',
+  'Контейнер / автовоз': 'Container / truck',
+  'Ожидаемое прибытие': 'Expected arrival',
+  'Город выдачи': 'Delivery city',
+  'Китайский представитель': 'China representative',
+  'Создать сделку': 'Create deal',
+  'Удалить сделку': 'Delete deal',
+  'Журнал': 'Log',
+  'Комментарий': 'Comment',
+  'Добавить комментарий': 'Add comment',
+  'К списку': 'Back to list',
+  'Офис': 'Office',
+  'Представитель': 'Representative',
+  'Статус: ': 'Status: ',
+  'Загружено фото: ': 'Photos uploaded: ',
+  'Сделка создана': 'Deal created',
+  'Записей пока нет': 'No entries yet',
+  'Сменить статус на ': 'Change status to ',
+  'Сохранено': 'Saved',
+  'Удалить сделку №': 'Delete deal #',
+  'Сделка удалена': 'Deal deleted',
+  'Фото загружены': 'Photos uploaded',
+  'Например: автомобиль передан на оформление экспорта': 'E.g.: the car was handed over for export processing',
+  'Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.': 'No deals yet — press “+ Add deal” when the first client appears.',
+  'режим представителя': 'representative mode',
+  'Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.': 'Each row is one car. Click a row to open its card: status, logistics, photos and the event log. The China representative signs in with their own key and sees only this journal — they can change status, write comments and upload photos.',
 },
 };
 const t = (s) => (DICT[LANG] && DICT[LANG][s]) || s;
@@ -576,22 +775,37 @@ async function api(path, opts = {}) {
   return data;
 }
 
-/* ---------- Вход ---------- */
+/* ---------- Вход: полный ключ (админ) или ключ представителя (staff) ---------- */
 async function tryLogin() {
   try {
     await api('/api/site-cars/check');
-    $('login').style.display = 'none';
-    $('app').style.display = '';
+    ROLE = 'admin';
+  } catch (e) {
+    try {
+      const w = await api('/api/deals/whoami');
+      ROLE = w.role;
+    } catch (e2) {
+      $('login').style.display = '';
+      $('app').style.display = 'none';
+      if (token) msg(t('Ключ не подошёл: ') + t(e2.message));
+      token = '';
+      return;
+    }
+  }
+  $('login').style.display = 'none';
+  $('app').style.display = '';
+  localStorage.setItem('inavto_admin_token', token);
+  if (ROLE === 'staff') {
+    /* Представитель: только журнал сделок, без каталога, заявок и контактов */
+    $('who').textContent = t('режим представителя');
+    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm]').forEach((b) => { b.style.display = 'none'; });
+    $('dealAddBtn').style.display = 'none';
+    showView('deals');
+  } else {
     $('who').textContent = t('доступ подтверждён');
-    localStorage.setItem('inavto_admin_token', token);
     load();
     loadLeads().catch(() => {});
     showView(localStorage.getItem('inavto_admin_view') || 'catalog');
-  } catch (e) {
-    $('login').style.display = '';
-    $('app').style.display = 'none';
-    if (token) msg(t('Ключ не подошёл: ') + t(e.message));
-    token = '';
   }
 }
 $('loginBtn').onclick = () => { token = $('token').value.trim(); tryLogin(); };
@@ -650,13 +864,17 @@ const STATUSES = [
 const stColor = (v) => (STATUSES.find((s) => s[0] === v) || STATUSES[0])[2];
 let leads = [];
 let crmFilter = 'all';
+let ROLE = 'admin';
 
 function showView(v) {
+  if (ROLE === 'staff') v = 'deals';
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
   $('view-catalog').style.display = v === 'catalog' ? '' : 'none';
   $('view-crm').style.display = v === 'crm' ? '' : 'none';
+  $('view-deals').style.display = v === 'deals' ? '' : 'none';
   localStorage.setItem('inavto_admin_view', v);
   if (v === 'crm') loadLeads().catch((e) => msg(t(e.message)));
+  if (v === 'deals') loadDeals().catch((e) => msg(t(e.message)));
 }
 document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
 
@@ -775,6 +993,310 @@ $('crm-export').onclick = () => {
   a.click();
   URL.revokeObjectURL(a.href);
 };
+
+/* ---------- CRM: ручное добавление заявки (звонок, знакомый) ---------- */
+$('leadAddBtn').onclick = () => { $('lead-add').style.display = ''; $('la-name').focus(); };
+$('leadCancelBtn').onclick = () => { $('lead-add').style.display = 'none'; };
+$('leadSaveBtn').onclick = async () => {
+  const name = $('la-name').value.trim();
+  const phone = $('la-phone').value.trim();
+  if (!name || !phone) { msg(t('Нужны имя и телефон')); return; }
+  try {
+    await api('/api/selections', { method: 'POST', body: JSON.stringify({
+      name, phone,
+      city: $('la-city').value.trim(),
+      brand: $('la-brand').value.trim(),
+      budget: $('la-budget').value.trim() || 'внесено вручную',
+      note: $('la-note').value.trim(),
+      body: '', fuel: '',
+    }) });
+    ['la-name', 'la-phone', 'la-city', 'la-brand', 'la-budget', 'la-note'].forEach((i) => { $(i).value = ''; });
+    $('lead-add').style.display = 'none';
+    msg(t('Заявка добавлена'), true);
+    loadLeads();
+  } catch (err) { msg(t(err.message)); }
+};
+
+/* ---------- Журнал сделок ---------- */
+const DEAL_ST = [
+  ['search',  '🔍', 'Поиск',            '#8a909b'],
+  ['bought',  '✅', 'Выкуплен',          '#177245'],
+  ['export',  '📄', 'Экспорт оформлен',  '#2b6cd4'],
+  ['transit', '🚛', 'В пути',            '#c8960a'],
+  ['customs', '🛃', 'Таможенный пост',   '#b45309'],
+  ['lab',     '📋', 'Лаборатория',       '#0e7490'],
+  ['epts',    '📑', 'ЭПТС',              '#6d28d9'],
+  ['done',    '🚗', 'Выдан клиенту',     '#17233b'],
+];
+const dSt = (v) => DEAL_ST.find((s) => s[0] === v) || DEAL_ST[0];
+let deals = [];
+let dealFilter = 'all';
+let openDealId = null;
+
+const fmtD = (s) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : String(s || '');
+};
+const fmtTS = (iso) => {
+  const d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
+
+async function loadDeals() {
+  deals = await api('/api/deals');
+  renderDeals();
+  if (openDealId != null) {
+    const d = deals.find((x) => x.id === openDealId);
+    if (d) renderDealCard(d); else closeDeal();
+  }
+}
+
+function dealsVisible() {
+  const q = ($('deal-search').value || '').trim().toLowerCase();
+  return deals.filter((d) => {
+    if (dealFilter !== 'all' && d.status !== dealFilter) return false;
+    if (!q) return true;
+    return [d.client_name, d.car, d.vin, d.container, d.from_city, d.to_city, d.rep]
+      .some((f) => f && String(f).toLowerCase().includes(q));
+  });
+}
+
+function renderDeals() {
+  const list = dealsVisible();
+  $('deals-count').textContent = t('машин: ') + list.length + (list.length !== deals.length ? ' / ' + deals.length : '');
+  const counts = { all: deals.length };
+  DEAL_ST.forEach(([v]) => { counts[v] = 0; });
+  deals.forEach((d) => { counts[d.status] = (counts[d.status] || 0) + 1; });
+  $('deal-stats').innerHTML =
+    `<button type="button" class="stat${dealFilter === 'all' ? ' on' : ''}" data-dflt="all"><b>${counts.all}</b> ${t('Все')}</button>` +
+    DEAL_ST.map(([v, emo, label, color]) =>
+      `<button type="button" class="stat${dealFilter === v ? ' on' : ''}" data-dflt="${v}"><span class="dot" style="background:${color}"></span><b>${counts[v] || 0}</b> ${emo} ${t(label)}</button>`).join('');
+  const tb = $('deal-list').querySelector('tbody');
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="6" style="padding:26px;text-align:center;color:var(--muted2);cursor:default">${t('Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.')}</td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map((d) => {
+    const [, emo, label, color] = dSt(d.status);
+    return `<tr data-deal="${d.id}">
+      <td><span class="dstatus"><span class="dot" style="background:${color}"></span>${emo} ${t(label)}</span></td>
+      <td class="rowname"><b>${escHtml(d.client_name || '—')}</b>${ROLE === 'admin' && d.client_phone ? `<small>${escHtml(d.client_phone)}</small>` : ''}</td>
+      <td class="rowname"><b>${escHtml(d.car)}</b>${d.trim ? `<small>${escHtml(d.trim)}</small>` : ''}</td>
+      <td style="font-size:12px;font-variant-numeric:tabular-nums">${escHtml(d.vin || '—')}</td>
+      <td class="rowname">${escHtml(d.from_city || '—')}${d.ship_date ? `<small>${t('отправка')} ${fmtD(d.ship_date)}</small>` : ''}</td>
+      <td class="rowname">${escHtml(d.to_city || '—')}${d.eta ? `<small>${t('прибытие')} ~${fmtD(d.eta)}</small>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function closeDeal() {
+  openDealId = null;
+  $('deal-card').style.display = 'none';
+  $('deal-listwrap').style.display = '';
+}
+
+function openDeal(id) {
+  const d = deals.find((x) => x.id === id);
+  if (!d) return;
+  openDealId = id;
+  renderDealCard(d);
+}
+
+function renderDealCard(d) {
+  const isNew = d.id == null;
+  const [, emo] = dSt(d.status);
+  const curIdx = DEAL_ST.findIndex((s) => s[0] === d.status);
+
+  const flow = isNew ? '' : `<div class="deal-sec"><label>${t('Статус')}</label><div class="deal-flow">` +
+    DEAL_ST.map(([v, e2, l2], i) =>
+      `<button type="button" class="dchip${v === d.status ? ' cur' : (i < curIdx ? ' done-step' : '')}" data-setst="${v}">${e2} ${t(l2)}</button>`
+    ).join('') + `</div></div>`;
+
+  const fi = (lab2, val) => val ? `<div class="fi">${t(lab2)}<b>${escHtml(val)}</b></div>` : '';
+  const info = isNew ? '' : `<div class="deal-info">` +
+    fi('Комплектация', d.trim) + fi('VIN', d.vin) + fi('Цвет', d.color) + fi('Год', d.year) +
+    (d.price_cny ? fi('Цена в Китае', '¥ ' + Number(d.price_cny).toLocaleString('ru-RU')) : '') +
+    fi('Клиент', d.client_name) +
+    (ROLE === 'admin' ? fi('Телефон', d.client_phone) + fi('Telegram', d.client_tg) : '') +
+    fi('Город отправки', d.from_city) + fi('Дата отправки', fmtD(d.ship_date)) +
+    fi('Таможенный пост', d.customs_post) + fi('Перевозчик', d.carrier) +
+    fi('Контейнер / автовоз', d.container) + fi('Ожидаемое прибытие', fmtD(d.eta)) +
+    fi('Город выдачи', d.to_city) + fi('Китайский представитель', d.rep) +
+    `</div>`;
+
+  const adminForm = ROLE !== 'admin' ? '' : `
+    <details class="deal-sec"${isNew ? ' open' : ''}>
+      <summary style="cursor:pointer;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em">${isNew ? t('Данные новой сделки') : t('Изменить данные сделки')}</summary>
+      <div style="margin-top:16px">
+        <h2>${t('Информация')}</h2>
+        <div class="grid g3" style="margin-bottom:16px">
+          <div><label>${t('Марка и модель')} *</label><input id="d-car" value="${escHtml(d.car || '')}" placeholder="Mazda CX-5"></div>
+          <div><label>${t('Комплектация')}</label><input id="d-trim" value="${escHtml(d.trim || '')}"></div>
+          <div><label>VIN</label><input id="d-vin" value="${escHtml(d.vin || '')}"></div>
+          <div><label>${t('Цвет')}</label><input id="d-color" value="${escHtml(d.color || '')}"></div>
+          <div><label>${t('Год')}</label><input id="d-year" type="number" min="2000" max="2030" value="${d.year || ''}"></div>
+          <div><label>${t('Цена в Китае')}, ¥</label><input id="d-cny" type="number" min="0" step="1000" value="${d.price_cny || ''}"></div>
+        </div>
+        <h2>${t('Клиент')}</h2>
+        <div class="grid g4" style="margin-bottom:16px">
+          <div><label>${t('ФИО')}</label><input id="d-cname" value="${escHtml(d.client_name || '')}"></div>
+          <div><label>${t('Телефон')}</label><input id="d-cphone" value="${escHtml(d.client_phone || '')}"></div>
+          <div><label>Telegram</label><input id="d-ctg" value="${escHtml(d.client_tg || '')}"></div>
+          <div><label>${t('Китайский представитель')}</label><input id="d-rep" value="${escHtml(d.rep || '')}"></div>
+        </div>
+        <div style="margin-bottom:16px"><label>${t('Комментарий по клиенту')}</label><textarea id="d-cnote">${escHtml(d.client_note || '')}</textarea></div>
+        <h2>${t('Логистика')}</h2>
+        <div class="grid g4" style="margin-bottom:16px">
+          <div><label>${t('Город отправки')}</label><input id="d-from" value="${escHtml(d.from_city || '')}" placeholder="Шанхай"></div>
+          <div><label>${t('Дата отправки')}</label><input id="d-ship" type="date" value="${escHtml(d.ship_date || '')}"></div>
+          <div><label>${t('Таможенный пост')}</label><input id="d-customs" value="${escHtml(d.customs_post || '')}" placeholder="Уссурийск"></div>
+          <div><label>${t('Перевозчик')}</label><input id="d-carrier" value="${escHtml(d.carrier || '')}"></div>
+          <div><label>${t('Контейнер / автовоз')}</label><input id="d-cont" value="${escHtml(d.container || '')}"></div>
+          <div><label>${t('Ожидаемое прибытие')}</label><input id="d-eta" type="date" value="${escHtml(d.eta || '')}"></div>
+          <div><label>${t('Город выдачи')}</label><input id="d-to" value="${escHtml(d.to_city || '')}" placeholder="Москва"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn red" id="dealSaveBtn">${isNew ? t('Создать сделку') : t('Сохранить')}</button>
+          ${isNew ? '' : `<button class="btn ghost sm" id="dealDelBtn" style="color:var(--red);border-color:var(--red)">${t('Удалить сделку')}</button>`}
+        </div>
+      </div>
+    </details>`;
+
+  const photos = isNew ? '' : `<div class="deal-sec"><label>${t('Фото')}</label>
+    <div class="photos">` + (d.photos || []).map((p) =>
+      `<div class="ph"><a href="${p}" target="_blank" rel="noopener"><img src="${p}" loading="lazy"></a>${ROLE === 'admin' ? `<button type="button" data-delphoto="${escHtml(p)}">✕</button>` : ''}</div>`).join('') + `</div>
+    <div class="drop" id="deal-drop" style="margin-top:10px">${t('Нажмите или перетащите фото сюда (JPG/PNG/WebP)')}</div>
+    <input type="file" id="deal-file" accept="image/*" multiple hidden></div>`;
+
+  const logHtml = isNew ? '' : `<div class="deal-sec"><label>${t('Журнал')}</label>
+    <div class="dlog">` + ((d.log || []).slice().reverse().map((e) => {
+      const who = e.role === 'staff' ? t('Представитель') : t('Офис');
+      let body2 = '';
+      if (e.type === 'status') body2 = t('Статус: ') + dSt(e.status)[1] + ' ' + t(dSt(e.status)[2]) + (e.text ? ' — ' + escHtml(e.text) : '');
+      else if (e.type === 'comment') body2 = escHtml(e.text);
+      else if (e.type === 'photos') body2 = t('Загружено фото: ') + escHtml(e.text);
+      else body2 = t('Сделка создана');
+      return `<div class="li"><small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;
+    }).join('') || `<div class="li"><small>${t('Записей пока нет')}</small></div>`) + `</div>
+    <div class="grid g2" style="align-items:end">
+      <div><label>${t('Комментарий')}</label><textarea id="deal-comment" placeholder="${t('Например: автомобиль передан на оформление экспорта')}"></textarea></div>
+      <div><button class="btn ghost" id="dealCommentBtn">${t('Добавить комментарий')}</button></div>
+    </div></div>`;
+
+  $('deal-card').innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <h2 style="margin:0">${isNew ? t('Новая сделка') : '№' + d.id + ' · ' + escHtml(d.car) + ' ' + emo}</h2>
+      <button class="btn ghost sm" id="dealCloseBtn">← ${t('К списку')}</button>
+    </div>
+    ${flow}${info}${adminForm}${photos}${logHtml}`;
+  $('deal-card').style.display = '';
+  $('deal-listwrap').style.display = 'none';
+
+  /* --- события карточки --- */
+  $('dealCloseBtn').onclick = closeDeal;
+
+  $('deal-card').querySelectorAll('[data-setst]').forEach((b) => b.addEventListener('click', async () => {
+    const v = b.dataset.setst;
+    if (v === d.status) return;
+    if (!confirm(t('Сменить статус на ') + dSt(v)[1] + ' ' + t(dSt(v)[2]) + '?')) return;
+    try {
+      await api('/api/deals/' + d.id + '/status', { method: 'PUT', body: JSON.stringify({ status: v }) });
+      msg(t('Статус обновлён'), true);
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  }));
+
+  const drop = $('deal-drop');
+  if (drop) {
+    const file = $('deal-file');
+    drop.onclick = () => file.click();
+    drop.ondragover = (e) => { e.preventDefault(); };
+    drop.ondrop = (e) => { e.preventDefault(); uploadDealPhotos(d.id, e.dataTransfer.files); };
+    file.onchange = () => { uploadDealPhotos(d.id, file.files); file.value = ''; };
+  }
+
+  const cbtn = $('dealCommentBtn');
+  if (cbtn) cbtn.onclick = async () => {
+    const text = $('deal-comment').value.trim();
+    if (!text) return;
+    try {
+      await api('/api/deals/' + d.id + '/comment', { method: 'POST', body: JSON.stringify({ text }) });
+      msg(t('Комментарий сохранён'), true);
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  };
+
+  $('deal-card').querySelectorAll('[data-delphoto]').forEach((b) => b.addEventListener('click', async () => {
+    try {
+      await api('/api/deals/' + d.id + '/photo', { method: 'DELETE', body: JSON.stringify({ url: b.dataset.delphoto }) });
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  }));
+
+  const sbtn = $('dealSaveBtn');
+  if (sbtn) sbtn.onclick = async () => {
+    const payload = {
+      car: $('d-car').value.trim(), trim: $('d-trim').value.trim(), vin: $('d-vin').value.trim(),
+      color: $('d-color').value.trim(), year: +$('d-year').value || null, price_cny: +$('d-cny').value || 0,
+      client_name: $('d-cname').value.trim(), client_phone: $('d-cphone').value.trim(),
+      client_tg: $('d-ctg').value.trim(), client_note: $('d-cnote').value.trim(), rep: $('d-rep').value.trim(),
+      from_city: $('d-from').value.trim(), ship_date: $('d-ship').value, customs_post: $('d-customs').value.trim(),
+      carrier: $('d-carrier').value.trim(), container: $('d-cont').value.trim(), eta: $('d-eta').value,
+      to_city: $('d-to').value.trim(),
+    };
+    if (!payload.car) { msg(t('Нужны марка и модель')); return; }
+    try {
+      if (isNew) {
+        const r = await api('/api/deals', { method: 'POST', body: JSON.stringify(payload) });
+        msg(t('Сделка создана'), true);
+        await loadDeals();
+        openDeal(r.id);
+      } else {
+        await api('/api/deals/' + d.id, { method: 'PUT', body: JSON.stringify(payload) });
+        msg(t('Сохранено'), true);
+        loadDeals();
+      }
+    } catch (err) { msg(t(err.message)); }
+  };
+
+  const delBtn = $('dealDelBtn');
+  if (delBtn) delBtn.onclick = async () => {
+    if (!confirm(t('Удалить сделку №') + d.id + t(' безвозвратно?'))) return;
+    try {
+      await api('/api/deals/' + d.id, { method: 'DELETE' });
+      msg(t('Сделка удалена'), true);
+      closeDeal();
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  };
+}
+
+async function uploadDealPhotos(id, files) {
+  const imgs = [...files].filter((f) => /^image\//.test(f.type)).slice(0, 20);
+  if (!imgs.length) return;
+  msg(t('Загружаю фото… не закрывайте страницу'), true);
+  try {
+    const data = [];
+    for (const f of imgs) data.push(await resize(f, 1400, 0.82));
+    await api('/api/deals/' + id + '/photos', { method: 'POST', body: JSON.stringify({ photos: data }) });
+    msg(t('Фото загружены'), true);
+    loadDeals();
+  } catch (err) { msg(t(err.message)); }
+}
+
+$('deal-refresh').onclick = () => loadDeals().then(() => msg(t('Обновлено'), true)).catch((e) => msg(t(e.message)));
+$('deal-search').addEventListener('input', renderDeals);
+$('deal-stats').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-dflt]');
+  if (!b) return;
+  dealFilter = b.dataset.dflt;
+  renderDeals();
+});
+$('deal-list').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-deal]');
+  if (tr) openDeal(+tr.dataset.deal);
+});
+$('dealAddBtn').onclick = () => renderDealCard({ id: null, car: '', status: 'search', photos: [], log: [] });
 
 /* ---------- Форма ---------- */
 const translit = (s) => s.toLowerCase()

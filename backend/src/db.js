@@ -81,6 +81,33 @@ db.exec(`
     client_phone TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS deals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    car TEXT NOT NULL,
+    trim TEXT DEFAULT '',
+    vin TEXT DEFAULT '',
+    color TEXT DEFAULT '',
+    year INTEGER,
+    price_cny INTEGER DEFAULT 0,
+    client_name TEXT DEFAULT '',
+    client_phone TEXT DEFAULT '',
+    client_tg TEXT DEFAULT '',
+    client_note TEXT DEFAULT '',
+    status TEXT DEFAULT 'search',
+    from_city TEXT DEFAULT '',
+    to_city TEXT DEFAULT '',
+    ship_date TEXT DEFAULT '',
+    customs_post TEXT DEFAULT '',
+    carrier TEXT DEFAULT '',
+    container TEXT DEFAULT '',
+    eta TEXT DEFAULT '',
+    rep TEXT DEFAULT '',
+    photos TEXT DEFAULT '[]',
+    log TEXT DEFAULT '[]',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:

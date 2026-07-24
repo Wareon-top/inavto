@@ -84,6 +84,31 @@
   .lang.on { background:var(--red); border-color:var(--red); }
   .tablewrap { overflow-x:auto; }
   .tablewrap table { min-width:680px; }
+  /* ---- Вкладки разделов ---- */
+  .tabs { display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; }
+  .tab { border:1px solid var(--ink); background:transparent; color:var(--ink); padding:10px 18px;
+    font:inherit; font-size:11.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; }
+  .tab.on { background:var(--ink); color:#fafafa; }
+  .tab-badge { background:var(--red); color:#fff; font-size:10px; padding:1px 7px; border-radius:999px; }
+  /* ---- CRM: заявки ---- */
+  .crm-stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .stat { border:1px solid var(--line2); background:var(--card); padding:8px 13px; font:inherit; font-size:12px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+  .stat b { font-size:15px; }
+  .stat .dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; }
+  .stat.on { border-color:var(--ink); background:var(--ink); color:#fafafa; }
+  #crm-search { width:220px; border:1px solid var(--line2); padding:8px 10px; }
+  #crm-list td { vertical-align:top; }
+  #crm-list table, .tablewrap #crm-list { min-width:900px; }
+  .crm-date { white-space:nowrap; color:var(--muted); font-size:12px; }
+  select.crm-status { width:auto; min-width:150px; border:1px solid var(--line2); padding:6px 8px; background:var(--card); }
+  textarea.crm-note { min-height:40px; min-width:190px; border:1px dashed var(--line2); padding:6px 8px; font-size:12.5px; }
+  textarea.crm-note:focus { border-style:solid; }
+  .crm-contact a { color:var(--ink); text-decoration:none; font-weight:700; white-space:nowrap; }
+  .crm-contact .wa { display:inline-block; margin-top:3px; font-size:11px; color:var(--green); font-weight:700; letter-spacing:.04em; }
+  .crm-req b { display:block; }
+  .crm-req small { color:var(--muted2); display:block; max-width:320px; }
 </style>
 </head>
 <body>
@@ -114,6 +139,13 @@
 
   <!-- ПАНЕЛЬ -->
   <div id="app" style="display:none">
+
+    <div class="tabs">
+      <button type="button" class="tab on" data-view="catalog">Каталог</button>
+      <button type="button" class="tab" data-view="crm">CRM · Заявки <span class="tab-badge" id="crm-badge" style="display:none"></span></button>
+    </div>
+
+    <div id="view-catalog">
     <div class="toolbar">
       <div>
         <h1>Каталог сайта</h1>
@@ -201,6 +233,33 @@
     </div>
     <p class="footer-note">Изменения появляются на сайте сразу после сохранения — обновите страницу сайта.
       Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.</p>
+    </div><!-- /view-catalog -->
+
+    <!-- CRM: заявки клиентов -->
+    <div id="view-crm" style="display:none">
+      <div class="toolbar">
+        <div>
+          <h1>Заявки клиентов</h1>
+          <span class="muted" id="crm-count"></span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input type="search" id="crm-search" placeholder="Поиск: имя, телефон, авто">
+          <button class="btn ghost sm" id="crm-export">Выгрузить CSV</button>
+          <button class="btn ghost sm" id="crm-refresh">Обновить</button>
+        </div>
+      </div>
+      <div class="crm-stats" id="crm-stats"></div>
+      <div class="tablewrap">
+        <table id="crm-list">
+          <thead><tr>
+            <th>Дата</th><th>Клиент</th><th>Контакт</th><th>Запрос</th><th>Статус</th><th>Комментарий менеджера</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="footer-note">Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.</p>
+    </div>
+
   </div>
 </div>
 
@@ -307,6 +366,34 @@ zh: {
   'Такой слаг уже есть': '该 slug 已存在',
   'Не найдено': '未找到',
   'Пустой список': '列表为空',
+  'Каталог': '目录',
+  'CRM · Заявки': 'CRM · 客户申请',
+  'Заявки клиентов': '客户申请',
+  'Поиск: имя, телефон, авто': '搜索：姓名、电话、车型',
+  'Выгрузить CSV': '导出 CSV',
+  'Обновить': '刷新',
+  'Обновлено': '已刷新',
+  'Дата': '日期',
+  'Клиент': '客户',
+  'Контакт': '联系方式',
+  'Запрос': '需求',
+  'Комментарий менеджера': '经理备注',
+  'Все': '全部',
+  'Новая': '新申请',
+  'В работе': '跟进中',
+  'Расчёт отправлен': '已发送报价',
+  'Договор': '合同',
+  'Выкуп и доставка': '购车与运输',
+  'Выдано': '已交付',
+  'Отказ': '已流失',
+  'заявок: ': '申请数：',
+  'Статус обновлён': '状态已更新',
+  'Комментарий сохранён': '备注已保存',
+  'Заявка удалена': '申请已删除',
+  'Удалить заявку №': '删除申请 №',
+  ' безвозвратно?': '，且无法恢复？',
+  'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': '暂无申请——客户在网站留下联系方式后，会立即显示在这里。',
+  'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': '网站的所有申请都会进入这里：测验、页面表单、计算器和 PDF 指南。状态和备注即时保存——团队随时掌握最新情况。电话可点击：一键拨号或 WhatsApp。',
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
@@ -405,6 +492,34 @@ en: {
   'Такой слаг уже есть': 'This slug already exists',
   'Не найдено': 'Not found',
   'Пустой список': 'The list is empty',
+  'Каталог': 'Catalog',
+  'CRM · Заявки': 'CRM · Leads',
+  'Заявки клиентов': 'Customer leads',
+  'Поиск: имя, телефон, авто': 'Search: name, phone, car',
+  'Выгрузить CSV': 'Export CSV',
+  'Обновить': 'Refresh',
+  'Обновлено': 'Refreshed',
+  'Дата': 'Date',
+  'Клиент': 'Client',
+  'Контакт': 'Contact',
+  'Запрос': 'Request',
+  'Комментарий менеджера': 'Manager note',
+  'Все': 'All',
+  'Новая': 'New',
+  'В работе': 'In progress',
+  'Расчёт отправлен': 'Quote sent',
+  'Договор': 'Contract',
+  'Выкуп и доставка': 'Purchase & delivery',
+  'Выдано': 'Delivered',
+  'Отказ': 'Lost',
+  'заявок: ': 'leads: ',
+  'Статус обновлён': 'Status updated',
+  'Комментарий сохранён': 'Note saved',
+  'Заявка удалена': 'Lead deleted',
+  'Удалить заявку №': 'Delete lead #',
+  ' безвозвратно?': ' permanently?',
+  'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': 'No leads yet — as soon as a customer leaves their contact on the site, it will appear here.',
+  'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': 'All site leads land here: the quiz, page forms, the calculator and the PDF guide. Status and note are saved instantly, so the team always sees the current picture. The phone is clickable — call or WhatsApp in one tap.',
 },
 };
 const t = (s) => (DICT[LANG] && DICT[LANG][s]) || s;
@@ -470,6 +585,8 @@ async function tryLogin() {
     $('who').textContent = t('доступ подтверждён');
     localStorage.setItem('inavto_admin_token', token);
     load();
+    loadLeads().catch(() => {});
+    showView(localStorage.getItem('inavto_admin_view') || 'catalog');
   } catch (e) {
     $('login').style.display = '';
     $('app').style.display = 'none';
@@ -519,6 +636,145 @@ document.addEventListener('click', async (e) => {
     catch (err) { msg(t(err.message)); }
   }
 });
+
+/* ---------- CRM: заявки клиентов ---------- */
+const STATUSES = [
+  ['new', 'Новая', '#d6291e'],
+  ['work', 'В работе', '#2b6cd4'],
+  ['calc', 'Расчёт отправлен', '#c8960a'],
+  ['contract', 'Договор', '#17233b'],
+  ['delivery', 'Выкуп и доставка', '#0e7490'],
+  ['done', 'Выдано', '#177245'],
+  ['lost', 'Отказ', '#8a909b'],
+];
+const stColor = (v) => (STATUSES.find((s) => s[0] === v) || STATUSES[0])[2];
+let leads = [];
+let crmFilter = 'all';
+
+function showView(v) {
+  document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
+  $('view-catalog').style.display = v === 'catalog' ? '' : 'none';
+  $('view-crm').style.display = v === 'crm' ? '' : 'none';
+  localStorage.setItem('inavto_admin_view', v);
+  if (v === 'crm') loadLeads().catch((e) => msg(t(e.message)));
+}
+document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
+
+const fmtDT = (s) => {
+  const d = new Date(String(s).replace(' ', 'T') + 'Z');   // SQLite пишет UTC
+  return isNaN(d) ? (s || '') : d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
+const escHtml = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+async function loadLeads() {
+  leads = await api('/api/selections');
+  const fresh = leads.filter((l) => (l.status || 'new') === 'new').length;
+  const badge = $('crm-badge');
+  badge.style.display = fresh ? '' : 'none';
+  badge.textContent = fresh;
+  renderCRM();
+}
+
+function crmVisible() {
+  const q = ($('crm-search').value || '').trim().toLowerCase();
+  return leads.filter((l) => {
+    if (crmFilter !== 'all' && (l.status || 'new') !== crmFilter) return false;
+    if (!q) return true;
+    return [l.name, l.phone, l.brand, l.city, l.budget, l.note, l.manager_note]
+      .some((f) => f && String(f).toLowerCase().includes(q));
+  });
+}
+
+function renderCRM() {
+  const list = crmVisible();
+  $('crm-count').textContent = t('заявок: ') + list.length + (list.length !== leads.length ? ' / ' + leads.length : '');
+
+  const counts = { all: leads.length };
+  STATUSES.forEach(([v]) => { counts[v] = 0; });
+  leads.forEach((l) => { const s = l.status || 'new'; counts[s] = (counts[s] || 0) + 1; });
+  $('crm-stats').innerHTML =
+    `<button type="button" class="stat${crmFilter === 'all' ? ' on' : ''}" data-flt="all"><b>${counts.all}</b> ${t('Все')}</button>` +
+    STATUSES.map(([v, label, color]) =>
+      `<button type="button" class="stat${crmFilter === v ? ' on' : ''}" data-flt="${v}"><span class="dot" style="background:${color}"></span><b>${counts[v] || 0}</b> ${t(label)}</button>`).join('');
+
+  const tb = $('crm-list').querySelector('tbody');
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted2)">${t('Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.')}</td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map((l) => {
+    const st = l.status || 'new';
+    const digits = String(l.phone || '').replace(/\D/g, '');
+    const req = [l.budget, l.body, l.fuel].filter(Boolean).map(escHtml).join(' · ');
+    return `<tr>
+      <td class="crm-date">№${l.id}<br>${fmtDT(l.created_at)}</td>
+      <td class="rowname"><b>${escHtml(l.name || '—')}</b><small>${escHtml(l.city || '')}</small></td>
+      <td class="crm-contact">${digits
+        ? `<a href="tel:+${digits}">${escHtml(l.phone)}</a><br><a class="wa" target="_blank" rel="noopener" href="https://wa.me/${digits}">WhatsApp ↗</a>`
+        : '—'}</td>
+      <td class="crm-req"><b>${escHtml(l.brand || '—')}</b>${req ? `<small>${req}</small>` : ''}${l.note ? `<small>${escHtml(l.note)}</small>` : ''}</td>
+      <td><select class="crm-status" data-lead="${l.id}" style="border-left:3px solid ${stColor(st)}">
+        ${STATUSES.map(([v, label]) => `<option value="${v}"${v === st ? ' selected' : ''}>${t(label)}</option>`).join('')}
+      </select></td>
+      <td><textarea class="crm-note" data-note="${l.id}" placeholder="${t('Комментарий менеджера')}…">${escHtml(l.manager_note || '')}</textarea></td>
+      <td><button class="btn ghost sm" data-crmdel="${l.id}" style="color:var(--red);border-color:var(--red)">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+$('crm-refresh').onclick = () => loadLeads().then(() => msg(t('Обновлено'), true)).catch((e) => msg(t(e.message)));
+$('crm-search').addEventListener('input', renderCRM);
+$('crm-stats').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-flt]');
+  if (!b) return;
+  crmFilter = b.dataset.flt;
+  renderCRM();
+});
+
+document.addEventListener('change', async (e) => {
+  const el = e.target;
+  if (el.classList.contains('crm-status')) {
+    try {
+      await api('/api/selections/' + el.dataset.lead, { method: 'PUT', body: JSON.stringify({ status: el.value }) });
+      const l = leads.find((x) => x.id == el.dataset.lead);
+      if (l) l.status = el.value;
+      msg(t('Статус обновлён'), true);
+      renderCRM();
+    } catch (err) { msg(t(err.message)); }
+  }
+  if (el.classList.contains('crm-note')) {
+    try {
+      await api('/api/selections/' + el.dataset.note, { method: 'PUT', body: JSON.stringify({ manager_note: el.value }) });
+      const l = leads.find((x) => x.id == el.dataset.note);
+      if (l) l.manager_note = el.value;
+      msg(t('Комментарий сохранён'), true);
+    } catch (err) { msg(t(err.message)); }
+  }
+});
+
+document.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-crmdel]');
+  if (!el) return;
+  if (!confirm(t('Удалить заявку №') + el.dataset.crmdel + t(' безвозвратно?'))) return;
+  try { await api('/api/selections/' + el.dataset.crmdel, { method: 'DELETE' }); msg(t('Заявка удалена'), true); loadLeads(); }
+  catch (err) { msg(t(err.message)); }
+});
+
+$('crm-export').onclick = () => {
+  const stLabel = (v) => (STATUSES.find((s) => s[0] === (v || 'new')) || [, v])[1] || '';
+  const rows = [['№', 'Дата', 'Имя', 'Телефон', 'Город', 'Интерес', 'Бюджет/форма', 'Детали', 'Статус', 'Комментарий']];
+  crmVisible().forEach((l) => rows.push([
+    l.id, fmtDT(l.created_at), l.name || '', l.phone || '', l.city || '',
+    l.brand || '', l.budget || '', l.note || '', stLabel(l.status), l.manager_note || '',
+  ]));
+  const csv = '﻿' + rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');  // BOM — чтобы Excel открыл кириллицу
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'inavto-crm.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
 
 /* ---------- Форма ---------- */
 const translit = (s) => s.toLowerCase()

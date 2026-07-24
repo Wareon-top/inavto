@@ -92,6 +92,9 @@ for (const col of ["cond TEXT DEFAULT 'new'", 'mileage INTEGER DEFAULT 0']) {
 /* Заявкам добавили квалификацию (срок покупки, способ связи, комментарий) — колонка note. */
 try { db.exec('ALTER TABLE selections ADD COLUMN note TEXT') } catch { /* колонка уже есть */ }
 
+/* CRM в админке: внутренний комментарий менеджера по заявке. */
+try { db.exec('ALTER TABLE selections ADD COLUMN manager_note TEXT') } catch { /* колонка уже есть */ }
+
 // Seed demo cars if empty
 const count = db.prepare('SELECT COUNT(*) as c FROM cars').get()
 if (count.c === 0) {

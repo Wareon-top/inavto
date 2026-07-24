@@ -34,13 +34,30 @@ router.post('/', async (req, res) => {
 })
 
 router.get('/', adminOnly, (req, res) => {
-  const items = db.prepare('SELECT * FROM selections ORDER BY created_at DESC').all()
+  const items = db.prepare('SELECT * FROM selections ORDER BY created_at DESC, id DESC').all()
   res.json(items)
 })
 
 router.put('/:id/status', adminOnly, (req, res) => {
   const { status } = req.body
   db.prepare('UPDATE selections SET status = ? WHERE id = ?').run(status, req.params.id)
+  res.json({ ok: true })
+})
+
+/* CRM: обновление статуса и/или комментария менеджера */
+router.put('/:id', adminOnly, (req, res) => {
+  const { status, manager_note } = req.body
+  const cur = db.prepare('SELECT id FROM selections WHERE id = ?').get(req.params.id)
+  if (!cur) return res.status(404).json({ error: 'Не найдено' })
+  if (status !== undefined) db.prepare('UPDATE selections SET status = ? WHERE id = ?').run(String(status), req.params.id)
+  if (manager_note !== undefined) db.prepare('UPDATE selections SET manager_note = ? WHERE id = ?').run(String(manager_note), req.params.id)
+  res.json({ ok: true })
+})
+
+/* CRM: удаление заявки (спам/тест) */
+router.delete('/:id', adminOnly, (req, res) => {
+  const r = db.prepare('DELETE FROM selections WHERE id = ?').run(req.params.id)
+  if (!r.changes) return res.status(404).json({ error: 'Не найдено' })
   res.json({ ok: true })
 })
 

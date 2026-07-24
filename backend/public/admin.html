@@ -126,6 +126,12 @@
   .dlog .li { font-size:13px; }
   .dlog .li small { color:var(--muted2); display:block; font-size:11px; }
   .deal-sec { margin-top:20px; }
+  /* ---- Документы ---- */
+  .doc-rows { display:grid; gap:8px; }
+  .doc-row { display:flex; align-items:center; gap:12px; border:1px solid var(--line); padding:8px 12px; background:var(--card); }
+  .doc-row a { color:var(--ink); text-decoration:none; font-weight:700; font-size:13px; overflow-wrap:anywhere; }
+  .doc-row small { color:var(--muted2); margin-left:auto; white-space:nowrap; }
+  .doc-row .btn { flex:none; }
 </style>
 </head>
 <body>
@@ -161,6 +167,7 @@
       <button type="button" class="tab on" data-view="catalog">Каталог</button>
       <button type="button" class="tab" data-view="crm">CRM · Заявки <span class="tab-badge" id="crm-badge" style="display:none"></span></button>
       <button type="button" class="tab" data-view="deals">Журнал сделок</button>
+      <button type="button" class="tab" data-view="docs">Документы</button>
     </div>
 
     <div id="view-catalog">
@@ -321,6 +328,31 @@
         </table>
       </div>
       <p class="footer-note">Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.</p>
+    </div>
+
+    <!-- ДОКУМЕНТЫ -->
+    <div id="view-docs" style="display:none">
+      <div class="toolbar">
+        <div>
+          <h1>Документы</h1>
+          <span class="muted" id="docs-count"></span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn ghost sm" id="folderRenameBtn" style="display:none">Переименовать</button>
+          <button class="btn ghost sm" id="folderDelBtn" style="display:none;color:var(--red);border-color:var(--red)">Удалить папку</button>
+          <button class="btn red" id="folderAddBtn">+ Новая папка</button>
+        </div>
+      </div>
+      <div class="crm-stats" id="doc-folders"></div>
+      <div class="drop" id="doc-drop">Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)</div>
+      <input type="file" id="doc-file" multiple hidden>
+      <div class="tablewrap" style="margin-top:14px">
+        <table id="doc-list">
+          <thead><tr><th>Файл</th><th>Загружен</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="footer-note">Папки — для договоров, шаблонов, таможенных и бухгалтерских файлов компании. Документы конкретного автомобиля прикрепляйте в его карточке в «Журнале сделок» — их видит и китайский представитель.</p>
     </div>
 
   </div>
@@ -525,6 +557,36 @@ zh: {
   'Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.': '暂无交易——有第一位客户时，请点击「+ 添加交易」。',
   'режим представителя': '代表模式',
   'Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.': '每一行代表一辆车。点击行即可打开卡片：状态、物流、照片和事件日志。中国代表使用自己的密钥登录，只能看到此台账——可以更改状态、写备注和上传照片。',
+  'Документы': '文件',
+  'файлов: ': '文件数：',
+  'Без папки': '未分组',
+  '+ Новая папка': '+ 新建文件夹',
+  'Переименовать': '重命名',
+  'Удалить папку': '删除文件夹',
+  'Название папки:': '文件夹名称：',
+  'Папка создана': '文件夹已创建',
+  'Переименовано': '已重命名',
+  'Удалить папку «': '删除文件夹「',
+  '» и все файлы в ней?': '」及其所有文件？',
+  'Папка удалена': '文件夹已删除',
+  'Файл': '文件',
+  'Загружен': '上传时间',
+  'Скачать': '下载',
+  'Пока нет файлов — перетащите их в поле выше.': '暂无文件——请将文件拖拽到上方区域。',
+  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)': '点击或拖拽文件到此处（PDF、照片、Word、Excel、ZIP——最大 15 MB）',
+  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)': '附加文件（PDF、照片、Word、Excel、ZIP——最大 15 MB）',
+  'Файл больше 15 МБ: ': '文件超过 15 MB：',
+  'Загружаю: ': '正在上传：',
+  'Файлы загружены': '文件已上传',
+  'Документов пока нет': '暂无文件',
+  'Документ: ': '文件：',
+  'МБ': 'MB',
+  'КБ': 'KB',
+  'Б': 'B',
+  'Удалить файл «': '删除文件「',
+  '»?': '」？',
+  'Файл удалён': '文件已删除',
+  'Папки — для договоров, шаблонов, таможенных и бухгалтерских файлов компании. Документы конкретного автомобиля прикрепляйте в его карточке в «Журнале сделок» — их видит и китайский представитель.': '文件夹用于合同、模板、海关和财务等公司文件。具体车辆的文件请附加到「交易台账」中该车的卡片里——中国代表也能看到。',
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
@@ -719,6 +781,36 @@ en: {
   'Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.': 'No deals yet — press “+ Add deal” when the first client appears.',
   'режим представителя': 'representative mode',
   'Каждая строка — один автомобиль. Нажмите на строку, чтобы открыть карточку: статус, логистика, фото и журнал событий. Представитель в Китае входит со своим ключом и видит только этот журнал — может менять статус, писать комментарии и загружать фото.': 'Each row is one car. Click a row to open its card: status, logistics, photos and the event log. The China representative signs in with their own key and sees only this journal — they can change status, write comments and upload photos.',
+  'Документы': 'Documents',
+  'файлов: ': 'files: ',
+  'Без папки': 'No folder',
+  '+ Новая папка': '+ New folder',
+  'Переименовать': 'Rename',
+  'Удалить папку': 'Delete folder',
+  'Название папки:': 'Folder name:',
+  'Папка создана': 'Folder created',
+  'Переименовано': 'Renamed',
+  'Удалить папку «': 'Delete folder “',
+  '» и все файлы в ней?': '” and all files in it?',
+  'Папка удалена': 'Folder deleted',
+  'Файл': 'File',
+  'Загружен': 'Uploaded',
+  'Скачать': 'Download',
+  'Пока нет файлов — перетащите их в поле выше.': 'No files yet — drag them to the area above.',
+  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)': 'Click or drag files here (PDF, photos, Word, Excel, ZIP — up to 15 MB)',
+  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)': 'Attach a document (PDF, photo, Word, Excel, ZIP — up to 15 MB)',
+  'Файл больше 15 МБ: ': 'File over 15 MB: ',
+  'Загружаю: ': 'Uploading: ',
+  'Файлы загружены': 'Files uploaded',
+  'Документов пока нет': 'No documents yet',
+  'Документ: ': 'Document: ',
+  'МБ': 'MB',
+  'КБ': 'KB',
+  'Б': 'B',
+  'Удалить файл «': 'Delete file “',
+  '»?': '”?',
+  'Файл удалён': 'File deleted',
+  'Папки — для договоров, шаблонов, таможенных и бухгалтерских файлов компании. Документы конкретного автомобиля прикрепляйте в его карточке в «Журнале сделок» — их видит и китайский представитель.': 'Folders are for contracts, templates, customs and accounting files. Attach car-specific documents in the car card in the Deals journal — the China representative sees them too.',
 },
 };
 const t = (s) => (DICT[LANG] && DICT[LANG][s]) || s;
@@ -798,7 +890,7 @@ async function tryLogin() {
   if (ROLE === 'staff') {
     /* Представитель: только журнал сделок, без каталога, заявок и контактов */
     $('who').textContent = t('режим представителя');
-    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm]').forEach((b) => { b.style.display = 'none'; });
+    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm], .tab[data-view=docs]').forEach((b) => { b.style.display = 'none'; });
     $('dealAddBtn').style.display = 'none';
     showView('deals');
   } else {
@@ -872,9 +964,11 @@ function showView(v) {
   $('view-catalog').style.display = v === 'catalog' ? '' : 'none';
   $('view-crm').style.display = v === 'crm' ? '' : 'none';
   $('view-deals').style.display = v === 'deals' ? '' : 'none';
+  $('view-docs').style.display = v === 'docs' ? '' : 'none';
   localStorage.setItem('inavto_admin_view', v);
   if (v === 'crm') loadLeads().catch((e) => msg(t(e.message)));
   if (v === 'deals') loadDeals().catch((e) => msg(t(e.message)));
+  if (v === 'docs') loadDocs().catch((e) => msg(t(e.message)));
 }
 document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
 
@@ -1175,6 +1269,7 @@ function renderDealCard(d) {
       if (e.type === 'status') body2 = t('Статус: ') + dSt(e.status)[1] + ' ' + t(dSt(e.status)[2]) + (e.text ? ' — ' + escHtml(e.text) : '');
       else if (e.type === 'comment') body2 = escHtml(e.text);
       else if (e.type === 'photos') body2 = t('Загружено фото: ') + escHtml(e.text);
+      else if (e.type === 'doc') body2 = '📎 ' + t('Документ: ') + escHtml(e.text);
       else body2 = t('Сделка создана');
       return `<div class="li"><small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;
     }).join('') || `<div class="li"><small>${t('Записей пока нет')}</small></div>`) + `</div>
@@ -1183,12 +1278,14 @@ function renderDealCard(d) {
       <div><button class="btn ghost" id="dealCommentBtn">${t('Добавить комментарий')}</button></div>
     </div></div>`;
 
+  const docsSec = isNew ? '' : `<div class="deal-sec"><label>${t('Документы')}</label><div id="deal-docs"></div></div>`;
+
   $('deal-card').innerHTML = `
     <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
       <h2 style="margin:0">${isNew ? t('Новая сделка') : '№' + d.id + ' · ' + escHtml(d.car) + ' ' + emo}</h2>
       <button class="btn ghost sm" id="dealCloseBtn">← ${t('К списку')}</button>
     </div>
-    ${flow}${info}${adminForm}${photos}${logHtml}`;
+    ${flow}${info}${adminForm}${photos}${docsSec}${logHtml}`;
   $('deal-card').style.display = '';
   $('deal-listwrap').style.display = 'none';
 
@@ -1269,6 +1366,8 @@ function renderDealCard(d) {
       loadDeals();
     } catch (err) { msg(t(err.message)); }
   };
+
+  if (!isNew) loadDealDocs(d.id);
 }
 
 async function uploadDealPhotos(id, files) {
@@ -1297,6 +1396,161 @@ $('deal-list').addEventListener('click', (e) => {
   if (tr) openDeal(+tr.dataset.deal);
 });
 $('dealAddBtn').onclick = () => renderDealCard({ id: null, car: '', status: 'search', photos: [], log: [] });
+
+/* ---------- Документы: папки и файлы ---------- */
+let docFolders = [];
+let docRootCount = 0;
+let curFolder = null;   // null = «Без папки»
+let docFiles = [];
+
+const fmtSize = (n) => n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' ' + t('МБ')
+  : n > 1024 ? Math.round(n / 1024) + ' ' + t('КБ') : (n || 0) + ' ' + t('Б');
+const docIcon = (ext) => ({ '.pdf': '📄', '.jpg': '🖼', '.png': '🖼', '.webp': '🖼', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.csv': '📊', '.zip': '🗜', '.txt': '📃' })[ext] || '📄';
+
+const readFileDataURL = (f) => new Promise((resolve, reject) => {
+  const r = new FileReader();
+  r.onload = () => resolve(r.result);
+  r.onerror = reject;
+  r.readAsDataURL(f);
+});
+
+/* Общая загрузка: target = {folder_id} для раздела или {deal_id} для сделки */
+async function uploadDocs(files, target) {
+  const list = [...files].slice(0, 20);
+  if (!list.length) return;
+  for (const f of list) {
+    if (f.size > 15 * 1024 * 1024) { msg(t('Файл больше 15 МБ: ') + f.name); continue; }
+    msg(t('Загружаю: ') + f.name, true);
+    const data = await readFileDataURL(f);
+    await api('/api/docs', { method: 'POST', body: JSON.stringify({ name: f.name, data, ...target }) });
+  }
+  msg(t('Файлы загружены'), true);
+}
+
+async function loadDocs() {
+  const f = await api('/api/docs/folders');
+  docFolders = f.folders;
+  docRootCount = f.rootFiles;
+  if (curFolder && !docFolders.find((x) => x.id === curFolder)) curFolder = null;
+  docFiles = await api('/api/docs' + (curFolder ? '?folder_id=' + curFolder : ''));
+  renderDocs();
+}
+
+function renderDocs() {
+  $('docs-count').textContent = t('файлов: ') + docFiles.length;
+  $('doc-folders').innerHTML =
+    `<button type="button" class="stat${curFolder == null ? ' on' : ''}" data-folder="root">📁 ${t('Без папки')} <b>${docRootCount}</b></button>` +
+    docFolders.map((f) =>
+      `<button type="button" class="stat${curFolder === f.id ? ' on' : ''}" data-folder="${f.id}">📁 ${escHtml(f.name)} <b>${f.files}</b></button>`).join('');
+  $('folderRenameBtn').style.display = curFolder ? '' : 'none';
+  $('folderDelBtn').style.display = curFolder ? '' : 'none';
+  const tb = $('doc-list').querySelector('tbody');
+  if (!docFiles.length) {
+    tb.innerHTML = `<tr><td colspan="3" style="padding:26px;text-align:center;color:var(--muted2)">${t('Пока нет файлов — перетащите их в поле выше.')}</td></tr>`;
+    return;
+  }
+  tb.innerHTML = docFiles.map((d) => `
+    <tr>
+      <td class="rowname"><b>${docIcon(d.ext)} ${escHtml(d.name)}</b><small>${fmtSize(d.size)}</small></td>
+      <td class="crm-date">${fmtDT(d.created_at)}</td>
+      <td><div class="actions">
+        <a class="btn ghost sm" href="${d.url}" target="_blank" rel="noopener" download="${escHtml(d.name)}">${t('Скачать')}</a>
+        <button class="btn ghost sm" data-docdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+$('doc-folders').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-folder]');
+  if (!b) return;
+  curFolder = b.dataset.folder === 'root' ? null : +b.dataset.folder;
+  loadDocs().catch((err) => msg(t(err.message)));
+});
+
+$('folderAddBtn').onclick = async () => {
+  const name = prompt(t('Название папки:'));
+  if (!name || !name.trim()) return;
+  try {
+    const r = await api('/api/docs/folders', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
+    curFolder = r.id;
+    msg(t('Папка создана'), true);
+    loadDocs();
+  } catch (err) { msg(t(err.message)); }
+};
+
+$('folderRenameBtn').onclick = async () => {
+  const f = docFolders.find((x) => x.id === curFolder);
+  if (!f) return;
+  const name = prompt(t('Название папки:'), f.name);
+  if (!name || !name.trim() || name.trim() === f.name) return;
+  try {
+    await api('/api/docs/folders/' + curFolder, { method: 'PUT', body: JSON.stringify({ name: name.trim() }) });
+    msg(t('Переименовано'), true);
+    loadDocs();
+  } catch (err) { msg(t(err.message)); }
+};
+
+$('folderDelBtn').onclick = async () => {
+  const f = docFolders.find((x) => x.id === curFolder);
+  if (!f) return;
+  if (!confirm(t('Удалить папку «') + f.name + t('» и все файлы в ней?'))) return;
+  try {
+    await api('/api/docs/folders/' + curFolder, { method: 'DELETE' });
+    curFolder = null;
+    msg(t('Папка удалена'), true);
+    loadDocs();
+  } catch (err) { msg(t(err.message)); }
+};
+
+$('doc-drop').onclick = () => $('doc-file').click();
+$('doc-drop').ondragover = (e) => e.preventDefault();
+$('doc-drop').ondrop = (e) => {
+  e.preventDefault();
+  uploadDocs(e.dataTransfer.files, curFolder ? { folder_id: curFolder } : {}).then(loadDocs).catch((err) => msg(t(err.message)));
+};
+$('doc-file').onchange = () => {
+  uploadDocs($('doc-file').files, curFolder ? { folder_id: curFolder } : {}).then(loadDocs).catch((err) => msg(t(err.message)));
+  $('doc-file').value = '';
+};
+
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-docdel]');
+  if (!b) return;
+  const doc = docFiles.find((x) => x.id == b.dataset.docdel);
+  if (!confirm(t('Удалить файл «') + (doc ? doc.name : '') + t('»?'))) return;
+  try { await api('/api/docs/' + b.dataset.docdel, { method: 'DELETE' }); msg(t('Файл удалён'), true); loadDocs(); }
+  catch (err) { msg(t(err.message)); }
+});
+
+/* Документы в карточке сделки (видны обеим ролям; удаление — только админ) */
+async function loadDealDocs(id) {
+  const box = $('deal-docs');
+  if (!box) return;
+  let items = [];
+  try { items = await api('/api/docs?deal_id=' + id); } catch { /* нет доступа/сети — покажем пусто */ }
+  box.innerHTML = (items.length
+    ? `<div class="doc-rows">` + items.map((d) => `
+        <div class="doc-row">
+          <a href="${d.url}" target="_blank" rel="noopener" download="${escHtml(d.name)}">${docIcon(d.ext)} ${escHtml(d.name)}</a>
+          <small>${fmtSize(d.size)} · ${fmtDT(d.created_at)}</small>
+          ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dealdocdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>` : ''}
+        </div>`).join('') + `</div>`
+    : `<div class="muted" style="font-size:12.5px">${t('Документов пока нет')}</div>`) +
+    `<div class="drop" id="deal-doc-drop" style="margin-top:10px">${t('Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)')}</div>
+     <input type="file" id="deal-doc-file" multiple hidden>`;
+  const drop = $('deal-doc-drop');
+  const file = $('deal-doc-file');
+  /* после загрузки/удаления перерисовываем карточку целиком —
+     тогда и журнал событий сразу показывает «📎 Документ» */
+  drop.onclick = () => file.click();
+  drop.ondragover = (e) => e.preventDefault();
+  drop.ondrop = (e) => { e.preventDefault(); uploadDocs(e.dataTransfer.files, { deal_id: id }).then(() => loadDeals()).catch((err) => msg(t(err.message))); };
+  file.onchange = () => { uploadDocs(file.files, { deal_id: id }).then(() => loadDeals()).catch((err) => msg(t(err.message))); file.value = ''; };
+  box.querySelectorAll('[data-dealdocdel]').forEach((b) => b.addEventListener('click', async () => {
+    try { await api('/api/docs/' + b.dataset.dealdocdel, { method: 'DELETE' }); loadDeals(); }
+    catch (err) { msg(t(err.message)); }
+  }));
+}
 
 /* ---------- Форма ---------- */
 const translit = (s) => s.toLowerCase()

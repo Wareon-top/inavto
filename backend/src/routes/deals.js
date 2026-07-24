@@ -36,7 +36,7 @@ const forRole = (deal, role) => {
 
 const touch = (id) => db.prepare("UPDATE deals SET updated_at = datetime('now') WHERE id = ?").run(id)
 
-function addLog(id, entry) {
+export function addLog(id, entry) {
   const row = db.prepare('SELECT log FROM deals WHERE id = ?').get(id)
   const log = JSON.parse(row.log || '[]')
   log.push({ ts: new Date().toISOString(), ...entry })

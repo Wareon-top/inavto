@@ -9,6 +9,7 @@ import selectionsRouter from './routes/selections.js'
 import ordersRouter from './routes/orders.js'
 import siteCarsRouter from './routes/siteCars.js'
 import dealsRouter from './routes/deals.js'
+import docsRouter from './routes/docs.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 
 const app = express()
@@ -16,13 +17,15 @@ const PORT = process.env.PORT || 3000
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(cors())
-app.use(express.json({ limit: '8mb' }))
+/* 25mb: документы (PDF/сканы) идут base64 — файл до 15 МБ превращается в ~20 МБ JSON */
+app.use(express.json({ limit: '25mb' }))
 
 app.use('/api/cars', carsRouter)
 app.use('/api/selections', selectionsRouter)
 app.use('/api/orders', ordersRouter)
 app.use('/api/site-cars', siteCarsRouter)
 app.use('/api/deals', dealsRouter)
+app.use('/api/docs', docsRouter)
 app.use('/api/upload', uploadRouter)
 
 /* Админка и загруженные фото */

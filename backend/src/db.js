@@ -108,6 +108,24 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS doc_folders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS docs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    folder_id INTEGER,
+    deal_id INTEGER,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    size INTEGER DEFAULT 0,
+    ext TEXT DEFAULT '',
+    uploaded_by TEXT DEFAULT 'admin',
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:

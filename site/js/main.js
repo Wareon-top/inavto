@@ -395,6 +395,7 @@
           <div class="quiz-nav"><button class="btn btn-ghost btn-sm" data-back>Назад</button></div>`;
         body.querySelector('[data-back]').addEventListener('click', () => { state.step--; draw(); });
         attachPhoneMask(body.querySelector('input[name=phone]'));
+        ensureConsent(body.querySelector('#quiz-form'));
         body.querySelector('#quiz-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const f = e.target;
@@ -410,6 +411,7 @@
             fuel: state.answers.fuel || '',
           };
           if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }
+          if (!consentOK(f)) return;
           await submitLead(payload, f);
           clearDraft();
           body.innerHTML = successHTML('Заявка отправлена!', isBiz
@@ -494,10 +496,30 @@
   }
   A.attachPhoneMask = attachPhoneMask;
 
+  /* ---------- Согласие на обработку персональных данных (152-ФЗ) ---------- */
+  function ensureConsent(form) {
+    if (!form || form.querySelector('input[name=consent]')) return;
+    const l = document.createElement('label');
+    l.className = 'consent';
+    l.innerHTML = '<input type="checkbox" name="consent" required>' +
+      '<span>Я согласен на обработку <a href="privacy.html" target="_blank" rel="noopener">персональных данных</a></span>';
+    l.querySelector('input').addEventListener('change', () => l.classList.remove('error'));
+    const btn = form.querySelector('button[type=submit]');
+    if (btn) form.insertBefore(l, btn); else form.appendChild(l);
+  }
+  function consentOK(form) {
+    const c = form.querySelector('input[name=consent]');
+    if (c && !c.checked) { c.closest('.consent').classList.add('error'); c.focus(); return false; }
+    return true;
+  }
+  A.ensureConsent = ensureConsent;
+  A.consentOK = consentOK;
+
   /* ---------- Обычные формы (обратный звонок и т.п.) ---------- */
   function bindLeadForms() {
     document.querySelectorAll('form[data-lead-form]').forEach((f) => {
       attachPhoneMask(f.querySelector('input[name=phone]'));
+      ensureConsent(f);
       f.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messenger = f.messenger ? f.messenger.value : '';
@@ -512,6 +534,7 @@
           fuel: '',
         };
         if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }
+        if (!consentOK(f)) return;
         await submitLead(payload, f);
         f.innerHTML = successHTML('Спасибо, заявка принята!', 'Мы перезвоним в ближайшее рабочее время (ежедневно 9:00–21:00 мск).');
       });
@@ -753,5 +776,24 @@
     initCountUp();
     initMagnetic();
     initHeroReveal();
+    initCookie();
   });
+
+  /* ---------- Cookie-уведомление ---------- */
+  function initCookie() {
+    if (localStorage.getItem('inavto_cookie_ok')) return;
+    const bar = document.createElement('div');
+    bar.className = 'cookie-bar';
+    bar.innerHTML =
+      '<p>Мы используем cookie и сервисы аналитики, чтобы сайт работал и становился удобнее. ' +
+      'Оставаясь на сайте, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</p>' +
+      '<button class="btn btn-red btn-sm" type="button">Хорошо</button>';
+    document.body.appendChild(bar);
+    requestAnimationFrame(() => bar.classList.add('show'));
+    bar.querySelector('button').addEventListener('click', () => {
+      try { localStorage.setItem('inavto_cookie_ok', '1'); } catch (e) { /* приватный режим */ }
+      bar.classList.remove('show');
+      setTimeout(() => bar.remove(), 350);
+    });
+  }
 })();

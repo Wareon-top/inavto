@@ -416,6 +416,7 @@
       (function () {
         const form = document.getElementById('lead-form');
         A.attachPhoneMask(form.querySelector('input[name=phone]'));
+        A.ensureConsent(form);
         form.querySelectorAll('.lead-chips').forEach((group) => {
           const single = group.hasAttribute('data-single');
           group.addEventListener('click', (e) => {
@@ -432,6 +433,7 @@
           e.preventDefault();
           const phone = form.phone.value.trim();
           if (!A.validPhone(phone)) { form.phone.classList.add('error'); form.phone.focus(); return; }
+          if (!A.consentOK(form)) return;
           const car = (form.car.value || '').trim();
           const timing = picked('timing')[0] || '';
           const contact = picked('contact');
@@ -478,10 +480,12 @@
       /* PDF-гайд за контакт */
       const pf = document.getElementById('pdf-form');
       A.attachPhoneMask(pf.querySelector('input[name=phone]'));
+      A.ensureConsent(pf);
       pf.addEventListener('submit', async (e) => {
         e.preventDefault();
         const phone = pf.phone.value.trim();
         if (!A.validPhone(phone)) { pf.phone.classList.add('error'); return; }
+        if (!A.consentOK(pf)) return;
         A.goal('pdf_lead');
         await A.submitLead({ name: pf.name.value.trim() || '—', phone, city: '',
           budget: 'PDF-гайд', brand: '#pdf', body: '', fuel: '' }, pf);

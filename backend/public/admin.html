@@ -71,6 +71,9 @@
     color:#fff; font-size:12px; line-height:1; cursor:pointer; }
   .ph .main { position:absolute; left:4px; bottom:4px; background:var(--ink); color:#fff; font-size:8.5px;
     letter-spacing:.12em; padding:2px 6px; text-transform:uppercase; }
+  .ph .mk { position:absolute; left:4px; bottom:4px; border:none; background:rgba(23,35,59,.82); color:#fff;
+    font:inherit; font-size:8.5px; font-weight:700; letter-spacing:.08em; padding:3px 7px; text-transform:uppercase; cursor:pointer; }
+  .ph .mk:hover { background:var(--red); }
   .drop { border:1px dashed var(--line2); padding:16px; text-align:center; color:var(--muted); cursor:pointer; }
   .drop:hover { border-color:var(--red); color:var(--red); }
   .toolbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
@@ -494,6 +497,7 @@ zh: {
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': '网站的所有申请都会进入这里：测验、页面表单、计算器和 PDF 指南。状态和备注即时保存——团队随时掌握最新情况。电话可点击：一键拨号或 WhatsApp。',
   '+ Добавить заявку': '+ 添加申请',
   'Новые': '新车',
+  'сделать главной': '设为主图',
   'Поиск: модель, марка, слаг': '搜索：型号、品牌、slug',
   'Новая заявка': '新增申请',
   'Имя *': '姓名 *',
@@ -720,6 +724,7 @@ en: {
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': 'All site leads land here: the quiz, page forms, the calculator and the PDF guide. Status and note are saved instantly, so the team always sees the current picture. The phone is clickable — call or WhatsApp in one tap.',
   '+ Добавить заявку': '+ Add lead',
   'Новые': 'New',
+  'сделать главной': 'set as main',
   'Поиск: модель, марка, слаг': 'Search: model, brand, slug',
   'Новая заявка': 'New lead',
   'Имя *': 'Name *',
@@ -1637,12 +1642,19 @@ function renderPhotos() {
   $('photos').innerHTML = photos.map((u, i) => `
     <div class="ph">
       <img src="${u}">
-      ${i === 0 ? `<span class="main">${t('главное')}</span>` : ''}
+      ${i === 0
+        ? `<span class="main">${t('главное')}</span>`
+        : `<button type="button" class="mk" data-mk="${i}" title="${t('сделать главной')}">★ ${t('сделать главной')}</button>`}
       <button data-rm="${i}" title="${t('Удалить')}">✕</button>
     </div>`).join('');
 }
 $('photos').addEventListener('click', (e) => {
   if (e.target.dataset.rm !== undefined) { photos.splice(+e.target.dataset.rm, 1); renderPhotos(); }
+  if (e.target.dataset.mk !== undefined) {
+    const [p] = photos.splice(+e.target.dataset.mk, 1);
+    photos.unshift(p);
+    renderPhotos();
+  }
 });
 $('drop').onclick = () => $('file').click();
 $('drop').addEventListener('dragover', (e) => e.preventDefault());

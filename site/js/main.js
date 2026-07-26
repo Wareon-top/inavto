@@ -133,7 +133,7 @@
           <div class="footer-grid">
             <div>
               <a class="logo" href="index.html"><b>INAVTO</b><span>ASIA</span></a>
-              <p class="footer-about">Новые автомобили из Китая под заказ с доставкой «под ключ» и растаможкой в любой город России.</p>
+              <p class="footer-about">INAVTO ASIA («Инавто Азия») — новые автомобили из Китая под заказ с доставкой «под ключ» и растаможкой в любой город России.</p>
             </div>
             <div>
               <h4>Каталог</h4>

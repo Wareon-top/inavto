@@ -99,6 +99,7 @@
   .stat .dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; }
   .stat.on { border-color:var(--ink); background:var(--ink); color:#fafafa; }
   #crm-search { width:220px; border:1px solid var(--line2); padding:8px 10px; }
+  #cat-search { width:200px; border:1px solid var(--line2); padding:8px 10px; }
   #crm-list td { vertical-align:top; }
   #crm-list table, .tablewrap #crm-list { min-width:900px; }
   .crm-date { white-space:nowrap; color:var(--muted); font-size:12px; }
@@ -176,7 +177,8 @@
         <h1>Каталог сайта</h1>
         <span class="muted" id="count"></span>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="search" id="cat-search" placeholder="Поиск: модель, марка, слаг">
         <button class="btn ghost sm" id="importBtn" style="display:none">Импортировать 16 моделей сайта</button>
         <button class="btn ghost sm" id="csvTplBtn" title="Скачать шаблон таблицы">Шаблон CSV</button>
         <button class="btn ghost sm" id="csvBtn">Импорт из CSV</button>
@@ -187,6 +189,7 @@
         <button class="btn red" id="addBtn">+ Добавить автомобиль</button>
       </div>
     </div>
+    <div class="crm-stats" id="cat-stats"></div>
 
     <!-- ФОРМА -->
     <div class="panel" id="form" style="display:none">
@@ -490,6 +493,8 @@ zh: {
   'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': '暂无申请——客户在网站留下联系方式后，会立即显示在这里。',
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': '网站的所有申请都会进入这里：测验、页面表单、计算器和 PDF 指南。状态和备注即时保存——团队随时掌握最新情况。电话可点击：一键拨号或 WhatsApp。',
   '+ Добавить заявку': '+ 添加申请',
+  'Новые': '新车',
+  'Поиск: модель, марка, слаг': '搜索：型号、品牌、slug',
   'Новая заявка': '新增申请',
   'Имя *': '姓名 *',
   'Телефон *': '电话 *',
@@ -714,6 +719,8 @@ en: {
   'Пока нет заявок — как только клиент оставит контакт на сайте, она появится здесь.': 'No leads yet — as soon as a customer leaves their contact on the site, it will appear here.',
   'Сюда попадают все заявки с сайта: квиз, формы на страницах, калькулятор и PDF-гайд. Статус и комментарий сохраняются сразу — команда видит актуальную картину. Телефон кликабелен: звонок или WhatsApp в одно касание.': 'All site leads land here: the quiz, page forms, the calculator and the PDF guide. Status and note are saved instantly, so the team always sees the current picture. The phone is clickable — call or WhatsApp in one tap.',
   '+ Добавить заявку': '+ Add lead',
+  'Новые': 'New',
+  'Поиск: модель, марка, слаг': 'Search: model, brand, slug',
   'Новая заявка': 'New lead',
   'Имя *': 'Name *',
   'Телефон *': 'Phone *',
@@ -906,12 +913,28 @@ $('logoutBtn').onclick = () => { localStorage.removeItem('inavto_admin_token'); 
 
 /* ---------- Список ---------- */
 const fmtRub = (v) => 'от ' + Number(v).toFixed(1).replace('.', ',') + ' млн ₽';
+let catFilter = 'all';   // all | new | used
+
 async function load() {
   cars = await api('/api/site-cars/all');
-  $('count').textContent = cars.length + t(' поз.');
+  renderCatalog();
+}
+
+function renderCatalog() {
+  const q = ($('cat-search').value || '').trim().toLowerCase();
+  const nUsed = cars.filter((c) => c.cond === 'used').length;
+  const nNew = cars.length - nUsed;
+  $('cat-stats').innerHTML =
+    `<button type="button" class="stat${catFilter === 'all' ? ' on' : ''}" data-cat="all"><b>${cars.length}</b> ${t('Все')}</button>` +
+    `<button type="button" class="stat${catFilter === 'new' ? ' on' : ''}" data-cat="new"><span class="dot" style="background:var(--green)"></span><b>${nNew}</b> ${t('Новые')}</button>` +
+    `<button type="button" class="stat${catFilter === 'used' ? ' on' : ''}" data-cat="used"><span class="dot" style="background:#c8960a"></span><b>${nUsed}</b> ${t('С пробегом')}</button>`;
+  let list = cars;
+  if (catFilter !== 'all') list = list.filter((c) => (c.cond === 'used') === (catFilter === 'used'));
+  if (q) list = list.filter((c) => [c.name, c.brand, c.slug].some((f) => f && String(f).toLowerCase().includes(q)));
+  $('count').textContent = list.length + t(' поз.') + (list.length !== cars.length ? ' / ' + cars.length : '');
   $('importBtn').style.display = cars.length ? 'none' : '';
   const tb = $('list').querySelector('tbody');
-  tb.innerHTML = cars.map((c) => `
+  tb.innerHTML = list.map((c) => `
     <tr>
       <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : `<div class="thumb empty">${t('нет фото')}</div>`}</td>
       <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}${c.cond === 'used' ? ' · ' + t('с пробегом') + (c.mileage ? ' ' + c.mileage.toLocaleString('ru-RU') + ' ' + t('км') : '') : ''}</small></td>
@@ -926,6 +949,14 @@ async function load() {
       </div></td>
     </tr>`).join('');
 }
+
+$('cat-stats').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cat]');
+  if (!b) return;
+  catFilter = b.dataset.cat;
+  renderCatalog();
+});
+$('cat-search').addEventListener('input', renderCatalog);
 
 document.addEventListener('click', async (e) => {
   const el = e.target;

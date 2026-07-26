@@ -990,6 +990,11 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
   .lead-visitka .lead-form-row { grid-template-columns: 1fr; }
 }
 
+/* ---------- Промо-баннер в каталоге ---------- */
+.catalog-promo { display: block; border-radius: calc(var(--radius) + 6px); overflow: hidden; box-shadow: var(--shadow); }
+.catalog-promo img { width: 100%; height: auto; display: block; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.catalog-promo:hover img { transform: scale(1.015); }
+
 /* ---------- Видео-шоурил: тёмно-синяя панель с видео ---------- */
 .video-reel {
   background-color: var(--ink);

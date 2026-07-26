@@ -46,6 +46,15 @@
     </div>
   </section>
 
+  <!-- ПРОМО-БАННЕР -->
+  <section class="section" style="padding-top:10px;padding-bottom:0">
+    <div class="container">
+      <a class="catalog-promo reveal" id="catalog-promo" href="#" aria-label="Changan Qiyuan A06 240 Ultra — подробнее">
+        <img src="img/catalog-banner.webp" alt="Changan Qiyuan A06 240 Ultra — новый лифтбек из Китая, доставка 30–60 дней" width="2000" height="895">
+      </a>
+    </div>
+  </section>
+
   <section class="section" style="padding-top:16px">
     <div class="container">
       <div class="fav-bar" id="fav-bar">
@@ -246,6 +255,16 @@
         }
       }
       apply();
+
+      /* Промо-баннер: если модель есть в каталоге — на её страницу, иначе квиз */
+      const promo = document.getElementById('catalog-promo');
+      if (promo) promo.addEventListener('click', (e) => {
+        e.preventDefault();
+        const car = (A.CARS || []).find((c) =>
+          /changan/i.test((c.brand || '') + ' ' + c.name) && /qiyuan|a06/i.test(c.name));
+        if (car) location.href = A.carUrl(car);
+        else { const b = document.querySelector('[data-quiz-open]'); if (b) b.click(); }
+      });
     };
   </script>
   <script src="js/main.js"></script>

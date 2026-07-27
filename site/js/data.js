@@ -4,10 +4,10 @@
 window.INAVTO = window.INAVTO || {};
 
 window.INAVTO.CONTACTS = {
-  phone: '+7 967 646-36-29',
-  phoneHref: 'tel:+79676463629',
+  phone: '+7 918 309-30-92',
+  phoneHref: 'tel:+79183093092',
   telegram: 'https://t.me/Dilshat1985',
-  whatsapp: 'https://wa.me/79676463629',
+  whatsapp: 'https://wa.me/79183093092',
   email: 'inavto.asia@yandex.ru',
 };
 

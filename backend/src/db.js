@@ -134,6 +134,12 @@ for (const col of ["cond TEXT DEFAULT 'new'", 'mileage INTEGER DEFAULT 0']) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 
+/* Ручные переводы описания машины для 中文/EN-версий сайта (необязательные).
+   Если пусто — сайт собирает автоописание из характеристик. */
+for (const col of ["descr_zh TEXT DEFAULT ''", "descr_en TEXT DEFAULT ''"]) {
+  try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
+}
+
 /* Заявкам добавили квалификацию (срок покупки, способ связи, комментарий) — колонка note. */
 try { db.exec('ALTER TABLE selections ADD COLUMN note TEXT') } catch { /* колонка уже есть */ }
 

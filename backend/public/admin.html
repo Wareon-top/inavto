@@ -239,6 +239,17 @@
         <label>Описание</label>
         <textarea id="f-desc" placeholder="1–2 предложения: чем хорош автомобиль."></textarea>
       </div>
+      <details style="margin-bottom:18px">
+        <summary style="cursor:pointer;font-weight:600">Переводы описания — 中文 и English (необязательно)</summary>
+        <div style="margin-top:12px">
+          <label>Описание 中文</label>
+          <textarea id="f-desc-zh" placeholder="Если оставить пустым, сайт сам соберёт описание на языке посетителя из характеристик."></textarea>
+        </div>
+        <div style="margin-top:12px">
+          <label>Описание English</label>
+          <textarea id="f-desc-en" placeholder="Если оставить пустым, сайт сам соберёт описание на языке посетителя из характеристик."></textarea>
+        </div>
+      </details>
       <div style="margin-bottom:20px">
         <label>Фото (первое — главное; сжимаются автоматически)</label>
         <div class="drop" id="drop">Нажмите или перетащите фото сюда (JPG/PNG/WebP)</div>
@@ -372,6 +383,10 @@ let LANG = localStorage.getItem('inavto_admin_lang') || 'ru';
 const DICT = {
 zh: {
   'Каталог — админка INAVTO ASIA': 'INAVTO ASIA — 车辆目录管理后台',
+  'Переводы описания — 中文 и English (необязательно)': '描述翻译 — 中文与英文（选填）',
+  'Описание 中文': '中文描述',
+  'Описание English': '英文描述',
+  'Если оставить пустым, сайт сам соберёт описание на языке посетителя из характеристик.': '留空时，网站会根据车辆参数自动生成对应语言的描述。',
   '· админка каталога': '· 目录管理后台',
   'Вход': '登录',
   'Введите ключ доступа (ADMIN_TOKEN с сервера). Ключ сохранится в этом браузере.': '请输入访问密钥（服务器上的 ADMIN_TOKEN）。密钥将保存在此浏览器中。',
@@ -599,6 +614,10 @@ zh: {
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
+  'Переводы описания — 中文 и English (необязательно)': 'Description translations — 中文 & English (optional)',
+  'Описание 中文': 'Chinese description',
+  'Описание English': 'English description',
+  'Если оставить пустым, сайт сам соберёт описание на языке посетителя из характеристик.': 'If left empty, the site auto-builds a description from the specs in the visitor language.',
   '· админка каталога': '· catalog admin',
   'Вход': 'Sign in',
   'Введите ключ доступа (ADMIN_TOKEN с сервера). Ключ сохранится в этом браузере.': 'Enter the access key (ADMIN_TOKEN from the server). It will be saved in this browser.',
@@ -1624,6 +1643,8 @@ function openForm(car) {
   $('f-cny').value = car && car.priceCny ? car.priceCny : '';
   $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
   $('f-desc').value = car ? car.desc : '';
+  $('f-desc-zh').value = car ? (car.descZh || '') : '';
+  $('f-desc-en').value = car ? (car.descEn || '') : '';
   $('f-hidden').checked = car ? car.hidden : false;
   $('f-tags').querySelectorAll('input').forEach((i) => { i.checked = car ? car.tags.includes(i.value) : false; });
   renderPhotos();
@@ -1706,6 +1727,8 @@ $('saveBtn').onclick = async () => {
     price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
     price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
     desc: $('f-desc').value.trim(),
+    descZh: $('f-desc-zh').value.trim(),
+    descEn: $('f-desc-en').value.trim(),
     tags: [...$('f-tags').querySelectorAll('input:checked')].map((i) => i.value),
     photos, hidden: $('f-hidden').checked,
   };

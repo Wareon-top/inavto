@@ -31,6 +31,8 @@ const rowToCar = (r) => ({
   tags: JSON.parse(r.tags || '[]'),
   grad: JSON.parse(r.grad || '["#37424e","#141a20"]'),
   desc: r.descr || '',
+  descZh: r.descr_zh || '',
+  descEn: r.descr_en || '',
   photos: JSON.parse(r.photos || '[]'),
   hidden: Boolean(r.hidden),
   sort: r.sort,
@@ -55,7 +57,7 @@ router.get('/all', adminOnly, (req, res) => {
 
 const FIELDS = ['brand', 'name', 'body', 'fuel', 'power', 'drive', 'range', 'battery',
   'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden',
-  'cond', 'mileage']
+  'cond', 'mileage', 'descr_zh', 'descr_en']
 
 function carPayload(body) {
   const p = {}
@@ -74,6 +76,8 @@ function carPayload(body) {
   p.tags = JSON.stringify(Array.isArray(body.tags) ? body.tags : [])
   p.grad = JSON.stringify(Array.isArray(body.grad) && body.grad.length === 2 ? body.grad : ['#37424e', '#141a20'])
   p.descr = String(body.desc ?? body.descr ?? '')
+  p.descr_zh = String(body.descZh ?? body.descr_zh ?? '').trim()
+  p.descr_en = String(body.descEn ?? body.descr_en ?? '').trim()
   p.photos = JSON.stringify(Array.isArray(body.photos) ? body.photos : [])
   p.sort = Math.round(Number(body.sort) || 100)
   p.hidden = body.hidden ? 1 : 0

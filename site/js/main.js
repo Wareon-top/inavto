@@ -281,6 +281,38 @@
     ? 'cars/' + car.slug + '.html'
     : 'car.html?slug=' + car.slug;
 
+  /* Описание машины на языке посетителя.
+     Приоритет: ручной перевод из админки → словарный перевод (встроенные модели) →
+     автоописание из характеристик. Русская версия всегда показывает исходный текст. */
+  A.localDesc = function (car) {
+    const I = window.INAVTO_I18N || {};
+    const lang = I.lang || 'ru';
+    if (lang === 'ru') return car.desc || '';
+    if (lang === 'zh' && car.descZh) return car.descZh;
+    if (lang === 'en' && car.descEn) return car.descEn;
+    if (car.desc && I.tr && I.tr(car.desc) !== null) return car.desc; // переведёт словарь
+    const tv = (s) => (s && I.tr && I.tr(s)) || s || '';
+    const used = car.cond === 'used';
+    const parts = [];
+    if (car.body) parts.push(tv(car.body));
+    if (car.fuel) parts.push(tv(car.fuel));
+    if (car.power && car.power !== '—') parts.push(lang === 'zh' ? '功率 ' + tv(car.power) : tv(car.power));
+    if (car.drive && car.drive !== '—') parts.push(tv(car.drive));
+    if (car.range && car.range !== '—') parts.push((lang === 'zh' ? '续航 ' : 'range ') + tv(car.range));
+    if (used && car.mileage) {
+      const km = Number(car.mileage).toLocaleString('en-US');
+      parts.push(lang === 'zh' ? '里程 ' + km + ' 公里' : 'mileage ' + km + ' km');
+    }
+    if (lang === 'zh') {
+      return car.name + (car.year ? '（' + car.year + ' 年款）' : '') + ' — ' + parts.join('，') + '。' +
+        (used ? '中国按单代购二手车，购买前全面检测。' : '中国市场按单代购。') +
+        '全包价格已含物流、清关、SBKTS/EPTS 认证及服务费，30–60 天送达俄罗斯任意城市，全程提供照片和视频报告。';
+    }
+    return car.name + (car.year ? ' (' + car.year + ')' : '') + ' — ' + parts.join(', ') + '. ' +
+      (used ? 'Used car to order from China, fully inspected before purchase. ' : 'To order from the Chinese market. ') +
+      'The all-in price includes logistics, customs clearance, SBKTS/EPTS and our fee. Delivery to any city in Russia in 30–60 days, with photo and video reports at every stage.';
+  };
+
   A.carCard = function (car) {
     const used = car.cond === 'used';
     const priceNote = used ? 'с пробегом, под ключ' : 'новый, под ключ';
@@ -769,6 +801,11 @@
     renderFooter();
     renderQuizModal();
     if (typeof window.INAVTO_PAGE_INIT === 'function') window.INAVTO_PAGE_INIT();
+    // страницы (car.html) выставляют title после старта переводчика — доводим вручную
+    if (window.INAVTO_I18N && window.INAVTO_I18N.tr) {
+      const tt = window.INAVTO_I18N.tr(document.title);
+      if (tt) document.title = tt;
+    }
     bindLeadForms();
     initReveal();
     initFaq();

@@ -1105,6 +1105,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .float-contact a:hover { background: var(--red-hover); transform: translateY(-2px); }
 .float-tg { background: var(--red); }
 .float-wa { background: var(--red); }
+.float-max { background: var(--red); }
 .float-contact svg { width: 22px; height: 22px; color: #ffffff; transition: color 0.2s; }
 
 /* ---------- Липкая мобильная CTA-панель ---------- */

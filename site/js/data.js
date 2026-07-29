@@ -8,6 +8,9 @@ window.INAVTO.CONTACTS = {
   phoneHref: 'tel:+79183093092',
   telegram: 'https://t.me/Dilshat1985',
   whatsapp: 'https://wa.me/79183093092',
+  /* Ссылка на профиль/канал в MAX (из приложения: Профиль → Поделиться).
+     Пока пусто — кнопки MAX на сайте скрыты. */
+  max: '',
   email: 'inavto.asia@yandex.ru',
 };
 

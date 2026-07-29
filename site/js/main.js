@@ -27,6 +27,7 @@
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
     tg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6 18.8 19c-.2 1-.8 1.2-1.7.8l-4.6-3.4-2.2 2.1c-.3.3-.5.5-1 .5l.3-4.6L18 6.9c.4-.3-.1-.5-.6-.2L7.1 13.2l-4.5-1.4c-1-.3-1-1 .2-1.4l17.7-6.8c.8-.3 1.5.2 1.4 1z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.7-1.3 1.3-1.8 1.3-.5.1-1 .2-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.5.5c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.2 2.4 1.5 2.7 1.7.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2.1 1c.3.1.5.2.6.4 0 .1 0 .7-.2 1.2z"/></svg>',
+    max: '<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.4a9.6 9.6 0 1 1-6.9 16.3c-.9 1.1-2.2 1.8-3.9 2-.4.1-.6-.4-.3-.7.9-1 1.4-2.1 1.5-3.3A9.6 9.6 0 0 1 12 2.4Zm0 4.8a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/></svg>',
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
     heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
   };
@@ -157,6 +158,7 @@
               <a href="${C.phoneHref}">${C.phone}</a>
               <a href="${C.telegram}" target="_blank" rel="noopener">Telegram</a>
               <a href="${C.whatsapp}" target="_blank" rel="noopener">WhatsApp</a>
+              ${C.max ? `<a href="${C.max}" target="_blank" rel="noopener">MAX</a>` : ''}
               <a href="mailto:${C.email}">${C.email}</a>
             </div>
           </div>
@@ -169,6 +171,7 @@
       <div class="float-contact">
         <a class="float-tg" href="${C.telegram}" target="_blank" rel="noopener" aria-label="Telegram">${ICONS.tg}</a>
         <a class="float-wa" href="${C.whatsapp}" target="_blank" rel="noopener" aria-label="WhatsApp">${ICONS.wa}</a>
+        ${C.max ? `<a class="float-max" href="${C.max}" target="_blank" rel="noopener" aria-label="MAX">${ICONS.max}</a>` : ''}
       </div>
       <div class="cta-bar" role="navigation" aria-label="Быстрая связь">
         <a href="${C.phoneHref}" data-goal="phone_click">${ICONS.phone}<span>Звонок</span></a>
@@ -186,6 +189,7 @@
       if (a.href.startsWith('tel:')) A.goal('phone_click');
       else if (a.href.includes('t.me/')) A.goal('tg_click');
       else if (a.href.includes('wa.me/')) A.goal('wa_click');
+      else if (a.href.includes('max.ru/')) A.goal('max_click');
     });
   }
 
@@ -419,7 +423,7 @@
             <div class="form-field"><label>Телефон</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
             <div class="form-field"><label>${isBiz ? 'Регион работы' : 'Город доставки'}</label><input name="city" placeholder="${isBiz ? 'Например, Сибирь' : 'Например, Москва'}"></div>
             <div class="form-field"><label>Как с вами связаться?</label><select name="messenger">
-              <option>Telegram</option><option>WhatsApp</option><option>Звонок по телефону</option>
+              <option>Telegram</option><option>WhatsApp</option><option>MAX</option><option>Звонок по телефону</option>
             </select></div>
             <button class="btn btn-red btn-block" type="submit">${isBiz ? 'Получить условия' : 'Получить подборку'}</button>
             <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>

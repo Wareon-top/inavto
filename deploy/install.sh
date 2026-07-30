@@ -144,6 +144,10 @@ server {
     listen [::]:80 default_server;
     server_name _;
 
+    # Документы и фото уходят на бэкенд как JSON до ~20 МБ —
+    # дефолтный лимит nginx в 1 МБ их режет (ошибка 413)
+    client_max_body_size 30m;
+
     root /var/www/inavto;
     index index.html;
     charset utf-8;

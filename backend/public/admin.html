@@ -127,8 +127,11 @@
   .deal-info .fi { font-size:10px; color:var(--muted2); text-transform:uppercase; letter-spacing:.1em; font-weight:700; }
   .deal-info .fi b { display:block; font-size:14px; color:var(--ink); text-transform:none; letter-spacing:0; margin-top:2px; }
   .dlog { border-left:2px solid var(--line2); margin:10px 0 16px; display:grid; gap:11px; padding-left:14px; max-height:340px; overflow:auto; }
-  .dlog .li { font-size:13px; }
+  .dlog .li { font-size:13px; position:relative; padding-right:30px; }
   .dlog .li small { color:var(--muted2); display:block; font-size:11px; }
+  .li-del { position:absolute; right:0; top:2px; background:none; border:none; cursor:pointer;
+    color:var(--muted2); font-size:13px; padding:4px 6px; line-height:1; }
+  .li-del:hover { color:var(--red); }
   .deal-sec { margin-top:20px; }
   /* ---- Документы ---- */
   .doc-rows { display:grid; gap:8px; }
@@ -362,7 +365,7 @@
       </div>
       <div class="crm-stats" id="doc-folders"></div>
       <div class="drop" id="doc-drop">Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)</div>
-      <input type="file" id="doc-file" multiple hidden>
+      <input type="file" id="doc-file" accept=".pdf,image/*,.heic,.heif,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" multiple hidden>
       <div class="tablewrap" style="margin-top:14px">
         <table id="doc-list">
           <thead><tr><th>Файл</th><th>Загружен</th><th></th></tr></thead>
@@ -395,6 +398,9 @@ zh: {
   'Сообщение клиенту: ': '发给客户的消息：',
   'виден клиенту': '客户可见',
   'скрыт от клиента': '对客户隐藏',
+  'Удалить запись': '删除记录',
+  'Удалить запись из журнала?': '从日志中删除这条记录？',
+  'Запись удалена': '记录已删除',
   'Переводы описания — 中文 и English (необязательно)': '描述翻译 — 中文与英文（选填）',
   'Описание 中文': '中文描述',
   'Описание English': '英文描述',
@@ -639,6 +645,9 @@ en: {
   'Сообщение клиенту: ': 'Message to client: ',
   'виден клиенту': 'visible to client',
   'скрыт от клиента': 'hidden from client',
+  'Удалить запись': 'Delete entry',
+  'Удалить запись из журнала?': 'Delete this journal entry?',
+  'Запись удалена': 'Entry deleted',
   'Переводы описания — 中文 и English (необязательно)': 'Description translations — 中文 & English (optional)',
   'Описание 中文': 'Chinese description',
   'Описание English': 'English description',
@@ -1367,7 +1376,7 @@ function renderDealCard(d) {
       else if (e.type === 'doc') body2 = '📎 ' + t('Документ: ') + escHtml(e.text);
       else if (e.type === 'client_msg') body2 = '💬 ' + t('Сообщение клиенту: ') + escHtml(e.text);
       else body2 = t('Сделка создана');
-      return `<div class="li"><small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;
+      return `<div class="li">${ROLE === 'admin' ? `<button type="button" class="li-del" data-dellog="${escHtml(e.ts)}" title="${t('Удалить запись')}">✕</button>` : ''}<small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;
     }).join('') || `<div class="li"><small>${t('Записей пока нет')}</small></div>`) + `</div>
     <div class="grid g2" style="align-items:end">
       <div><label>${t('Комментарий')}</label><textarea id="deal-comment" placeholder="${t('Например: автомобиль передан на оформление экспорта')}"></textarea></div>
@@ -1441,6 +1450,15 @@ function renderDealCard(d) {
       loadDeals();
     } catch (err) { msg(t(err.message)); }
   };
+
+  $('deal-card').querySelectorAll('[data-dellog]').forEach((b) => b.addEventListener('click', async () => {
+    if (!confirm(t('Удалить запись из журнала?'))) return;
+    try {
+      await api('/api/deals/' + d.id + '/log', { method: 'DELETE', body: JSON.stringify({ ts: b.dataset.dellog }) });
+      msg(t('Запись удалена'), true);
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  }));
 
   $('deal-card').querySelectorAll('[data-delphoto]').forEach((b) => b.addEventListener('click', async () => {
     try {
@@ -1537,13 +1555,33 @@ const readFileDataURL = (f) => new Promise((resolve, reject) => {
 async function uploadDocs(files, target) {
   const list = [...files].slice(0, 20);
   if (!list.length) return;
+  let okCount = 0;
+  const errs = [];
   for (const f of list) {
-    if (f.size > 15 * 1024 * 1024) { msg(t('Файл больше 15 МБ: ') + f.name); continue; }
-    msg(t('Загружаю: ') + f.name, true);
-    const data = await readFileDataURL(f);
-    await api('/api/docs', { method: 'POST', body: JSON.stringify({ name: f.name, data, ...target }) });
+    try {
+      let name = f.name;
+      let data;
+      /* Фото (в т.ч. HEIC с iPhone) пересжимаем в браузере через canvas:
+         телефон отдаёт формат, который сервер не принимает, и файлы по 5–10 МБ */
+      const isImage = (f.type && f.type.startsWith('image/')) || /\.(heic|heif|jpe?g|png|webp)$/i.test(f.name);
+      if (isImage) {
+        data = await resize(f, 1600, 0.85);
+        const mime = (data.match(/^data:([^;]+)/) || [])[1] || '';
+        const ext = mime === 'image/webp' ? '.webp' : mime === 'image/png' ? '.png' : '.jpg';
+        name = name.replace(/\.[^.]+$/, '') + ext;
+      } else {
+        if (f.size > 15 * 1024 * 1024) { errs.push(t('Файл больше 15 МБ: ') + f.name); continue; }
+        data = await readFileDataURL(f);
+      }
+      msg(t('Загружаю: ') + name, true);
+      await api('/api/docs', { method: 'POST', body: JSON.stringify({ name, data, ...target }) });
+      okCount++;
+    } catch (err) {
+      errs.push(f.name + ' — ' + t(err.message));
+    }
   }
-  msg(t('Файлы загружены'), true);
+  if (errs.length) msg((okCount ? t('Файлы загружены') + ' · ' : '') + errs.join('; '), false);
+  else msg(t('Файлы загружены'), true);
 }
 
 async function loadDocs() {
@@ -1657,7 +1695,7 @@ async function loadDealDocs(id) {
         </div>`).join('') + `</div>`
     : `<div class="muted" style="font-size:12.5px">${t('Документов пока нет')}</div>`) +
     `<div class="drop" id="deal-doc-drop" style="margin-top:10px">${t('Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)')}</div>
-     <input type="file" id="deal-doc-file" multiple hidden>`;
+     <input type="file" id="deal-doc-file" accept=".pdf,image/*,.heic,.heif,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" multiple hidden>`;
   const drop = $('deal-doc-drop');
   const file = $('deal-doc-file');
   /* после загрузки/удаления перерисовываем карточку целиком —

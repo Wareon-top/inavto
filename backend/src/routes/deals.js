@@ -174,6 +174,20 @@ router.post('/:id/client-link', adminOnly, (req, res) => {
   res.json({ ok: true, token })
 })
 
+/* Удаление записи журнала по её метке времени — только админ.
+   Если это было «сообщение клиенту», оно пропадёт и из личного кабинета. */
+router.delete('/:id/log', adminOnly, (req, res) => {
+  const cur = db.prepare('SELECT log FROM deals WHERE id = ?').get(req.params.id)
+  if (!cur) return res.status(404).json({ error: 'Не найдено' })
+  const ts = String((req.body || {}).ts || '')
+  const log = JSON.parse(cur.log || '[]')
+  const next = log.filter((e) => e.ts !== ts)
+  if (next.length === log.length) return res.status(404).json({ error: 'Запись не найдена' })
+  db.prepare('UPDATE deals SET log = ? WHERE id = ?').run(JSON.stringify(next), req.params.id)
+  touch(req.params.id)
+  res.json({ ok: true })
+})
+
 /* Сообщение клиенту — показывается в его личном кабинете */
 router.post('/:id/client-msg', adminOnly, (req, res) => {
   const text = String((req.body || {}).text || '').trim()

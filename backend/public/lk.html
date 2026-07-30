@@ -96,7 +96,7 @@
 
     /* ---------- Горизонтальные этапы ---------- */
     .steps-wrap { overflow-x: auto; margin-top: 16px; padding-bottom: 4px; }
-    .steps { display: flex; min-width: 620px; }
+    .steps { display: flex; min-width: 700px; }
     .step { flex: 1; text-align: center; position: relative; min-width: 68px; }
     .step::before {
       content: ''; position: absolute; top: 13px; right: 50%; width: 100%;
@@ -235,11 +235,11 @@
     /* ---------- Данные и константы ---------- */
     const STAGES = [
       ['search', 'Подбор', '🔍'], ['bought', 'Выкуп', '🤝'], ['export', 'Экспорт', '📄'],
-      ['transit', 'В пути', '🚛'], ['customs', 'Таможня', '🛃'], ['lab', 'СБКТС', '📋'],
-      ['epts', 'ЭПТС', '📑'], ['done', 'Выдача', '🔑'],
+      ['transit', 'В пути', '🚛'], ['border', 'Граница', '🚧'], ['customs', 'Таможня', '🛃'],
+      ['lab', 'СБКТС', '📋'], ['epts', 'ЭПТС', '📑'], ['done', 'Выдача', '🔑'],
     ];
-    const ST_LABEL = { search: 'Подбор авто', bought: 'Автомобиль выкуплен', export: 'Экспортные документы', transit: 'В пути', customs: 'На таможне', lab: 'СБКТС', epts: 'ЭПТС', done: 'Выдан' };
-    const pillCls = (s) => s === 'done' ? 'green' : s === 'customs' ? 'orange' : s === 'search' ? 'grey' : 'blue';
+    const ST_LABEL = { search: 'Подбор авто', bought: 'Автомобиль выкуплен', export: 'Экспортные документы', transit: 'В пути', border: 'Очередь на границе', customs: 'На таможне', lab: 'СБКТС', epts: 'ЭПТС', done: 'Выдан' };
+    const pillCls = (s) => s === 'done' ? 'green' : (s === 'customs' || s === 'border') ? 'orange' : s === 'search' ? 'grey' : 'blue';
     const CONTACTS = {
       tg: 'https://t.me/Dilshat1985',
       wa: 'https://wa.me/79183093092',
@@ -313,7 +313,7 @@
       return '<div class="steps-wrap"><div class="steps">' + STAGES.map(([k, lab, emo], i) => {
         const done = i < idx || fin;
         const cur = !fin && i === idx;
-        const cls = done ? 'done' : cur ? ('cur' + (k === 'customs' ? ' warn' : '')) : '';
+        const cls = done ? 'done' : cur ? ('cur' + (k === 'customs' || k === 'border' ? ' warn' : '')) : '';
         const mark = done ? '✓' : cur ? emo : '';
         return '<div class="step ' + cls + '"><div class="s-dot">' + mark + '</div><div class="s-lab">' + lab + '</div></div>';
       }).join('') + '</div></div>';
@@ -321,8 +321,8 @@
     function stripHtml(o) {
       const msgs = (o.events || []).filter((e) => e.type === 'client_msg');
       const last = msgs[msgs.length - 1];
-      const cls = o.status === 'done' ? 'good' : o.status === 'customs' ? 'warn' : '';
-      const icon = o.status === 'done' ? '🔑' : o.status === 'customs' ? '🛃' : o.status === 'transit' ? '🚛' : '💬';
+      const cls = o.status === 'done' ? 'good' : (o.status === 'customs' || o.status === 'border') ? 'warn' : '';
+      const icon = o.status === 'done' ? '🔑' : o.status === 'customs' ? '🛃' : o.status === 'border' ? '🚧' : o.status === 'transit' ? '🚛' : '💬';
       const text = last ? esc(last.text) : 'Текущий этап: <b>' + (ST_LABEL[o.status] || o.status) + '</b>';
       return '<div class="strip ' + cls + '"><span>' + icon + '</span><span class="tx">' + text +
         '</span><button class="btn" data-open="' + o.order + '">Подробнее</button></div>';
@@ -356,6 +356,7 @@
       const chips = [
         ['all', 'Все заказы (' + os.length + ')'],
         ['transit', 'В пути (' + cnt('transit') + ')'],
+        ['border', 'На границе (' + cnt('border') + ')'],
         ['customs', 'На таможне (' + cnt('customs') + ')'],
         ['done', 'Готово (' + cnt('done') + ')'],
       ].map(([k, l]) => '<button class="fchip' + (FILTER === k ? ' act' : '') + '" data-filter="' + k + '">' + l + '</button>').join('');

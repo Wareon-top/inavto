@@ -140,6 +140,12 @@ for (const col of ["descr_zh TEXT DEFAULT ''", "descr_en TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 
+/* Личный кабинет клиента: секретный токен ссылки у сделки
+   и флаг «документ виден клиенту». */
+try { db.exec('ALTER TABLE deals ADD COLUMN client_token TEXT') } catch { /* колонка уже есть */ }
+try { db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_client_token ON deals (client_token)') } catch { /* индекс уже есть */ }
+try { db.exec('ALTER TABLE docs ADD COLUMN client_visible INTEGER DEFAULT 0') } catch { /* колонка уже есть */ }
+
 /* Заявкам добавили квалификацию (срок покупки, способ связи, комментарий) — колонка note. */
 try { db.exec('ALTER TABLE selections ADD COLUMN note TEXT') } catch { /* колонка уже есть */ }
 

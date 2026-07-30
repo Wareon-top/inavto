@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ваш заказ — INAVTO ASIA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%2317233b'/%3E%3Ctext%20x='16'%20y='21.5'%20font-family='Arial,%20sans-serif'%20font-size='13'%20font-weight='900'%20fill='%23fff'%20text-anchor='middle'%3EIA%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #e4e6ea; --card: #ffffff; --ink: #17233b;
+      --muted: #5c6776; --line: #d5d9e0; --red: #d6291e; --blue: #2b6cd4;
+      --gold: #f7c325; --green: #1f9d55; --r: 18px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--ink);
+      -webkit-font-smoothing: antialiased; line-height: 1.55;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 60px; }
+
+    header.top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 0 14px;
+    }
+    .logo { font-weight: 800; font-size: 19px; letter-spacing: .4px; color: var(--ink); }
+    .logo b { color: var(--red); }
+    .logo-sub { display: block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 2.2px; text-transform: uppercase; }
+    .top-badge {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 13px; background: #fff;
+    }
+
+    .hello { margin: 10px 0 18px; }
+    .hello h1 { font-size: clamp(22px, 5vw, 30px); font-weight: 800; letter-spacing: -.3px; }
+    .hello p { color: var(--muted); font-size: 14.5px; margin-top: 4px; }
+
+    .card {
+      background: var(--card); border-radius: var(--r);
+      padding: 22px; margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(23, 35, 59, .05), 0 8px 28px rgba(23, 35, 59, .06);
+    }
+    .card h2 { font-size: 16.5px; font-weight: 800; margin-bottom: 14px; letter-spacing: -.2px; }
+
+    /* Карточка авто */
+    .car-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    .car-photo {
+      width: 148px; height: 104px; border-radius: 12px; object-fit: cover;
+      background: linear-gradient(135deg, #2c3a55, #111827); flex: none;
+    }
+    .car-photo.ph { display: flex; align-items: center; justify-content: center; font-size: 34px; }
+    .car-info { flex: 1; min-width: 200px; }
+    .car-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+    .car-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-size: 12px; font-weight: 700; color: var(--ink);
+      background: var(--bg); border-radius: 999px; padding: 4px 11px; white-space: nowrap;
+    }
+    .chip.mono { font-family: ui-monospace, 'JetBrains Mono', monospace; letter-spacing: .3px; }
+    .status-badge {
+      display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 800;
+      color: #fff; background: var(--blue); border-radius: 999px; padding: 6px 14px;
+    }
+    .status-badge.done { background: var(--green); }
+    .eta-row {
+      margin-top: 16px; padding: 12px 16px; border-radius: 12px;
+      background: #fdf6dd; border: 1.5px solid #f3e3a6;
+      font-size: 14px; font-weight: 600; display: none;
+    }
+    .eta-row b { font-weight: 800; }
+
+    /* Маршрут */
+    .route { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+    .route b { color: var(--ink); font-weight: 800; }
+
+    /* Таймлайн */
+    .tl { list-style: none; }
+    .tl li { display: flex; gap: 14px; position: relative; padding-bottom: 22px; }
+    .tl li:last-child { padding-bottom: 4px; }
+    .tl li::before {
+      content: ''; position: absolute; left: 15px; top: 32px; bottom: 0;
+      width: 2px; background: var(--line);
+    }
+    .tl li:last-child::before { display: none; }
+    .tl li.done::before { background: var(--green); }
+    .dot {
+      flex: none; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border: 2px solid var(--line); z-index: 1;
+      font-size: 15px; color: transparent;
+    }
+    .done .dot { background: var(--green); border-color: var(--green); color: #fff; }
+    .cur .dot { border-color: var(--red); color: var(--red); box-shadow: 0 0 0 5px rgba(214, 41, 30, .12); }
+    .tl .t { font-weight: 800; font-size: 15px; padding-top: 3px; }
+    .tl .s { font-size: 13px; color: var(--muted); }
+    .cur .t { color: var(--red); }
+    .future .t, .future .s { color: #9aa3b2; }
+
+    /* Фото */
+    .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+    .ph-grid a { display: block; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; background: var(--bg); }
+    .ph-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
+    .ph-grid a:hover img { transform: scale(1.05); }
+
+    /* Документы */
+    .doc { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .doc:last-child { border-bottom: none; }
+    .doc .ic { font-size: 20px; flex: none; }
+    .doc .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .doc .sz { font-size: 12px; color: var(--muted); flex: none; }
+    .doc a.dl {
+      flex: none; font-size: 12.5px; font-weight: 800; color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 13px;
+    }
+    .doc a.dl:hover { border-color: var(--ink); }
+
+    /* Лента событий */
+    .ev { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .ev:last-child { border-bottom: none; }
+    .ev .ic { flex: none; font-size: 16px; width: 24px; text-align: center; }
+    .ev .tx { flex: 1; }
+    .ev .dt { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .ev.msg { background: #f0f5ff; border: 1.5px solid #d8e4fa; border-radius: 12px; padding: 12px 14px; margin: 8px 0; border-bottom-width: 1.5px; }
+    .ev.msg .tx b { color: var(--blue); }
+
+    /* Связь */
+    .contacts { display: flex; flex-wrap: wrap; gap: 10px; }
+    .cbtn {
+      flex: 1; min-width: 130px; text-align: center;
+      font-size: 14px; font-weight: 800; color: #fff; background: var(--red);
+      border-radius: 12px; padding: 13px 10px;
+    }
+    .cbtn:hover { filter: brightness(1.07); }
+    .cbtn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); }
+
+    footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 26px; line-height: 1.7; }
+
+    /* Служебные экраны */
+    .center { text-align: center; padding: 70px 20px; }
+    .center .big { font-size: 40px; margin-bottom: 12px; }
+    .center h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .center p { color: var(--muted); font-size: 14.5px; max-width: 420px; margin: 0 auto; }
+    .hidden { display: none; }
+
+    @media (max-width: 480px) {
+      .card { padding: 18px 16px; }
+      .car-photo { width: 100%; height: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="logo" href="https://inavtoasia.ru" target="_blank" rel="noopener">INAVTO <b>ASIA</b>
+        <span class="logo-sub">Личный кабинет</span></a>
+      <span class="top-badge" id="order-badge"></span>
+    </header>
+
+    <div id="loading" class="center"><div class="big">🚗</div><p>Загружаем ваш заказ…</p></div>
+
+    <div id="err" class="center hidden">
+      <div class="big">🔒</div>
+      <h2>Ссылка не подошла</h2>
+      <p>Похоже, ссылка скопирована не полностью или устарела.
+        Напишите вашему менеджеру — он пришлёт новую.</p>
+      <p style="margin-top:16px"><a href="https://t.me/Dilshat1985" target="_blank" rel="noopener"><b>Написать в Telegram</b></a></p>
+    </div>
+
+    <div id="app" class="hidden">
+      <div class="hello">
+        <h1 id="hello-h">Здравствуйте!</h1>
+        <p>Здесь всегда актуальный статус вашего автомобиля — от выкупа до вручения.</p>
+      </div>
+
+      <div class="card">
+        <div class="car-head">
+          <img class="car-photo hidden" id="car-photo" alt="Фото автомобиля">
+          <div class="car-photo ph" id="car-ph">🚘</div>
+          <div class="car-info">
+            <div class="car-name" id="car-name"></div>
+            <div class="car-meta" id="car-meta"></div>
+            <span class="status-badge" id="status-badge"></span>
+          </div>
+        </div>
+        <div class="eta-row" id="eta-row"></div>
+      </div>
+
+      <div class="card" id="route-card" style="display:none">
+        <h2>Маршрут</h2>
+        <div class="route" id="route"></div>
+      </div>
+
+      <div class="card">
+        <h2>Этапы заказа</h2>
+        <ul class="tl" id="tl"></ul>
+      </div>
+
+      <div class="card" id="photos-card" style="display:none">
+        <h2>Фотоотчёт</h2>
+        <div class="ph-grid" id="ph-grid"></div>
+      </div>
+
+      <div class="card" id="docs-card" style="display:none">
+        <h2>Документы</h2>
+        <div id="docs"></div>
+      </div>
+
+      <div class="card" id="events-card" style="display:none">
+        <h2>История и сообщения</h2>
+        <div id="events"></div>
+      </div>
+
+      <div class="card">
+        <h2>Связь с менеджером</h2>
+        <div class="contacts">
+          <a class="cbtn" href="https://t.me/Dilshat1985" target="_blank" rel="noopener">Telegram</a>
+          <a class="cbtn" href="https://wa.me/79183093092" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="cbtn" href="https://max.ru/u/f9LHodD0cOKPbvQhR0XlohsUsLY_WbbX3Q5leHGivzsjdAf711Yds7Q_JOw" target="_blank" rel="noopener">MAX</a>
+          <a class="cbtn ghost" href="tel:+79183093092">+7 918 309-30-92</a>
+        </div>
+      </div>
+
+      <footer>
+        INAVTO ASIA — автомобили из Китая под ключ · <a href="https://inavtoasia.ru" target="_blank" rel="noopener">inavtoasia.ru</a><br>
+        Эта страница доступна только по вашей персональной ссылке.
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const STAGES = [
+      ['search', 'Подбор и проверка', 'ищем автомобиль и проверяем его перед оплатой'],
+      ['bought', 'Автомобиль выкуплен', 'проверка пройдена, оплата по инвойсу'],
+      ['export', 'Экспортные документы', 'оформление на стороне Китая'],
+      ['transit', 'В пути', 'доставка до границы России'],
+      ['customs', 'Таможня', 'растаможка и утильсбор'],
+      ['lab', 'СБКТС', 'лаборатория и сертификация'],
+      ['epts', 'ЭПТС', 'электронный ПТС оформлен'],
+      ['done', 'Выдача', 'вручение с полным пакетом документов'],
+    ];
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtDT = (ts) => {
+      try {
+        return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) +
+          ', ' + new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return ''; }
+    };
+    const fmtSize = (b) => b > 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + ' МБ' : Math.max(1, Math.round(b / 1024)) + ' КБ';
+    const DOC_IC = { '.pdf': '📄', '.jpg': '🖼️', '.png': '🖼️', '.webp': '🖼️', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.zip': '📦', '.txt': '📄', '.csv': '📊' };
+
+    async function load() {
+      const k = new URLSearchParams(location.search).get('k') || '';
+      if (!/^[A-Za-z0-9_-]{20,64}$/.test(k)) return fail();
+      let data;
+      try {
+        const r = await fetch('/api/lk/' + encodeURIComponent(k));
+        if (!r.ok) return fail();
+        data = await r.json();
+      } catch (e) { return fail(); }
+      render(data);
+    }
+    function fail() {
+      $('loading').classList.add('hidden');
+      $('err').classList.remove('hidden');
+    }
+
+    function render({ deal, docs, events }) {
+      $('loading').classList.add('hidden');
+      $('app').classList.remove('hidden');
+
+      $('order-badge').textContent = 'Заказ № ' + deal.order;
+      if (deal.client_name) $('hello-h').textContent = 'Здравствуйте, ' + deal.client_name + '!';
+
+      $('car-name').textContent = deal.car + (deal.trim ? ' · ' + deal.trim : '');
+      const meta = [];
+      if (deal.year) meta.push('<span class="chip">' + esc(deal.year) + '</span>');
+      if (deal.color) meta.push('<span class="chip">' + esc(deal.color) + '</span>');
+      if (deal.vin) meta.push('<span class="chip mono">VIN ' + esc(deal.vin) + '</span>');
+      $('car-meta').innerHTML = meta.join('');
+
+      if (deal.photos && deal.photos.length) {
+        $('car-photo').src = deal.photos[0];
+        $('car-photo').classList.remove('hidden');
+        $('car-ph').style.display = 'none';
+      }
+
+      const idx = Math.max(0, STAGES.findIndex(([k]) => k === deal.status));
+      const finished = deal.status === 'done';
+      $('status-badge').textContent = finished ? 'Автомобиль выдан 🎉' : STAGES[idx][1];
+      if (finished) $('status-badge').classList.add('done');
+
+      if (deal.eta && !finished) {
+        $('eta-row').style.display = 'block';
+        $('eta-row').innerHTML = '📅 Ожидаемая выдача: <b>' + esc(deal.eta) + '</b>';
+      }
+
+      const route = [];
+      if (deal.from_city || deal.to_city) {
+        route.push('<span><b>' + esc(deal.from_city || 'Китай') + '</b> → <b>' + esc(deal.to_city || 'Россия') + '</b></span>');
+      }
+      if (deal.ship_date) route.push('<span>Отправка: <b>' + esc(deal.ship_date) + '</b></span>');
+      if (route.length) {
+        $('route-card').style.display = '';
+        $('route').innerHTML = route.join('');
+      }
+
+      $('tl').innerHTML = STAGES.map(([key, t, s], i) => {
+        const cls = i < idx || finished ? 'done' : i === idx ? 'cur' : 'future';
+        const mark = i < idx || finished ? '✓' : i === idx ? '●' : '';
+        return '<li class="' + cls + '"><div class="dot">' + mark + '</div><div><div class="t">' + t + '</div><div class="s">' + s + '</div></div></li>';
+      }).join('');
+
+      if (deal.photos && deal.photos.length) {
+        $('photos-card').style.display = '';
+        $('ph-grid').innerHTML = deal.photos.map((p) =>
+          '<a href="' + esc(p) + '" target="_blank" rel="noopener"><img src="' + esc(p) + '" alt="Фотоотчёт" loading="lazy"></a>').join('');
+      }
+
+      if (docs && docs.length) {
+        $('docs-card').style.display = '';
+        $('docs').innerHTML = docs.map((d) =>
+          '<div class="doc"><span class="ic">' + (DOC_IC[d.ext] || '📄') + '</span>' +
+          '<span class="nm">' + esc(d.name) + '</span><span class="sz">' + fmtSize(d.size) + '</span>' +
+          '<a class="dl" href="' + esc(d.url) + '" target="_blank" rel="noopener">Открыть</a></div>').join('');
+      }
+
+      if (events && events.length) {
+        $('events-card').style.display = '';
+        $('events').innerHTML = events.slice().reverse().map((e) => {
+          if (e.type === 'client_msg') {
+            return '<div class="ev msg"><span class="ic">💬</span><div class="tx"><b>Сообщение от менеджера</b><br>' +
+              esc(e.text) + '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+          }
+          if (e.type === 'status') {
+            const st = STAGES.find(([k]) => k === e.status);
+            return '<div class="ev"><span class="ic">✅</span><div class="tx">Новый этап: <b>' +
+              esc(st ? st[1] : e.status) + '</b><div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+          }
+          if (e.type === 'photos') {
+            return '<div class="ev"><span class="ic">📷</span><div class="tx">Добавлен фотоотчёт' +
+              (e.text ? ' (' + esc(e.text) + ' фото)' : '') + '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+          }
+          return '';
+        }).join('');
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

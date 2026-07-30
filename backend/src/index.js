@@ -10,6 +10,7 @@ import ordersRouter from './routes/orders.js'
 import siteCarsRouter from './routes/siteCars.js'
 import dealsRouter from './routes/deals.js'
 import docsRouter from './routes/docs.js'
+import lkRouter from './routes/lk.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 
 const app = express()
@@ -26,11 +27,13 @@ app.use('/api/orders', ordersRouter)
 app.use('/api/site-cars', siteCarsRouter)
 app.use('/api/deals', dealsRouter)
 app.use('/api/docs', docsRouter)
+app.use('/api/lk', lkRouter)
 app.use('/api/upload', uploadRouter)
 
-/* Админка и загруженные фото */
+/* Админка, личный кабинет клиента и загруженные фото */
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d' }))
 app.get('/admin', (_, res) => res.sendFile(path.join(ROOT, '../public/admin.html')))
+app.get('/lk', (_, res) => res.sendFile(path.join(ROOT, '../public/lk.html')))
 
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }))
 

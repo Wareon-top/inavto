@@ -27,10 +27,11 @@ const parse = (row) => row && ({
   log: JSON.parse(row.log || '[]'),
 })
 
-/* Представителю не показываем контакты клиента — только имя */
+/* Представителю не показываем контакты клиента — только имя.
+   Токен личного кабинета — тоже только админу. */
 const forRole = (deal, role) => {
   if (!deal || role === 'admin') return deal
-  const { client_phone, client_tg, client_note, ...rest } = deal
+  const { client_phone, client_tg, client_note, client_token, ...rest } = deal
   return rest
 }
 
@@ -157,6 +158,29 @@ router.delete('/:id/photo', adminOnly, (req, res) => {
   const photos = JSON.parse(cur.photos || '[]').filter((p) => p !== url)
   db.prepare('UPDATE deals SET photos = ? WHERE id = ?').run(JSON.stringify(photos), req.params.id)
   touch(req.params.id)
+  res.json({ ok: true })
+})
+
+/* Ссылка личного кабинета клиента: токен создаётся при первом запросе,
+   повторные вызовы возвращают тот же — ссылка у клиента не «протухает». */
+router.post('/:id/client-link', adminOnly, (req, res) => {
+  const cur = db.prepare('SELECT client_token FROM deals WHERE id = ?').get(req.params.id)
+  if (!cur) return res.status(404).json({ error: 'Не найдено' })
+  let token = cur.client_token
+  if (!token) {
+    token = crypto.randomBytes(24).toString('base64url')
+    db.prepare('UPDATE deals SET client_token = ? WHERE id = ?').run(token, req.params.id)
+  }
+  res.json({ ok: true, token })
+})
+
+/* Сообщение клиенту — показывается в его личном кабинете */
+router.post('/:id/client-msg', adminOnly, (req, res) => {
+  const text = String((req.body || {}).text || '').trim()
+  if (!text) return res.status(400).json({ error: 'Пустое сообщение' })
+  const cur = db.prepare('SELECT id FROM deals WHERE id = ?').get(req.params.id)
+  if (!cur) return res.status(404).json({ error: 'Не найдено' })
+  addLog(req.params.id, { role: 'admin', type: 'client_msg', text: text.slice(0, 2000) })
   res.json({ ok: true })
 })
 

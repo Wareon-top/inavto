@@ -128,6 +128,16 @@ router.post('/', staffOnly, (req, res) => {
   res.status(201).json({ id: r.lastInsertRowid, url, ok: true })
 })
 
+/* Видимость документа в личном кабинете клиента (только вложения сделок) */
+router.put('/:id/client', adminOnly, (req, res) => {
+  const doc = db.prepare('SELECT id, deal_id FROM docs WHERE id = ?').get(req.params.id)
+  if (!doc) return res.status(404).json({ error: 'Не найдено' })
+  if (!doc.deal_id) return res.status(400).json({ error: 'Клиенту видны только документы сделки' })
+  db.prepare('UPDATE docs SET client_visible = ? WHERE id = ?')
+    .run(req.body && req.body.visible ? 1 : 0, req.params.id)
+  res.json({ ok: true })
+})
+
 router.delete('/:id', adminOnly, (req, res) => {
   const doc = db.prepare('SELECT * FROM docs WHERE id = ?').get(req.params.id)
   if (!doc) return res.status(404).json({ error: 'Не найдено' })

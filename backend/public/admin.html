@@ -144,7 +144,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-3</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-4</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -1380,7 +1380,9 @@ function renderDealCard(d) {
       if (e.type === 'status') body2 = t('Статус: ') + dSt(e.status)[1] + ' ' + t(dSt(e.status)[2]) + (e.text ? ' — ' + escHtml(e.text) : '');
       else if (e.type === 'comment') body2 = escHtml(e.text);
       else if (e.type === 'photos') body2 = t('Загружено фото: ') + escHtml(e.text);
-      else if (e.type === 'doc') body2 = '📎 ' + t('Документ: ') + escHtml(e.text);
+      else if (e.type === 'doc') body2 = '📎 ' + (e.url
+        ? `<a href="${escHtml(e.url)}" target="_blank" rel="noopener">${t('Документ: ')}${escHtml(e.text)}</a>`
+        : t('Документ: ') + escHtml(e.text));
       else if (e.type === 'client_msg') body2 = '💬 ' + t('Сообщение клиенту: ') + escHtml(e.text);
       else body2 = t('Сделка создана');
       return `<div class="li">${ROLE === 'admin' ? `<button type="button" class="li-del" data-dellog="${escHtml(e.ts)}" title="${t('Удалить запись')}">✕</button>` : ''}<small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;

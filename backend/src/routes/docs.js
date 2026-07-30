@@ -120,11 +120,14 @@ router.post('/', staffOnly, (req, res) => {
   fs.writeFileSync(path.join(dir, fname), buf)
   const url = '/uploads/docs/' + fname
 
+  /* Вложения сделки: загрузки админа сразу видны клиенту в кабинете,
+     загрузки представителя скрыты, пока админ не включит их вручную */
+  const clientVisible = dealId && req.role === 'admin' ? 1 : 0
   const r = db.prepare(`
-    INSERT INTO docs (folder_id, deal_id, name, url, size, ext, uploaded_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(dealId ? null : folderId, dealId, name, url, buf.length, ext, req.role)
-  if (dealId) addLog(dealId, { role: req.role, type: 'doc', text: name })
+    INSERT INTO docs (folder_id, deal_id, name, url, size, ext, uploaded_by, client_visible)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(dealId ? null : folderId, dealId, name, url, buf.length, ext, req.role, clientVisible)
+  if (dealId) addLog(dealId, { role: req.role, type: 'doc', text: name, url })
   res.status(201).json({ id: r.lastInsertRowid, url, ok: true })
 })
 

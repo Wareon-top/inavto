@@ -144,7 +144,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-3</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -342,7 +342,7 @@
       <div class="tablewrap" id="deal-listwrap">
         <table id="deal-list">
           <thead><tr>
-            <th>Статус</th><th>Клиент</th><th>Автомобиль</th><th>VIN</th><th>Китай</th><th>Россия</th>
+            <th>Статус</th><th>Клиент</th><th>Автомобиль</th><th>VIN</th><th>Китай</th><th>Россия</th><th></th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -401,6 +401,9 @@ zh: {
   'Удалить запись': '删除记录',
   'Удалить запись из журнала?': '从日志中删除这条记录？',
   'Запись удалена': '记录已删除',
+  'Не удалось распознать фото. Подходят JPG, PNG, WebP и HEIC; видео сюда загрузить нельзя.': '无法识别照片。支持 JPG、PNG、WebP 和 HEIC；此处不能上传视频。',
+  'Фото не загрузились: ': '照片未能上传：',
+  'не распознаны: ': '未识别：',
   'Переводы описания — 中文 и English (необязательно)': '描述翻译 — 中文与英文（选填）',
   'Описание 中文': '中文描述',
   'Описание English': '英文描述',
@@ -648,6 +651,9 @@ en: {
   'Удалить запись': 'Delete entry',
   'Удалить запись из журнала?': 'Delete this journal entry?',
   'Запись удалена': 'Entry deleted',
+  'Не удалось распознать фото. Подходят JPG, PNG, WebP и HEIC; видео сюда загрузить нельзя.': 'Could not recognize the photos. JPG, PNG, WebP and HEIC are supported; videos cannot be uploaded here.',
+  'Фото не загрузились: ': 'Photos failed to upload: ',
+  'не распознаны: ': 'not recognized: ',
   'Переводы описания — 中文 и English (необязательно)': 'Description translations — 中文 & English (optional)',
   'Описание 中文': 'Chinese description',
   'Описание English': 'English description',
@@ -1258,7 +1264,7 @@ function renderDeals() {
       `<button type="button" class="stat${dealFilter === v ? ' on' : ''}" data-dflt="${v}"><span class="dot" style="background:${color}"></span><b>${counts[v] || 0}</b> ${emo} ${t(label)}</button>`).join('');
   const tb = $('deal-list').querySelector('tbody');
   if (!list.length) {
-    tb.innerHTML = `<tr><td colspan="6" style="padding:26px;text-align:center;color:var(--muted2);cursor:default">${t('Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.')}</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted2);cursor:default">${t('Пока нет сделок — нажмите «+ Добавить сделку», когда появится первый клиент.')}</td></tr>`;
     return;
   }
   tb.innerHTML = list.map((d) => {
@@ -1270,6 +1276,7 @@ function renderDeals() {
       <td style="font-size:12px;font-variant-numeric:tabular-nums">${escHtml(d.vin || '—')}</td>
       <td class="rowname">${escHtml(d.from_city || '—')}${d.ship_date ? `<small>${t('отправка')} ${fmtD(d.ship_date)}</small>` : ''}</td>
       <td class="rowname">${escHtml(d.to_city || '—')}${d.eta ? `<small>${t('прибытие')} ~${fmtD(d.eta)}</small>` : ''}</td>
+      <td>${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dealdel="${d.id}" title="${t('Удалить сделку')}" style="color:var(--red);border-color:var(--red);padding:4px 9px">✕</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -1508,14 +1515,23 @@ function renderDealCard(d) {
 }
 
 async function uploadDealPhotos(id, files) {
-  const imgs = [...files].filter((f) => /^image\//.test(f.type)).slice(0, 20);
-  if (!imgs.length) return;
+  const list = [...files].slice(0, 20);
+  if (!list.length) return;
+  /* Телефоны отдают фото с пустым или экзотическим типом (HEIC у iPhone) —
+     принимаем и по типу, и по расширению, а не молчим, если ничего не подошло */
+  const isImg = (f) => (f.type && /^image\//.test(f.type)) || /\.(heic|heif|jpe?g|png|webp)$/i.test(f.name || '');
+  const imgs = list.filter(isImg);
+  if (!imgs.length) { msg(t('Не удалось распознать фото. Подходят JPG, PNG, WebP и HEIC; видео сюда загрузить нельзя.')); return; }
   msg(t('Загружаю фото… не закрывайте страницу'), true);
+  const data = [];
+  const bad = [];
+  for (const f of imgs) {
+    try { data.push(await resize(f, 1400, 0.82)); } catch (e) { bad.push(f.name); }
+  }
+  if (!data.length) { msg(t('Фото не загрузились: ') + bad.join(', ')); return; }
   try {
-    const data = [];
-    for (const f of imgs) data.push(await resize(f, 1400, 0.82));
     await api('/api/deals/' + id + '/photos', { method: 'POST', body: JSON.stringify({ photos: data }) });
-    msg(t('Фото загружены'), true);
+    msg(t('Фото загружены') + (bad.length ? ' · ' + t('не распознаны: ') + bad.join(', ') : ''), !bad.length);
     loadDeals();
   } catch (err) { msg(t(err.message)); }
 }
@@ -1528,7 +1544,19 @@ $('deal-stats').addEventListener('click', (e) => {
   dealFilter = b.dataset.dflt;
   renderDeals();
 });
-$('deal-list').addEventListener('click', (e) => {
+$('deal-list').addEventListener('click', async (e) => {
+  const del = e.target.closest('[data-dealdel]');
+  if (del) {
+    const id = +del.dataset.dealdel;
+    const dd = deals.find((x) => x.id === id);
+    if (!confirm(t('Удалить сделку №') + id + (dd ? ' · ' + dd.car : '') + t(' безвозвратно?'))) return;
+    try {
+      await api('/api/deals/' + id, { method: 'DELETE' });
+      msg(t('Сделка удалена'), true);
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+    return;
+  }
   const tr = e.target.closest('tr[data-deal]');
   if (tr) openDeal(+tr.dataset.deal);
 });
@@ -1794,7 +1822,7 @@ $('file').addEventListener('change', () => handleFiles($('file').files));
 
 async function handleFiles(files) {
   for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
+    if (!((f.type && f.type.startsWith('image/')) || /\.(heic|heif|jpe?g|png|webp)$/i.test(f.name || ''))) continue;
     try {
       const dataUrl = await resize(f, 1280, 0.82);
       const r = await api('/api/upload', { method: 'POST',

@@ -144,7 +144,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-4</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-5</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -364,7 +364,7 @@
         </div>
       </div>
       <div class="crm-stats" id="doc-folders"></div>
-      <div class="drop" id="doc-drop">Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)</div>
+      <div class="drop" id="doc-drop">Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 50 МБ)</div>
       <input type="file" id="doc-file" accept=".pdf,image/*,.heic,.heif,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" multiple hidden>
       <div class="tablewrap" style="margin-top:14px">
         <table id="doc-list">
@@ -619,9 +619,9 @@ zh: {
   'Загружен': '上传时间',
   'Скачать': '下载',
   'Пока нет файлов — перетащите их в поле выше.': '暂无文件——请将文件拖拽到上方区域。',
-  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)': '点击或拖拽文件到此处（PDF、照片、Word、Excel、ZIP——最大 15 MB）',
-  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)': '附加文件（PDF、照片、Word、Excel、ZIP——最大 15 MB）',
-  'Файл больше 15 МБ: ': '文件超过 15 MB：',
+  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 50 МБ)': '点击或拖拽文件到此处（PDF、照片、Word、Excel、ZIP——最大 50 MB）',
+  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 50 МБ)': '附加文件（PDF、照片、Word、Excel、ZIP——最大 50 MB）',
+  'Файл больше 50 МБ: ': '文件超过 50 MB：',
   'Загружаю: ': '正在上传：',
   'Файлы загружены': '文件已上传',
   'Документов пока нет': '暂无文件',
@@ -869,9 +869,9 @@ en: {
   'Загружен': 'Uploaded',
   'Скачать': 'Download',
   'Пока нет файлов — перетащите их в поле выше.': 'No files yet — drag them to the area above.',
-  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 15 МБ)': 'Click or drag files here (PDF, photos, Word, Excel, ZIP — up to 15 MB)',
-  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)': 'Attach a document (PDF, photo, Word, Excel, ZIP — up to 15 MB)',
-  'Файл больше 15 МБ: ': 'File over 15 MB: ',
+  'Нажмите или перетащите файлы сюда (PDF, фото, Word, Excel, ZIP — до 50 МБ)': 'Click or drag files here (PDF, photos, Word, Excel, ZIP — up to 50 MB)',
+  'Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 50 МБ)': 'Attach a document (PDF, photo, Word, Excel, ZIP — up to 50 MB)',
+  'Файл больше 50 МБ: ': 'File over 50 MB: ',
   'Загружаю: ': 'Uploading: ',
   'Файлы загружены': 'Files uploaded',
   'Документов пока нет': 'No documents yet',
@@ -1600,7 +1600,7 @@ async function uploadDocs(files, target) {
         const ext = mime === 'image/webp' ? '.webp' : mime === 'image/png' ? '.png' : '.jpg';
         name = name.replace(/\.[^.]+$/, '') + ext;
       } else {
-        if (f.size > 15 * 1024 * 1024) { errs.push(t('Файл больше 15 МБ: ') + f.name); continue; }
+        if (f.size > 50 * 1024 * 1024) { errs.push(t('Файл больше 50 МБ: ') + f.name); continue; }
         data = await readFileDataURL(f);
       }
       msg(t('Загружаю: ') + name, true);
@@ -1724,7 +1724,7 @@ async function loadDealDocs(id) {
           ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dealdocdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>` : ''}
         </div>`).join('') + `</div>`
     : `<div class="muted" style="font-size:12.5px">${t('Документов пока нет')}</div>`) +
-    `<div class="drop" id="deal-doc-drop" style="margin-top:10px">${t('Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 15 МБ)')}</div>
+    `<div class="drop" id="deal-doc-drop" style="margin-top:10px">${t('Прикрепить документ (PDF, фото, Word, Excel, ZIP — до 50 МБ)')}</div>
      <input type="file" id="deal-doc-file" accept=".pdf,image/*,.heic,.heif,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" multiple hidden>`;
   const drop = $('deal-doc-drop');
   const file = $('deal-doc-file');

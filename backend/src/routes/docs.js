@@ -13,7 +13,7 @@ import { addLog } from './deals.js'
 
 const router = Router()
 
-const MAX_FILE = 15 * 1024 * 1024 // 15 МБ
+const MAX_FILE = 50 * 1024 * 1024 // 50 МБ
 
 /* Разрешённые типы: документы и сканы. Видео сознательно нет — тяжело для VPS. */
 const EXT_BY_MIME = {
@@ -112,7 +112,7 @@ router.post('/', staffOnly, (req, res) => {
   if (!OK_EXTS.has(ext)) return res.status(400).json({ error: 'Формат не поддерживается. Можно: PDF, JPG/PNG/WebP, DOC(X), XLS(X), TXT, CSV, ZIP' })
   const buf = Buffer.from(m[2], 'base64')
   if (!buf.length) return res.status(400).json({ error: 'Пустой файл' })
-  if (buf.length > MAX_FILE) return res.status(413).json({ error: 'Файл больше 15 МБ' })
+  if (buf.length > MAX_FILE) return res.status(413).json({ error: 'Файл больше 50 МБ' })
 
   const dir = path.join(UPLOAD_DIR, 'docs')
   fs.mkdirSync(dir, { recursive: true })

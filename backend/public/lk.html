@@ -4,352 +4,458 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Ваш заказ — INAVTO ASIA</title>
+  <title>Личный кабинет — INAVTO ASIA</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%2317233b'/%3E%3Ctext%20x='16'%20y='21.5'%20font-family='Arial,%20sans-serif'%20font-size='13'%20font-weight='900'%20fill='%23fff'%20text-anchor='middle'%3EIA%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #e4e6ea; --card: #ffffff; --ink: #17233b;
-      --muted: #5c6776; --line: #d5d9e0; --red: #d6291e; --blue: #2b6cd4;
-      --gold: #f7c325; --green: #1f9d55; --r: 18px;
+      --bg: #f2f4f7; --card: #fff; --ink: #101828; --muted: #667085;
+      --line: #e7eaf0; --blue: #2b6cd4; --blue-bg: #e8f0fd;
+      --green: #22a06b; --green-bg: #e8f6ef; --orange: #ef9214; --orange-bg: #fff4e3;
+      --red: #d6291e; --r: 14px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Manrope', system-ui, -apple-system, sans-serif;
       background: var(--bg); color: var(--ink);
-      -webkit-font-smoothing: antialiased; line-height: 1.55;
+      -webkit-font-smoothing: antialiased; line-height: 1.5; font-size: 14.5px;
     }
     a { color: var(--blue); text-decoration: none; }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 60px; }
+    button { font: inherit; cursor: pointer; }
 
-    header.top {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 0 14px;
+    /* ---------- Каркас ---------- */
+    .shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+    aside {
+      background: #fff; border-right: 1px solid var(--line);
+      padding: 20px 14px; display: flex; flex-direction: column; gap: 4px;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
     }
-    .logo { font-weight: 800; font-size: 19px; letter-spacing: .4px; color: var(--ink); }
+    .logo { font-weight: 800; font-size: 19px; letter-spacing: .3px; color: var(--ink); padding: 4px 10px 2px; }
     .logo b { color: var(--red); }
-    .logo-sub { display: block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 2.2px; text-transform: uppercase; }
-    .top-badge {
-      font-size: 12px; font-weight: 700; color: var(--muted);
-      border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 13px; background: #fff;
+    .logo-sub { display: block; font-size: 10.5px; font-weight: 700; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin: 2px 0 18px; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 11px; width: 100%;
+      background: none; border: none; text-align: left;
+      padding: 11px 12px; border-radius: 10px;
+      font-size: 14.5px; font-weight: 600; color: #344054;
     }
+    .nav-btn .ic { width: 20px; text-align: center; font-size: 16px; }
+    .nav-btn:hover { background: #f4f6fa; }
+    .nav-btn.act { background: var(--blue-bg); color: var(--blue); font-weight: 800; }
+    .aside-note { margin-top: auto; padding: 12px 10px 4px; font-size: 11.5px; color: var(--muted); line-height: 1.6; }
 
-    .hello { margin: 10px 0 18px; }
-    .hello h1 { font-size: clamp(22px, 5vw, 30px); font-weight: 800; letter-spacing: -.3px; }
-    .hello p { color: var(--muted); font-size: 14.5px; margin-top: 4px; }
-
-    .card {
-      background: var(--card); border-radius: var(--r);
-      padding: 22px; margin-bottom: 16px;
-      box-shadow: 0 1px 2px rgba(23, 35, 59, .05), 0 8px 28px rgba(23, 35, 59, .06);
+    main { min-width: 0; }
+    .bar {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff; border-bottom: 1px solid var(--line);
+      padding: 12px 22px; position: sticky; top: 0; z-index: 20;
     }
-    .card h2 { font-size: 16.5px; font-weight: 800; margin-bottom: 14px; letter-spacing: -.2px; }
-
-    /* Карточка авто */
-    .car-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
-    .car-photo {
-      width: 148px; height: 104px; border-radius: 12px; object-fit: cover;
-      background: linear-gradient(135deg, #2c3a55, #111827); flex: none;
+    .burger { display: none; background: none; border: none; font-size: 21px; color: var(--ink); padding: 4px; }
+    .bar h1 { font-size: 19px; font-weight: 800; letter-spacing: -.2px; }
+    .bar .sp { flex: 1; }
+    .bell { position: relative; background: none; border: none; font-size: 19px; padding: 5px 7px; }
+    .bell .cnt {
+      position: absolute; top: -2px; right: -3px; min-width: 17px; height: 17px;
+      background: var(--red); color: #fff; font-size: 10.5px; font-weight: 800;
+      border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px;
     }
-    .car-photo.ph { display: flex; align-items: center; justify-content: center; font-size: 34px; }
-    .car-info { flex: 1; min-width: 200px; }
-    .car-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
-    .car-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip {
-      font-size: 12px; font-weight: 700; color: var(--ink);
-      background: var(--bg); border-radius: 999px; padding: 4px 11px; white-space: nowrap;
-    }
-    .chip.mono { font-family: ui-monospace, 'JetBrains Mono', monospace; letter-spacing: .3px; }
-    .status-badge {
-      display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 800;
-      color: #fff; background: var(--blue); border-radius: 999px; padding: 6px 14px;
-    }
-    .status-badge.done { background: var(--green); }
-    .eta-row {
-      margin-top: 16px; padding: 12px 16px; border-radius: 12px;
-      background: #fdf6dd; border: 1.5px solid #f3e3a6;
-      font-size: 14px; font-weight: 600; display: none;
-    }
-    .eta-row b { font-weight: 800; }
-
-    /* Маршрут */
-    .route { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
-    .route b { color: var(--ink); font-weight: 800; }
-
-    /* Таймлайн */
-    .tl { list-style: none; }
-    .tl li { display: flex; gap: 14px; position: relative; padding-bottom: 22px; }
-    .tl li:last-child { padding-bottom: 4px; }
-    .tl li::before {
-      content: ''; position: absolute; left: 15px; top: 32px; bottom: 0;
-      width: 2px; background: var(--line);
-    }
-    .tl li:last-child::before { display: none; }
-    .tl li.done::before { background: var(--green); }
-    .dot {
-      flex: none; width: 32px; height: 32px; border-radius: 50%;
+    .who { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 14px; }
+    .ava {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--blue);
+      color: #fff; font-weight: 800; font-size: 14px;
       display: flex; align-items: center; justify-content: center;
-      background: #fff; border: 2px solid var(--line); z-index: 1;
-      font-size: 15px; color: transparent;
     }
-    .done .dot { background: var(--green); border-color: var(--green); color: #fff; }
-    .cur .dot { border-color: var(--red); color: var(--red); box-shadow: 0 0 0 5px rgba(214, 41, 30, .12); }
-    .tl .t { font-weight: 800; font-size: 15px; padding-top: 3px; }
-    .tl .s { font-size: 13px; color: var(--muted); }
-    .cur .t { color: var(--red); }
-    .future .t, .future .s { color: #9aa3b2; }
+    .content { padding: 22px; max-width: 1080px; }
 
-    /* Фото */
-    .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
-    .ph-grid a { display: block; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; background: var(--bg); }
-    .ph-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
-    .ph-grid a:hover img { transform: scale(1.05); }
+    /* ---------- Фильтры ---------- */
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .fchip {
+      background: #fff; border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 8px 14px; font-size: 13.5px; font-weight: 700; color: #344054;
+    }
+    .fchip.act { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
 
-    /* Документы */
-    .doc { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    /* ---------- Карточка заказа ---------- */
+    .ocard { background: var(--card); border-radius: var(--r); padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+    .o-top { display: grid; grid-template-columns: 176px 1fr auto; gap: 18px; align-items: start; }
+    .o-img { width: 176px; height: 108px; border-radius: 10px; object-fit: cover; background: #eef1f5; }
+    .o-img.ph { display: flex; align-items: center; justify-content: center; font-size: 34px; color: #98a2b3; }
+    .o-name { font-size: 17.5px; font-weight: 800; display: inline; margin-right: 8px; }
+    .o-rows { margin-top: 7px; font-size: 13.5px; color: var(--muted); display: grid; gap: 3px; }
+    .o-rows b { color: #344054; font-weight: 700; }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; letter-spacing: .2px; }
+    .pill { display: inline-block; vertical-align: 3px; font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 12px; border: 1.5px solid transparent; }
+    .pill.blue { color: var(--blue); background: var(--blue-bg); border-color: #c8dbf8; }
+    .pill.green { color: #177a4e; background: var(--green-bg); border-color: #bfe6d2; }
+    .pill.orange { color: #b45309; background: var(--orange-bg); border-color: #f5ddb0; }
+    .pill.grey { color: #475467; background: #f2f4f7; border-color: #e0e4ea; }
+    .o-eta { text-align: right; font-size: 12.5px; color: var(--muted); }
+    .o-eta b { display: block; font-size: 14.5px; color: var(--ink); margin-top: 2px; }
+
+    /* ---------- Горизонтальные этапы ---------- */
+    .steps-wrap { overflow-x: auto; margin-top: 16px; padding-bottom: 4px; }
+    .steps { display: flex; min-width: 620px; }
+    .step { flex: 1; text-align: center; position: relative; min-width: 68px; }
+    .step::before {
+      content: ''; position: absolute; top: 13px; right: 50%; width: 100%;
+      height: 3px; background: #e6e9ef; z-index: 0;
+    }
+    .step:first-child::before { display: none; }
+    .step.done::before, .step.cur::before { background: var(--green); }
+    .s-dot {
+      width: 28px; height: 28px; border-radius: 50%; margin: 0 auto;
+      position: relative; z-index: 1; font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      background: #f2f4f7; border: 2px solid #e6e9ef; color: transparent;
+    }
+    .done .s-dot { background: var(--green); border-color: var(--green); color: #fff; }
+    .cur .s-dot { background: var(--blue); border-color: var(--blue); color: #fff; font-size: 14px; box-shadow: 0 0 0 4px rgba(43,108,212,.16); }
+    .cur.warn .s-dot { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 4px rgba(239,146,20,.18); }
+    .s-lab { margin-top: 6px; font-size: 11.5px; color: #98a2b3; font-weight: 600; }
+    .done .s-lab { color: #1e7c4d; }
+    .cur .s-lab { color: var(--ink); font-weight: 800; }
+
+    /* ---------- Полоса-статус ---------- */
+    .strip {
+      margin-top: 14px; display: flex; align-items: center; gap: 12px;
+      border-radius: 10px; padding: 11px 14px; font-size: 13.5px;
+      background: var(--blue-bg); border: 1px solid #d5e3fa;
+    }
+    .strip.warn { background: var(--orange-bg); border-color: #f3dcb2; }
+    .strip.good { background: var(--green-bg); border-color: #c4e7d4; }
+    .strip .tx { flex: 1; min-width: 0; }
+    .btn {
+      background: #fff; border: 1.5px solid var(--line); border-radius: 9px;
+      padding: 8px 15px; font-size: 13px; font-weight: 800; color: var(--ink); white-space: nowrap;
+    }
+    .btn:hover { border-color: #b6bfcc; }
+    .btn.prime { background: var(--red); border-color: var(--red); color: #fff; }
+
+    /* ---------- Общие карточки/секции ---------- */
+    .card { background: var(--card); border-radius: var(--r); padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+    .card h2 { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
+    .gr-title { font-size: 13px; font-weight: 800; color: var(--muted); margin: 2px 0 10px; text-transform: uppercase; letter-spacing: .05em; }
+    .back { display: inline-flex; align-items: center; gap: 7px; font-weight: 800; font-size: 13.5px; color: var(--muted); background: none; border: none; margin-bottom: 14px; }
+    .back:hover { color: var(--ink); }
+
+    .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+    .ph-grid a { display: block; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; background: #eef1f5; }
+    .ph-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .doc { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
     .doc:last-child { border-bottom: none; }
-    .doc .ic { font-size: 20px; flex: none; }
-    .doc .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .doc .sz { font-size: 12px; color: var(--muted); flex: none; }
-    .doc a.dl {
-      flex: none; font-size: 12.5px; font-weight: 800; color: var(--ink);
-      border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 13px;
-    }
-    .doc a.dl:hover { border-color: var(--ink); }
+    .doc .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .doc .sz { font-size: 12px; color: var(--muted); white-space: nowrap; }
 
-    /* Лента событий */
-    .ev { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .ev { display: flex; gap: 11px; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
     .ev:last-child { border-bottom: none; }
-    .ev .ic { flex: none; font-size: 16px; width: 24px; text-align: center; }
-    .ev .tx { flex: 1; }
-    .ev .dt { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .ev.msg { background: #f0f5ff; border: 1.5px solid #d8e4fa; border-radius: 12px; padding: 12px 14px; margin: 8px 0; border-bottom-width: 1.5px; }
-    .ev.msg .tx b { color: var(--blue); }
+    .ev .ic { flex: none; width: 22px; text-align: center; }
+    .ev .tx { flex: 1; min-width: 0; }
+    .ev .dt { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .ev .otag { font-size: 11px; font-weight: 800; color: var(--blue); background: var(--blue-bg); border-radius: 6px; padding: 1px 7px; margin-left: 6px; }
+    .ev.msg { background: #f6f9ff; border: 1px solid #dde8fb; border-radius: 10px; padding: 11px 13px; margin: 8px 0; }
+    .ev.msg b { color: var(--blue); }
 
-    /* Связь */
+    .empty { text-align: center; color: var(--muted); padding: 46px 16px; font-size: 14px; }
+    .empty .big { font-size: 34px; margin-bottom: 10px; }
+
     .contacts { display: flex; flex-wrap: wrap; gap: 10px; }
     .cbtn {
-      flex: 1; min-width: 130px; text-align: center;
-      font-size: 14px; font-weight: 800; color: #fff; background: var(--red);
-      border-radius: 12px; padding: 13px 10px;
+      flex: 1; min-width: 140px; text-align: center; font-size: 14px; font-weight: 800;
+      color: #fff; background: var(--red); border-radius: 10px; padding: 13px 10px;
     }
     .cbtn:hover { filter: brightness(1.07); }
     .cbtn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); }
 
-    footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 26px; line-height: 1.7; }
-
-    /* Служебные экраны */
-    .center { text-align: center; padding: 70px 20px; }
-    .center .big { font-size: 40px; margin-bottom: 12px; }
+    /* ---------- Служебные экраны ---------- */
+    .center { text-align: center; padding: 90px 20px; }
+    .center .big { font-size: 42px; margin-bottom: 12px; }
     .center h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-    .center p { color: var(--muted); font-size: 14.5px; max-width: 420px; margin: 0 auto; }
-    .hidden { display: none; }
+    .center p { color: var(--muted); max-width: 430px; margin: 0 auto; }
+    .hidden { display: none !important; }
 
-    @media (max-width: 480px) {
-      .card { padding: 18px 16px; }
-      .car-photo { width: 100%; height: 170px; }
+    /* ---------- Мобильный ---------- */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(16,24,40,.42); z-index: 29; }
+    @media (max-width: 920px) {
+      .shell { display: block; }
+      aside {
+        position: fixed; z-index: 30; left: 0; top: 0; width: 258px;
+        transform: translateX(-102%); transition: transform .22s; box-shadow: 8px 0 30px rgba(16,24,40,.12);
+      }
+      aside.open { transform: none; }
+      .overlay.show { display: block; }
+      .burger { display: block; }
+      .content { padding: 14px; }
+      .o-top { grid-template-columns: 1fr; }
+      .o-img { width: 100%; height: 168px; }
+      .o-eta { text-align: left; }
     }
+    @media (max-width: 480px) { #who-name { display: none; } }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="top">
-      <a class="logo" href="https://inavtoasia.ru" target="_blank" rel="noopener">INAVTO <b>ASIA</b>
-        <span class="logo-sub">Личный кабинет</span></a>
-      <span class="top-badge" id="order-badge"></span>
-    </header>
+  <div id="loading" class="center"><div class="big">🚗</div><p>Загружаем ваши заказы…</p></div>
 
-    <div id="loading" class="center"><div class="big">🚗</div><p>Загружаем ваш заказ…</p></div>
+  <div id="err" class="center hidden">
+    <div class="big">🔒</div>
+    <h2>Ссылка не подошла</h2>
+    <p>Похоже, ссылка скопирована не полностью или устарела.
+      Напишите вашему менеджеру — он пришлёт новую.</p>
+    <p style="margin-top:16px"><a href="https://t.me/Dilshat1985" target="_blank" rel="noopener"><b>Написать в Telegram</b></a></p>
+  </div>
 
-    <div id="err" class="center hidden">
-      <div class="big">🔒</div>
-      <h2>Ссылка не подошла</h2>
-      <p>Похоже, ссылка скопирована не полностью или устарела.
-        Напишите вашему менеджеру — он пришлёт новую.</p>
-      <p style="margin-top:16px"><a href="https://t.me/Dilshat1985" target="_blank" rel="noopener"><b>Написать в Telegram</b></a></p>
-    </div>
+  <div class="shell hidden" id="shell">
+    <div class="overlay" id="overlay"></div>
+    <aside id="sidebar">
+      <div class="logo">INAVTO <b>ASIA</b><span class="logo-sub">Личный кабинет</span></div>
+      <button class="nav-btn" data-nav="orders"><span class="ic">🚘</span>Мои заказы</button>
+      <button class="nav-btn" data-nav="docs"><span class="ic">📄</span>Документы</button>
+      <button class="nav-btn" data-nav="media"><span class="ic">📷</span>Фото и видео</button>
+      <button class="nav-btn" data-nav="msgs"><span class="ic">💬</span>Сообщения</button>
+      <button class="nav-btn" data-nav="contact"><span class="ic">☎️</span>Связь с менеджером</button>
+      <div class="aside-note">Доступ — только по вашей персональной ссылке. Сохраните её.<br><br>
+        <a href="https://inavtoasia.ru" target="_blank" rel="noopener">inavtoasia.ru</a></div>
+    </aside>
 
-    <div id="app" class="hidden">
-      <div class="hello">
-        <h1 id="hello-h">Здравствуйте!</h1>
-        <p>Здесь всегда актуальный статус вашего автомобиля — от выкупа до вручения.</p>
+    <main>
+      <div class="bar">
+        <button class="burger" id="burger" aria-label="Меню">☰</button>
+        <h1 id="bar-title">Мои заказы</h1>
+        <span class="sp"></span>
+        <button class="bell" id="bell" aria-label="Уведомления">🔔<span class="cnt hidden" id="bell-cnt"></span></button>
+        <span class="who"><span class="ava" id="ava">К</span><span id="who-name" class="hide-sm"></span></span>
       </div>
-
-      <div class="card">
-        <div class="car-head">
-          <img class="car-photo hidden" id="car-photo" alt="Фото автомобиля">
-          <div class="car-photo ph" id="car-ph">🚘</div>
-          <div class="car-info">
-            <div class="car-name" id="car-name"></div>
-            <div class="car-meta" id="car-meta"></div>
-            <span class="status-badge" id="status-badge"></span>
-          </div>
-        </div>
-        <div class="eta-row" id="eta-row"></div>
-      </div>
-
-      <div class="card" id="route-card" style="display:none">
-        <h2>Маршрут</h2>
-        <div class="route" id="route"></div>
-      </div>
-
-      <div class="card">
-        <h2>Этапы заказа</h2>
-        <ul class="tl" id="tl"></ul>
-      </div>
-
-      <div class="card" id="photos-card" style="display:none">
-        <h2>Фотоотчёт</h2>
-        <div class="ph-grid" id="ph-grid"></div>
-      </div>
-
-      <div class="card" id="docs-card" style="display:none">
-        <h2>Документы</h2>
-        <div id="docs"></div>
-      </div>
-
-      <div class="card" id="events-card" style="display:none">
-        <h2>История и сообщения</h2>
-        <div id="events"></div>
-      </div>
-
-      <div class="card">
-        <h2>Связь с менеджером</h2>
-        <div class="contacts">
-          <a class="cbtn" href="https://t.me/Dilshat1985" target="_blank" rel="noopener">Telegram</a>
-          <a class="cbtn" href="https://wa.me/79183093092" target="_blank" rel="noopener">WhatsApp</a>
-          <a class="cbtn" href="https://max.ru/u/f9LHodD0cOKPbvQhR0XlohsUsLY_WbbX3Q5leHGivzsjdAf711Yds7Q_JOw" target="_blank" rel="noopener">MAX</a>
-          <a class="cbtn ghost" href="tel:+79183093092">+7 918 309-30-92</a>
-        </div>
-      </div>
-
-      <footer>
-        INAVTO ASIA — автомобили из Китая под ключ · <a href="https://inavtoasia.ru" target="_blank" rel="noopener">inavtoasia.ru</a><br>
-        Эта страница доступна только по вашей персональной ссылке.
-      </footer>
-    </div>
+      <div class="content" id="view"></div>
+    </main>
   </div>
 
   <script>
+    /* ---------- Данные и константы ---------- */
     const STAGES = [
-      ['search', 'Подбор и проверка', 'ищем автомобиль и проверяем его перед оплатой'],
-      ['bought', 'Автомобиль выкуплен', 'проверка пройдена, оплата по инвойсу'],
-      ['export', 'Экспортные документы', 'оформление на стороне Китая'],
-      ['transit', 'В пути', 'доставка до границы России'],
-      ['customs', 'Таможня', 'растаможка и утильсбор'],
-      ['lab', 'СБКТС', 'лаборатория и сертификация'],
-      ['epts', 'ЭПТС', 'электронный ПТС оформлен'],
-      ['done', 'Выдача', 'вручение с полным пакетом документов'],
+      ['search', 'Подбор', '🔍'], ['bought', 'Выкуп', '🤝'], ['export', 'Экспорт', '📄'],
+      ['transit', 'В пути', '🚛'], ['customs', 'Таможня', '🛃'], ['lab', 'СБКТС', '📋'],
+      ['epts', 'ЭПТС', '📑'], ['done', 'Выдача', '🔑'],
     ];
-    const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const fmtDT = (ts) => {
-      try {
-        return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) +
-          ', ' + new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-      } catch (e) { return ''; }
+    const ST_LABEL = { search: 'Подбор авто', bought: 'Автомобиль выкуплен', export: 'Экспортные документы', transit: 'В пути', customs: 'На таможне', lab: 'СБКТС', epts: 'ЭПТС', done: 'Выдан' };
+    const pillCls = (s) => s === 'done' ? 'green' : s === 'customs' ? 'orange' : s === 'search' ? 'grey' : 'blue';
+    const CONTACTS = {
+      tg: 'https://t.me/Dilshat1985',
+      wa: 'https://wa.me/79183093092',
+      max: 'https://max.ru/u/f9LHodD0cOKPbvQhR0XlohsUsLY_WbbX3Q5leHGivzsjdAf711Yds7Q_JOw',
+      phone: '+7 918 309-30-92', phoneHref: 'tel:+79183093092',
     };
-    const fmtSize = (b) => b > 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + ' МБ' : Math.max(1, Math.round(b / 1024)) + ' КБ';
     const DOC_IC = { '.pdf': '📄', '.jpg': '🖼️', '.png': '🖼️', '.webp': '🖼️', '.doc': '📝', '.docx': '📝', '.xls': '📊', '.xlsx': '📊', '.zip': '📦', '.txt': '📄', '.csv': '📊' };
 
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtD = (ts) => { try { return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
+    const fmtDT = (ts) => fmtD(ts) + ', ' + new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    const fmtSize = (b) => b > 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + ' МБ' : Math.max(1, Math.round(b / 1024)) + ' КБ';
+    const photoOf = (o) => (o.photos && o.photos[0]) || o.fallback_photo || null;
+
+    let DATA = null, TOKEN = '', VIEW = 'orders', CUR = null, FILTER = 'all';
+    const seenKey = () => 'inavto_lk_seen_' + TOKEN.slice(0, 10);
+
+    /* ---------- Загрузка ---------- */
     async function load() {
-      const k = new URLSearchParams(location.search).get('k') || '';
-      if (!/^[A-Za-z0-9_-]{20,64}$/.test(k)) return fail();
-      let data;
+      TOKEN = new URLSearchParams(location.search).get('k') || '';
+      if (!/^[A-Za-z0-9_-]{20,64}$/.test(TOKEN)) return failScreen();
       try {
-        const r = await fetch('/api/lk/' + encodeURIComponent(k));
-        if (!r.ok) return fail();
-        data = await r.json();
-      } catch (e) { return fail(); }
-      render(data);
-    }
-    function fail() {
+        const r = await fetch('/api/lk/' + encodeURIComponent(TOKEN));
+        if (!r.ok) return failScreen();
+        DATA = await r.json();
+      } catch (e) { return failScreen(); }
       $('loading').classList.add('hidden');
-      $('err').classList.remove('hidden');
+      $('shell').classList.remove('hidden');
+      const name = (DATA.client && DATA.client.name || '').trim();
+      $('who-name').textContent = name || 'Клиент';
+      $('ava').textContent = (name[0] || 'К').toUpperCase();
+      render();
+    }
+    function failScreen() { $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); }
+
+    /* ---------- Уведомления ---------- */
+    const allEvents = () => (DATA.orders || []).flatMap((o) => (o.events || []).map((e) => ({ ...e, order: o.order, car: o.car })));
+    function newCount() {
+      const seen = +localStorage.getItem(seenKey()) || 0;
+      return allEvents().filter((e) => new Date(e.ts).getTime() > seen).length;
+    }
+    function updBell() {
+      const n = newCount();
+      $('bell-cnt').textContent = n;
+      $('bell-cnt').classList.toggle('hidden', n === 0);
     }
 
-    function render({ deal, docs, events }) {
-      $('loading').classList.add('hidden');
-      $('app').classList.remove('hidden');
+    /* ---------- Рендер ---------- */
+    const TITLES = { orders: 'Мои заказы', order: 'Заказ', docs: 'Документы', media: 'Фото и видео', msgs: 'Сообщения', contact: 'Связь с менеджером' };
 
-      $('order-badge').textContent = 'Заказ № ' + deal.order;
-      if (deal.client_name) $('hello-h').textContent = 'Здравствуйте, ' + deal.client_name + '!';
+    function render() {
+      document.querySelectorAll('.nav-btn').forEach((b) =>
+        b.classList.toggle('act', b.dataset.nav === (VIEW === 'order' ? 'orders' : VIEW)));
+      $('bar-title').textContent = VIEW === 'order' && CUR ? 'Заказ № ' + CUR.order : TITLES[VIEW];
+      const v = $('view');
+      if (VIEW === 'orders') v.innerHTML = viewOrders();
+      else if (VIEW === 'order') v.innerHTML = viewOrder(CUR);
+      else if (VIEW === 'docs') v.innerHTML = viewDocs();
+      else if (VIEW === 'media') v.innerHTML = viewMedia();
+      else if (VIEW === 'msgs') v.innerHTML = viewMsgs();
+      else v.innerHTML = viewContact();
+      updBell();
+      window.scrollTo({ top: 0 });
+    }
 
-      $('car-name').textContent = deal.car + (deal.trim ? ' · ' + deal.trim : '');
-      const meta = [];
-      if (deal.year) meta.push('<span class="chip">' + esc(deal.year) + '</span>');
-      if (deal.color) meta.push('<span class="chip">' + esc(deal.color) + '</span>');
-      if (deal.vin) meta.push('<span class="chip mono">VIN ' + esc(deal.vin) + '</span>');
-      $('car-meta').innerHTML = meta.join('');
+    /* --- список заказов --- */
+    function stepsHtml(o) {
+      const idx = Math.max(0, STAGES.findIndex(([k]) => k === o.status));
+      const fin = o.status === 'done';
+      return '<div class="steps-wrap"><div class="steps">' + STAGES.map(([k, lab, emo], i) => {
+        const done = i < idx || fin;
+        const cur = !fin && i === idx;
+        const cls = done ? 'done' : cur ? ('cur' + (k === 'customs' ? ' warn' : '')) : '';
+        const mark = done ? '✓' : cur ? emo : '';
+        return '<div class="step ' + cls + '"><div class="s-dot">' + mark + '</div><div class="s-lab">' + lab + '</div></div>';
+      }).join('') + '</div></div>';
+    }
+    function stripHtml(o) {
+      const msgs = (o.events || []).filter((e) => e.type === 'client_msg');
+      const last = msgs[msgs.length - 1];
+      const cls = o.status === 'done' ? 'good' : o.status === 'customs' ? 'warn' : '';
+      const icon = o.status === 'done' ? '🔑' : o.status === 'customs' ? '🛃' : o.status === 'transit' ? '🚛' : '💬';
+      const text = last ? esc(last.text) : 'Текущий этап: <b>' + (ST_LABEL[o.status] || o.status) + '</b>';
+      return '<div class="strip ' + cls + '"><span>' + icon + '</span><span class="tx">' + text +
+        '</span><button class="btn" data-open="' + o.order + '">Подробнее</button></div>';
+    }
+    /* Если файл фото не загрузился — аккуратная заглушка вместо битой иконки */
+    window.lkImgErr = (el) => {
+      const d = document.createElement('div');
+      d.className = 'o-img ph';
+      d.textContent = '🚘';
+      el.replaceWith(d);
+    };
 
-      if (deal.photos && deal.photos.length) {
-        $('car-photo').src = deal.photos[0];
-        $('car-photo').classList.remove('hidden');
-        $('car-ph').style.display = 'none';
-      }
+    function ocard(o) {
+      const ph = photoOf(o);
+      return '<div class="ocard" data-status="' + o.status + '">' +
+        '<div class="o-top">' +
+        (ph ? '<img class="o-img" src="' + esc(ph) + '" alt="' + esc(o.car) + '" loading="lazy" onerror="lkImgErr(this)">' : '<div class="o-img ph">🚘</div>') +
+        '<div><span class="o-name">' + esc(o.car) + (o.trim ? ' ' + esc(o.trim) : '') + '</span>' +
+        '<span class="pill ' + pillCls(o.status) + '">' + (ST_LABEL[o.status] || o.status) + '</span>' +
+        '<div class="o-rows">' +
+        '<span>Заказ <b>№' + o.order + '</b></span>' +
+        (o.color ? '<span>Цвет: <b>' + esc(o.color) + '</b></span>' : '') +
+        (o.vin ? '<span class="mono">VIN: ' + esc(o.vin) + '</span>' : '') +
+        '</div></div>' +
+        (o.eta && o.status !== 'done' ? '<div class="o-eta">Ожидаемая выдача<b>' + esc(o.eta) + '</b></div>' : '') +
+        '</div>' + stepsHtml(o) + stripHtml(o) + '</div>';
+    }
+    function viewOrders() {
+      const os = DATA.orders || [];
+      const cnt = (s) => os.filter((o) => o.status === s).length;
+      const chips = [
+        ['all', 'Все заказы (' + os.length + ')'],
+        ['transit', 'В пути (' + cnt('transit') + ')'],
+        ['customs', 'На таможне (' + cnt('customs') + ')'],
+        ['done', 'Готово (' + cnt('done') + ')'],
+      ].map(([k, l]) => '<button class="fchip' + (FILTER === k ? ' act' : '') + '" data-filter="' + k + '">' + l + '</button>').join('');
+      const list = os.filter((o) => FILTER === 'all' || o.status === FILTER);
+      return '<div class="chips">' + chips + '</div>' +
+        (list.length ? list.map(ocard).join('')
+          : '<div class="empty"><div class="big">🗂</div>В этом списке пока пусто</div>');
+    }
 
-      const idx = Math.max(0, STAGES.findIndex(([k]) => k === deal.status));
-      const finished = deal.status === 'done';
-      $('status-badge').textContent = finished ? 'Автомобиль выдан 🎉' : STAGES[idx][1];
-      if (finished) $('status-badge').classList.add('done');
-
-      if (deal.eta && !finished) {
-        $('eta-row').style.display = 'block';
-        $('eta-row').innerHTML = '📅 Ожидаемая выдача: <b>' + esc(deal.eta) + '</b>';
-      }
-
+    /* --- один заказ --- */
+    function viewOrder(o) {
+      if (!o) return '';
       const route = [];
-      if (deal.from_city || deal.to_city) {
-        route.push('<span><b>' + esc(deal.from_city || 'Китай') + '</b> → <b>' + esc(deal.to_city || 'Россия') + '</b></span>');
-      }
-      if (deal.ship_date) route.push('<span>Отправка: <b>' + esc(deal.ship_date) + '</b></span>');
-      if (route.length) {
-        $('route-card').style.display = '';
-        $('route').innerHTML = route.join('');
-      }
-
-      $('tl').innerHTML = STAGES.map(([key, t, s], i) => {
-        const cls = i < idx || finished ? 'done' : i === idx ? 'cur' : 'future';
-        const mark = i < idx || finished ? '✓' : i === idx ? '●' : '';
-        return '<li class="' + cls + '"><div class="dot">' + mark + '</div><div><div class="t">' + t + '</div><div class="s">' + s + '</div></div></li>';
-      }).join('');
-
-      if (deal.photos && deal.photos.length) {
-        $('photos-card').style.display = '';
-        $('ph-grid').innerHTML = deal.photos.map((p) =>
-          '<a href="' + esc(p) + '" target="_blank" rel="noopener"><img src="' + esc(p) + '" alt="Фотоотчёт" loading="lazy"></a>').join('');
-      }
-
-      if (docs && docs.length) {
-        $('docs-card').style.display = '';
-        $('docs').innerHTML = docs.map((d) =>
-          '<div class="doc"><span class="ic">' + (DOC_IC[d.ext] || '📄') + '</span>' +
-          '<span class="nm">' + esc(d.name) + '</span><span class="sz">' + fmtSize(d.size) + '</span>' +
-          '<a class="dl" href="' + esc(d.url) + '" target="_blank" rel="noopener">Открыть</a></div>').join('');
-      }
-
-      if (events && events.length) {
-        $('events-card').style.display = '';
-        $('events').innerHTML = events.slice().reverse().map((e) => {
-          if (e.type === 'client_msg') {
-            return '<div class="ev msg"><span class="ic">💬</span><div class="tx"><b>Сообщение от менеджера</b><br>' +
-              esc(e.text) + '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
-          }
-          if (e.type === 'status') {
-            const st = STAGES.find(([k]) => k === e.status);
-            return '<div class="ev"><span class="ic">✅</span><div class="tx">Новый этап: <b>' +
-              esc(st ? st[1] : e.status) + '</b><div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
-          }
-          if (e.type === 'photos') {
-            return '<div class="ev"><span class="ic">📷</span><div class="tx">Добавлен фотоотчёт' +
-              (e.text ? ' (' + esc(e.text) + ' фото)' : '') + '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
-          }
-          return '';
-        }).join('');
-      }
+      if (o.from_city || o.to_city) route.push('<span><b>' + esc(o.from_city || 'Китай') + '</b> → <b>' + esc(o.to_city || 'Россия') + '</b></span>');
+      if (o.ship_date) route.push('<span>Отправка: <b>' + esc(o.ship_date) + '</b></span>');
+      if (o.eta && o.status !== 'done') route.push('<span>Ожидаемая выдача: <b>' + esc(o.eta) + '</b></span>');
+      const evs = (o.events || []).slice().reverse();
+      return '<button class="back" data-nav="orders">← Все заказы</button>' +
+        ocard(o).replace('data-open="' + o.order + '">Подробнее<', 'data-nav="msgs">Сообщения<') +
+        (route.length ? '<div class="card"><h2>Маршрут</h2><div style="display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:var(--muted)">' + route.join('') + '</div></div>' : '') +
+        '<div class="card"><h2>Фотоотчёт</h2>' + (o.photos.length
+          ? '<div class="ph-grid">' + o.photos.map((p) => '<a href="' + esc(p) + '" target="_blank" rel="noopener"><img src="' + esc(p) + '" loading="lazy" alt="Фото"></a>').join('') + '</div>'
+          : '<div class="empty" style="padding:24px"><div class="big">📷</div>Фотографии появятся после осмотра и выкупа автомобиля</div>') + '</div>' +
+        '<div class="card"><h2>Документы</h2>' + (o.docs.length ? o.docs.map(docRow).join('')
+          : '<div class="empty" style="padding:24px"><div class="big">📄</div>Документы появятся здесь, когда менеджер их прикрепит</div>') + '</div>' +
+        '<div class="card"><h2>История заказа</h2>' + (evs.length ? evs.map((e) => evRow(e, false)).join('') : '<div class="empty" style="padding:20px">Записей пока нет</div>') + '</div>' +
+        viewContact();
     }
+
+    const docRow = (d) => '<div class="doc"><span>' + (DOC_IC[d.ext] || '📄') + '</span>' +
+      '<span class="nm">' + esc(d.name) + '</span><span class="sz">' + fmtSize(d.size) + '</span>' +
+      '<a class="btn" href="' + esc(d.url) + '" target="_blank" rel="noopener">Открыть</a></div>';
+
+    function evRow(e, withOrder) {
+      const tag = withOrder && (DATA.orders || []).length > 1 ? '<span class="otag">' + esc(e.car || e.order || '') + '</span>' : '';
+      if (e.type === 'client_msg') {
+        return '<div class="ev msg"><span class="ic">💬</span><div class="tx"><b>Сообщение от менеджера</b>' + tag +
+          '<br>' + esc(e.text) + '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+      }
+      if (e.type === 'status') {
+        const st = STAGES.find(([k]) => k === e.status);
+        return '<div class="ev"><span class="ic">✅</span><div class="tx">Новый этап: <b>' + esc(st ? ST_LABEL[e.status] || st[1] : e.status) + '</b>' + tag +
+          '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+      }
+      if (e.type === 'photos') {
+        return '<div class="ev"><span class="ic">📷</span><div class="tx">Добавлен фотоотчёт' + (e.text ? ' (' + esc(e.text) + ' фото)' : '') + tag +
+          '<div class="dt">' + fmtDT(e.ts) + '</div></div></div>';
+      }
+      return '';
+    }
+
+    /* --- документы всех заказов --- */
+    function viewDocs() {
+      const os = (DATA.orders || []).filter((o) => o.docs.length);
+      if (!os.length) return '<div class="card"><div class="empty"><div class="big">📄</div>' +
+        'Документы появятся здесь, когда менеджер прикрепит их к вашему заказу:<br>договор, инвойсы, таможенные квитанции, СБКТС, ЭПТС.</div></div>';
+      return os.map((o) => '<div class="card"><div class="gr-title">№' + o.order + ' · ' + esc(o.car) + '</div>' +
+        o.docs.map(docRow).join('') + '</div>').join('');
+    }
+
+    /* --- фото всех заказов --- */
+    function viewMedia() {
+      const os = (DATA.orders || []).filter((o) => o.photos.length);
+      if (!os.length) return '<div class="card"><div class="empty"><div class="big">📷</div>' +
+        'Фото и видео появятся после осмотра и выкупа автомобиля.<br>Мы снимаем каждый этап пути.</div></div>';
+      return os.map((o) => '<div class="card"><div class="gr-title">№' + o.order + ' · ' + esc(o.car) + '</div>' +
+        '<div class="ph-grid">' + o.photos.map((p) => '<a href="' + esc(p) + '" target="_blank" rel="noopener"><img src="' + esc(p) + '" loading="lazy" alt="Фото"></a>').join('') + '</div></div>').join('');
+    }
+
+    /* --- сообщения --- */
+    function viewMsgs() {
+      const evs = allEvents().sort((a, b) => new Date(b.ts) - new Date(a.ts));
+      localStorage.setItem(seenKey(), String(Date.now()));
+      if (!evs.length) return '<div class="card"><div class="empty"><div class="big">💬</div>Сообщений пока нет — они появятся по мере движения заказа.</div></div>';
+      return '<div class="card">' + evs.map((e) => evRow(e, true)).join('') + '</div>';
+    }
+
+    /* --- связь --- */
+    function viewContact() {
+      return '<div class="card"><h2>Связь с менеджером</h2><div class="contacts">' +
+        '<a class="cbtn" href="' + CONTACTS.tg + '" target="_blank" rel="noopener">Telegram</a>' +
+        '<a class="cbtn" href="' + CONTACTS.wa + '" target="_blank" rel="noopener">WhatsApp</a>' +
+        '<a class="cbtn" href="' + CONTACTS.max + '" target="_blank" rel="noopener">MAX</a>' +
+        '<a class="cbtn ghost" href="' + CONTACTS.phoneHref + '">' + CONTACTS.phone + '</a>' +
+        '</div><p style="margin-top:12px;font-size:12.5px;color:var(--muted)">Отвечаем ежедневно с 9:00 до 21:00 по московскому времени.</p></div>';
+    }
+
+    /* ---------- События интерфейса ---------- */
+    document.addEventListener('click', (e) => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav) { VIEW = nav.dataset.nav; CUR = null; closeMenu(); render(); return; }
+      const open = e.target.closest('[data-open]');
+      if (open) { CUR = (DATA.orders || []).find((o) => o.order === open.dataset.open); VIEW = 'order'; render(); return; }
+      const f = e.target.closest('[data-filter]');
+      if (f) { FILTER = f.dataset.filter; render(); return; }
+    });
+    $('bell').addEventListener('click', () => { VIEW = 'msgs'; CUR = null; render(); });
+    $('burger').addEventListener('click', () => { $('sidebar').classList.add('open'); $('overlay').classList.add('show'); });
+    $('overlay').addEventListener('click', closeMenu);
+    function closeMenu() { $('sidebar').classList.remove('open'); $('overlay').classList.remove('show'); }
 
     load();
   </script>

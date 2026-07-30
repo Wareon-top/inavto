@@ -30,10 +30,18 @@ app.use('/api/docs', docsRouter)
 app.use('/api/lk', lkRouter)
 app.use('/api/upload', uploadRouter)
 
-/* Админка, личный кабинет клиента и загруженные фото */
+/* Админка, личный кабинет клиента и загруженные фото.
+   HTML отдаём с no-cache: браузер каждый раз сверяется с сервером (304,
+   если не менялось) — после обновления не нужно чистить кэш. */
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d' }))
-app.get('/admin', (_, res) => res.sendFile(path.join(ROOT, '../public/admin.html')))
-app.get('/lk', (_, res) => res.sendFile(path.join(ROOT, '../public/lk.html')))
+app.get('/admin', (_, res) => {
+  res.set('Cache-Control', 'no-cache')
+  res.sendFile(path.join(ROOT, '../public/admin.html'))
+})
+app.get('/lk', (_, res) => {
+  res.set('Cache-Control', 'no-cache')
+  res.sendFile(path.join(ROOT, '../public/lk.html'))
+})
 
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }))
 

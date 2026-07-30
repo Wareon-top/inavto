@@ -135,8 +135,10 @@
   .deal-sec { margin-top:20px; }
   /* ---- Документы ---- */
   .doc-rows { display:grid; gap:8px; }
-  .doc-row { display:flex; align-items:center; gap:12px; border:1px solid var(--line); padding:8px 12px; background:var(--card); }
-  .doc-row a { color:var(--ink); text-decoration:none; font-weight:700; font-size:13px; overflow-wrap:anywhere; }
+  /* flex-wrap + гарантированная ширина имени: иначе на телефоне кнопки
+     сжимают ссылку в ноль и имя файла рассыпается по букве в строку */
+  .doc-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; border:1px solid var(--line); padding:8px 12px; background:var(--card); }
+  .doc-row a { color:var(--ink); text-decoration:none; font-weight:700; font-size:13px; overflow-wrap:anywhere; flex:1 1 180px; min-width:140px; }
   .doc-row small { color:var(--muted2); margin-left:auto; white-space:nowrap; }
   .doc-row .btn { flex:none; }
 </style>
@@ -144,7 +146,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-5</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-6</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>

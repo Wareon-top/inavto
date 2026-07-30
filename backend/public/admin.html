@@ -383,6 +383,18 @@ let LANG = localStorage.getItem('inavto_admin_lang') || 'ru';
 const DICT = {
 zh: {
   'Каталог — админка INAVTO ASIA': 'INAVTO ASIA — 车辆目录管理后台',
+  'Личный кабинет клиента': '客户个人中心',
+  'Скопировать ссылку для клиента': '复制客户链接',
+  'ссылка ещё не создавалась': '链接尚未创建',
+  'Сообщение клиенту в кабинет': '发送到客户个人中心的消息',
+  'Например: судно вышло из порта Шанхай, идём по графику': '例如：船已驶离上海港，按计划进行',
+  'Отправить в кабинет': '发送到个人中心',
+  'Ссылка скопирована — отправьте её клиенту': '链接已复制 — 请发送给客户',
+  'Ссылка готова — скопируйте её из карточки': '链接已生成 — 请从卡片中复制',
+  'Сообщение отправлено в кабинет': '消息已发送到客户个人中心',
+  'Сообщение клиенту: ': '发给客户的消息：',
+  'виден клиенту': '客户可见',
+  'скрыт от клиента': '对客户隐藏',
   'Переводы описания — 中文 и English (необязательно)': '描述翻译 — 中文与英文（选填）',
   'Описание 中文': '中文描述',
   'Описание English': '英文描述',
@@ -614,6 +626,18 @@ zh: {
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
+  'Личный кабинет клиента': 'Client portal',
+  'Скопировать ссылку для клиента': 'Copy client link',
+  'ссылка ещё не создавалась': 'link not created yet',
+  'Сообщение клиенту в кабинет': 'Message to the client portal',
+  'Например: судно вышло из порта Шанхай, идём по графику': 'E.g.: the ship left Shanghai port, on schedule',
+  'Отправить в кабинет': 'Send to portal',
+  'Ссылка скопирована — отправьте её клиенту': 'Link copied — send it to the client',
+  'Ссылка готова — скопируйте её из карточки': 'Link ready — copy it from the card',
+  'Сообщение отправлено в кабинет': 'Message sent to the portal',
+  'Сообщение клиенту: ': 'Message to client: ',
+  'виден клиенту': 'visible to client',
+  'скрыт от клиента': 'hidden from client',
   'Переводы описания — 中文 и English (необязательно)': 'Description translations — 中文 & English (optional)',
   'Описание 中文': 'Chinese description',
   'Описание English': 'English description',
@@ -1251,6 +1275,9 @@ function openDeal(id) {
   renderDealCard(d);
 }
 
+/* Адрес личного кабинета клиента (поддомен, скрыт от основного сайта) */
+const LK_BASE = 'https://lk.inavtoasia.ru/?k=';
+
 function renderDealCard(d) {
   const isNew = d.id == null;
   const [, emo] = dSt(d.status);
@@ -1311,6 +1338,16 @@ function renderDealCard(d) {
       </div>
     </details>`;
 
+  const lkSec = (isNew || ROLE !== 'admin') ? '' : `<div class="deal-sec"><label>${t('Личный кабинет клиента')}</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn ghost sm" id="lkLinkBtn">🔗 ${t('Скопировать ссылку для клиента')}</button>
+      <code id="lkUrl" style="font-size:12px;word-break:break-all">${d.client_token ? escHtml(LK_BASE + d.client_token) : t('ссылка ещё не создавалась')}</code>
+    </div>
+    <div class="grid g2" style="align-items:end;margin-top:12px">
+      <div><label>${t('Сообщение клиенту в кабинет')}</label><textarea id="lk-msg" placeholder="${t('Например: судно вышло из порта Шанхай, идём по графику')}"></textarea></div>
+      <div><button class="btn ghost" id="lkMsgBtn">💬 ${t('Отправить в кабинет')}</button></div>
+    </div></div>`;
+
   const photos = isNew ? '' : `<div class="deal-sec"><label>${t('Фото')}</label>
     <div class="photos">` + (d.photos || []).map((p) =>
       `<div class="ph"><a href="${p}" target="_blank" rel="noopener"><img src="${p}" loading="lazy"></a>${ROLE === 'admin' ? `<button type="button" data-delphoto="${escHtml(p)}">✕</button>` : ''}</div>`).join('') + `</div>
@@ -1325,6 +1362,7 @@ function renderDealCard(d) {
       else if (e.type === 'comment') body2 = escHtml(e.text);
       else if (e.type === 'photos') body2 = t('Загружено фото: ') + escHtml(e.text);
       else if (e.type === 'doc') body2 = '📎 ' + t('Документ: ') + escHtml(e.text);
+      else if (e.type === 'client_msg') body2 = '💬 ' + t('Сообщение клиенту: ') + escHtml(e.text);
       else body2 = t('Сделка создана');
       return `<div class="li"><small>${fmtTS(e.ts)} · ${who}</small>${body2}</div>`;
     }).join('') || `<div class="li"><small>${t('Записей пока нет')}</small></div>`) + `</div>
@@ -1340,7 +1378,7 @@ function renderDealCard(d) {
       <h2 style="margin:0">${isNew ? t('Новая сделка') : '№' + d.id + ' · ' + escHtml(d.car) + ' ' + emo}</h2>
       <button class="btn ghost sm" id="dealCloseBtn">← ${t('К списку')}</button>
     </div>
-    ${flow}${info}${adminForm}${photos}${docsSec}${logHtml}`;
+    ${flow}${info}${adminForm}${lkSec}${photos}${docsSec}${logHtml}`;
   $('deal-card').style.display = '';
   $('deal-listwrap').style.display = 'none';
 
@@ -1366,6 +1404,29 @@ function renderDealCard(d) {
     drop.ondrop = (e) => { e.preventDefault(); uploadDealPhotos(d.id, e.dataTransfer.files); };
     file.onchange = () => { uploadDealPhotos(d.id, file.files); file.value = ''; };
   }
+
+  const lkBtn = $('lkLinkBtn');
+  if (lkBtn) lkBtn.onclick = async () => {
+    try {
+      const r = await api('/api/deals/' + d.id + '/client-link', { method: 'POST' });
+      const url = LK_BASE + r.token;
+      $('lkUrl').textContent = url;
+      let copied = false;
+      try { await navigator.clipboard.writeText(url); copied = true; } catch (e) { /* нет clipboard — покажем строку */ }
+      msg(copied ? t('Ссылка скопирована — отправьте её клиенту') : t('Ссылка готова — скопируйте её из карточки'), true);
+    } catch (err) { msg(t(err.message)); }
+  };
+
+  const lkMsgBtn = $('lkMsgBtn');
+  if (lkMsgBtn) lkMsgBtn.onclick = async () => {
+    const text = $('lk-msg').value.trim();
+    if (!text) return;
+    try {
+      await api('/api/deals/' + d.id + '/client-msg', { method: 'POST', body: JSON.stringify({ text }) });
+      msg(t('Сообщение отправлено в кабинет'), true);
+      loadDeals();
+    } catch (err) { msg(t(err.message)); }
+  };
 
   const cbtn = $('dealCommentBtn');
   if (cbtn) cbtn.onclick = async () => {
@@ -1588,6 +1649,7 @@ async function loadDealDocs(id) {
         <div class="doc-row">
           <a href="${d.url}" target="_blank" rel="noopener" download="${escHtml(d.name)}">${docIcon(d.ext)} ${escHtml(d.name)}</a>
           <small>${fmtSize(d.size)} · ${fmtDT(d.created_at)}</small>
+          ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dcv="${d.id}" data-vis="${d.client_visible ? 1 : 0}">${d.client_visible ? '👁 ' + t('виден клиенту') : '🚫 ' + t('скрыт от клиента')}</button>` : ''}
           ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dealdocdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>` : ''}
         </div>`).join('') + `</div>`
     : `<div class="muted" style="font-size:12.5px">${t('Документов пока нет')}</div>`) +
@@ -1604,6 +1666,13 @@ async function loadDealDocs(id) {
   box.querySelectorAll('[data-dealdocdel]').forEach((b) => b.addEventListener('click', async () => {
     try { await api('/api/docs/' + b.dataset.dealdocdel, { method: 'DELETE' }); loadDeals(); }
     catch (err) { msg(t(err.message)); }
+  }));
+  box.querySelectorAll('[data-dcv]').forEach((b) => b.addEventListener('click', async () => {
+    try {
+      await api('/api/docs/' + b.dataset.dcv + '/client', { method: 'PUT',
+        body: JSON.stringify({ visible: b.dataset.vis !== '1' }) });
+      loadDealDocs(id);
+    } catch (err) { msg(t(err.message)); }
   }));
 }
 

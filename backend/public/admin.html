@@ -146,7 +146,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v30.07-6</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v31.07-1</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -227,6 +227,13 @@
         </select></div>
         <div><label>Пробег, км</label><input id="f-mileage" type="number" min="0" step="1000" placeholder="15000">
           <div class="price-hint">Только для авто с пробегом</div></div>
+      </div>
+      <div class="grid g3" style="margin-bottom:6px">
+        <div><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0">
+            <input type="checkbox" id="f-stock" style="width:auto"> В наличии в России</label>
+          <div class="price-hint">Растаможен, можно забрать сразу — попадёт в раздел «В наличии»</div></div>
+        <div><label>Город, где стоит автомобиль</label><input id="f-stock-city" placeholder="Краснодар"></div>
+        <div><label>VIN</label><input id="f-vin" placeholder="LZGKC2E44RX000777"></div>
       </div>
       <div class="grid g3" style="margin-bottom:6px">
         <div><label>Цена под ключ, млн ₽ *</label><input id="f-rub" type="number" step="0.1" min="0" placeholder="4.2">
@@ -403,6 +410,11 @@ zh: {
   'Удалить запись': '删除记录',
   'Удалить запись из журнала?': '从日志中删除这条记录？',
   'Запись удалена': '记录已删除',
+  'В наличии в России': '俄罗斯现车',
+  'В наличии': '现车',
+  'в наличии': '现车',
+  'Растаможен, можно забрать сразу — попадёт в раздел «В наличии»': '已清关，可立即提车 — 将显示在「现车」栏目',
+  'Город, где стоит автомобиль': '车辆所在城市',
   'Не удалось распознать фото. Подходят JPG, PNG, WebP и HEIC; видео сюда загрузить нельзя.': '无法识别照片。支持 JPG、PNG、WebP 和 HEIC；此处不能上传视频。',
   'Фото не загрузились: ': '照片未能上传：',
   'не распознаны: ': '未识别：',
@@ -653,6 +665,11 @@ en: {
   'Удалить запись': 'Delete entry',
   'Удалить запись из журнала?': 'Delete this journal entry?',
   'Запись удалена': 'Entry deleted',
+  'В наличии в России': 'In stock in Russia',
+  'В наличии': 'In stock',
+  'в наличии': 'in stock',
+  'Растаможен, можно забрать сразу — попадёт в раздел «В наличии»': 'Customs-cleared, ready for pickup — will appear in the “In stock” section',
+  'Город, где стоит автомобиль': 'City where the car is located',
   'Не удалось распознать фото. Подходят JPG, PNG, WebP и HEIC; видео сюда загрузить нельзя.': 'Could not recognize the photos. JPG, PNG, WebP and HEIC are supported; videos cannot be uploaded here.',
   'Фото не загрузились: ': 'Photos failed to upload: ',
   'не распознаны: ': 'not recognized: ',
@@ -991,12 +1008,15 @@ function renderCatalog() {
   const q = ($('cat-search').value || '').trim().toLowerCase();
   const nUsed = cars.filter((c) => c.cond === 'used').length;
   const nNew = cars.length - nUsed;
+  const nStock = cars.filter((c) => c.stock).length;
   $('cat-stats').innerHTML =
     `<button type="button" class="stat${catFilter === 'all' ? ' on' : ''}" data-cat="all"><b>${cars.length}</b> ${t('Все')}</button>` +
     `<button type="button" class="stat${catFilter === 'new' ? ' on' : ''}" data-cat="new"><span class="dot" style="background:var(--green)"></span><b>${nNew}</b> ${t('Новые')}</button>` +
-    `<button type="button" class="stat${catFilter === 'used' ? ' on' : ''}" data-cat="used"><span class="dot" style="background:#c8960a"></span><b>${nUsed}</b> ${t('С пробегом')}</button>`;
+    `<button type="button" class="stat${catFilter === 'used' ? ' on' : ''}" data-cat="used"><span class="dot" style="background:#c8960a"></span><b>${nUsed}</b> ${t('С пробегом')}</button>` +
+    `<button type="button" class="stat${catFilter === 'stock' ? ' on' : ''}" data-cat="stock"><span class="dot" style="background:var(--blue,#2b6cd4)"></span><b>${nStock}</b> ${t('В наличии')}</button>`;
   let list = cars;
-  if (catFilter !== 'all') list = list.filter((c) => (c.cond === 'used') === (catFilter === 'used'));
+  if (catFilter === 'stock') list = list.filter((c) => c.stock);
+  else if (catFilter !== 'all') list = list.filter((c) => (c.cond === 'used') === (catFilter === 'used'));
   if (q) list = list.filter((c) => [c.name, c.brand, c.slug].some((f) => f && String(f).toLowerCase().includes(q)));
   $('count').textContent = list.length + t(' поз.') + (list.length !== cars.length ? ' / ' + cars.length : '');
   $('importBtn').style.display = cars.length ? 'none' : '';
@@ -1004,7 +1024,7 @@ function renderCatalog() {
   tb.innerHTML = list.map((c) => `
     <tr>
       <td>${c.photos[0] ? `<img class="thumb" src="${c.photos[0]}">` : `<div class="thumb empty">${t('нет фото')}</div>`}</td>
-      <td class="rowname"><b>${c.name}</b><small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}${c.cond === 'used' ? ' · ' + t('с пробегом') + (c.mileage ? ' ' + c.mileage.toLocaleString('ru-RU') + ' ' + t('км') : '') : ''}</small></td>
+      <td class="rowname"><b>${c.name}</b>${c.stock ? ` <span style="font-size:10px;font-weight:800;color:var(--blue,#2b6cd4)">📍 ${t('в наличии')}${c.stockCity ? ' · ' + escHtml(c.stockCity) : ''}</span>` : ''}<small>${c.slug} · ${t(c.body)} · ${t(c.fuel)}${c.cond === 'used' ? ' · ' + t('с пробегом') + (c.mileage ? ' ' + c.mileage.toLocaleString('ru-RU') + ' ' + t('км') : '') : ''}</small></td>
       <td class="num">${fmtRub(c.price)}</td>
       <td class="num">${c.priceCny ? '¥ ' + c.priceCny.toLocaleString('ru-RU') : '—'}<br>${c.priceUsd ? '$ ' + c.priceUsd.toLocaleString('ru-RU') : ''}</td>
       <td>${c.power || '—'}</td>
@@ -1781,6 +1801,9 @@ function openForm(car) {
   $('f-sort').value = car ? car.sort : 100;
   $('f-cond').value = car && car.cond === 'used' ? 'used' : 'new';
   $('f-mileage').value = car && car.mileage ? car.mileage : '';
+  $('f-stock').checked = car ? !!car.stock : false;
+  $('f-stock-city').value = car ? (car.stockCity || '') : '';
+  $('f-vin').value = car ? (car.vin || '') : '';
   $('f-rub').value = car ? car.price : '';
   $('f-cny').value = car && car.priceCny ? car.priceCny : '';
   $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
@@ -1866,6 +1889,9 @@ $('saveBtn').onclick = async () => {
     year: +$('f-year').value || 2026, sort: +$('f-sort').value || 100,
     cond: $('f-cond').value === 'used' ? 'used' : 'new',
     mileage: +$('f-mileage').value || 0,
+    stock: $('f-stock').checked ? 1 : 0,
+    stockCity: $('f-stock-city').value.trim(),
+    vin: $('f-vin').value.trim(),
     price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
     price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
     desc: $('f-desc').value.trim(),
@@ -1888,7 +1914,7 @@ $('saveBtn').onclick = async () => {
 };
 
 /* ---------- Импорт из CSV (выгрузка поставщика / Excel) ---------- */
-const CSV_HEADERS = 'slug;name;brand;body;fuel;power;drive;range;battery;price_rub;price_cny;price_usd;year;cond;mileage;tags;desc';
+const CSV_HEADERS = 'slug;name;brand;body;fuel;power;drive;range;battery;price_rub;price_cny;price_usd;year;cond;mileage;tags;desc;stock;stock_city;vin';
 $('csvTplBtn').onclick = () => {
   const rows = [
     CSV_HEADERS,
@@ -1944,6 +1970,9 @@ async function csvToCars(file) {
       mileage: Math.round(num(g('mileage'))),
       tags: g('tags').split(/[,;|]/).map((s) => s.trim()).filter(Boolean),
       desc: g('desc'),
+      stock: /^(1|да|yes|true)$/i.test(g('stock')) ? 1 : 0,
+      stockCity: g('stock_city'),
+      vin: g('vin'),
     };
   }).filter(Boolean);
 }

@@ -140,6 +140,11 @@ for (const col of ["descr_zh TEXT DEFAULT ''", "descr_en TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 
+/* «Автомобили в наличии в России»: флаг, город и VIN у машин каталога. */
+for (const col of ['stock INTEGER DEFAULT 0', "stock_city TEXT DEFAULT ''", "vin TEXT DEFAULT ''"]) {
+  try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
+}
+
 /* Личный кабинет клиента: секретный токен ссылки у сделки
    и флаг «документ виден клиенту». */
 try { db.exec('ALTER TABLE deals ADD COLUMN client_token TEXT') } catch { /* колонка уже есть */ }

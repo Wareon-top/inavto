@@ -319,8 +319,16 @@
 
   A.carCard = function (car) {
     const used = car.cond === 'used';
-    const priceNote = used ? 'с пробегом, под ключ' : 'новый, под ключ';
+    const stock = !!car.stock;
+    const priceNote = stock ? 'в наличии, под ключ' : used ? 'с пробегом, под ключ' : 'новый, под ключ';
     const fav = A.favs.has(car.slug);
+    const specs = stock
+      ? `<li><span>Город</span><b>${car.stockCity || 'Россия'}</b></li>
+         ${car.mileage ? `<li><span>Пробег</span><b>${Number(car.mileage).toLocaleString('ru-RU')} км</b></li>` : `<li><span>Мощность</span><b>${car.power}</b></li>`}
+         ${car.vin ? `<li><span>VIN</span><b class="vinval">${car.vin}</b></li>` : `<li><span>Год</span><b>${car.year}</b></li>`}`
+      : `<li><span>Мощность</span><b>${car.power}</b></li>
+         ${used && car.mileage ? `<li><span>Пробег</span><b>${Number(car.mileage).toLocaleString('ru-RU')} км</b></li>` : `<li><span>Привод</span><b>${car.drive}</b></li>`}
+         ${car.range !== '—' ? `<li><span>Запас хода</span><b>${car.range}</b></li>` : `<li><span>Год</span><b>${car.year}</b></li>`}`;
     return `<article class="car-card reveal">
       <a href="${A.carUrl(car)}">${A.carVisual(car)}</a>
       <div class="car-card-body">
@@ -329,15 +337,14 @@
           <button class="fav-btn${fav ? ' on' : ''}" data-fav="${car.slug}" aria-label="В избранное" title="В избранное">${ICONS.heart}</button>
         </div>
         <div class="car-sub">${car.body} · ${car.fuel}</div>
-        <ul class="car-specs">
-          <li><span>Мощность</span><b>${car.power}</b></li>
-          ${used && car.mileage ? `<li><span>Пробег</span><b>${Number(car.mileage).toLocaleString('ru-RU')} км</b></li>` : `<li><span>Привод</span><b>${car.drive}</b></li>`}
-          ${car.range !== '—' ? `<li><span>Запас хода</span><b>${car.range}</b></li>` : `<li><span>Год</span><b>${car.year}</b></li>`}
-        </ul>
+        <ul class="car-specs">${specs}</ul>
+        ${stock ? '<div class="stock-today">Можно забрать сегодня</div>' : ''}
         <div class="car-price-row">
           <div class="car-price num">от ${car.price.toFixed(1).replace('.', ',')} млн ₽<small>${priceNote}</small></div>
         </div>
-        <a class="btn btn-ghost btn-sm" href="${A.carUrl(car)}">Подробнее</a>
+        ${stock
+          ? `<a class="btn btn-red btn-sm" data-goal="reserve_click" href="${A.carUrl(car)}">Забронировать</a>`
+          : `<a class="btn btn-ghost btn-sm" href="${A.carUrl(car)}">Подробнее</a>`}
       </div>
     </article>`;
   };

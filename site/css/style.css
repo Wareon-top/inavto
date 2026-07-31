@@ -1444,3 +1444,31 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
   .tracker-node span { font-size: 11.5px; display: block; }
   .tracker-node::after { top: 34px; bottom: 6px; left: 16px; right: auto; width: 1px; height: auto; }
 }
+
+/* ---------- Автомобили в наличии в России ---------- */
+.stock-today { color: #1f9d55; font-weight: 800; font-size: 13px; margin: -2px 0 10px; }
+.stock-today::before { content: '✓ '; }
+.car-specs .vinval { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: .02em; }
+
+/* ---------- Комиссионная продажа ---------- */
+.commission {
+  display: grid; grid-template-columns: 1.15fr .85fr; gap: 36px; align-items: start;
+  background: var(--card, #fff); border-radius: 18px; padding: 34px;
+  box-shadow: 0 12px 34px rgba(23, 35, 59, .08);
+}
+.commission > * { min-width: 0; }
+.commission .overline {
+  font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--red, #d6291e); margin-bottom: 8px;
+}
+.commission-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 9px; }
+.commission-list li { padding-left: 26px; position: relative; font-weight: 600; font-size: 15px; }
+.commission-list li::before {
+  content: '✓'; position: absolute; left: 0; top: 0;
+  color: #1f9d55; font-weight: 800;
+}
+.commission .form-grid { background: var(--bg, #eef0f3); border-radius: 14px; padding: 18px; }
+.commission .form-grid > * { min-width: 0; }
+@media (max-width: 860px) {
+  .commission { grid-template-columns: 1fr; padding: 22px 18px; gap: 22px; }
+}

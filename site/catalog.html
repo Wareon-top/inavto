@@ -72,6 +72,7 @@
       <div class="cond-tabs" id="cond-tabs">
         <button type="button" class="cond-tab active" data-cond="new">Новые</button>
         <button type="button" class="cond-tab" data-cond="used">С пробегом</button>
+        <button type="button" class="cond-tab" data-cond="stock">В наличии в России</button>
       </div>
       <!-- 2. Фильтр бренда -->
       <div class="pills brand-pills" id="brand-pills"></div>
@@ -112,6 +113,37 @@
         <p style="max-width:56ch;margin:0 auto 16px">Автомобили с пробегом привозим под заказ: расскажите, что ищете, — подберём проверенные варианты с прозрачной историей и полным отчётом по состоянию.</p>
         <button class="btn btn-red" data-quiz-open>Заказать подбор</button>
       </div>
+      <div class="empty-note" id="empty-stock" style="display:none">
+        <p style="max-width:56ch;margin:0 auto 16px">Раздел пополняется: сюда попадают автомобили, которые уже растаможены и находятся в России — их можно забрать сразу, без ожидания доставки. Оставьте заявку — сообщим о ближайших поступлениях.</p>
+        <button class="btn btn-red" data-quiz-open>Оставить заявку</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- КОМИССИОННАЯ ПРОДАЖА -->
+  <section class="section" style="padding-top:0" id="commission">
+    <div class="container">
+      <div class="commission reveal">
+        <div class="commission-info">
+          <div class="overline">Комиссионная продажа</div>
+          <h2 class="h2">Продадим ваш автомобиль быстро и безопасно</h2>
+          <p class="lead" style="margin-top:10px">Уже привезли автомобиль из Китая или продаёте свой? Разместите его у нас: реклама, общение с покупателями, показы и сопровождение сделки — на нашей стороне.</p>
+          <ul class="commission-list">
+            <li>Профессиональная фотосъёмка</li>
+            <li>Размещение на сайте и в Telegram</li>
+            <li>Проверка покупателей</li>
+            <li>Полное сопровождение сделки</li>
+            <li>Оплата — только после продажи</li>
+          </ul>
+        </div>
+        <form class="form-grid" data-lead-form="Комиссионная продажа" data-brand="Комиссионная продажа">
+          <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Имя" required></div>
+          <div class="form-field"><label>Телефон</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
+          <div class="form-field"><label>Марка, модель, год</label><input name="comment" placeholder="Например: Lixiang L7 2024"></div>
+          <button class="btn btn-red btn-block" type="submit">Разместить автомобиль</button>
+          <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -140,11 +172,15 @@
       const empty = document.getElementById('empty');
       const $ = id => document.getElementById(id);
 
-      /* 1. Состояние (новый / с пробегом), 2. бренд, 3. остальные фильтры */
+      /* 1. Состояние (новый / с пробегом / в наличии), 2. бренд, 3. остальные фильтры */
       let cond = 'new';
       let brand = '';
       const emptyUsed = $('empty-used');
-      const condOf = c => c.cond === 'used' ? 'used' : 'new';
+      const emptyStock = $('empty-stock');
+      /* «в наличии» — отдельная витрина: такая машина не дублируется в «Новых»/«С пробегом» */
+      const condOf = c => c.stock ? 'stock' : (c.cond === 'used' ? 'used' : 'new');
+      if (new URLSearchParams(location.search).get('stock')) cond = 'stock';
+      document.querySelectorAll('.cond-tab').forEach(x => x.classList.toggle('active', x.dataset.cond === cond));
 
       function renderBrandPills() {
         const brands = [...new Set(cars.filter(c => condOf(c) === cond).map(c => c.brand))].sort();
@@ -185,9 +221,10 @@
         if (sort === 'asc') list.sort((x, y) => x.price - y.price);
         if (sort === 'desc') list.sort((x, y) => y.price - x.price);
         grid.innerHTML = list.map(A.carCard).join('');
-        /* в разделе «С пробегом» пока пусто — приглашаем на подбор, иначе обычная заглушка */
+        /* в пустых разделах «С пробегом» и «В наличии» — свои приглашения, иначе обычная заглушка */
         emptyUsed.style.display = (!list.length && cond === 'used' && noneOfCond) ? 'block' : 'none';
-        empty.style.display = (!list.length && emptyUsed.style.display === 'none') ? 'block' : 'none';
+        emptyStock.style.display = (!list.length && cond === 'stock' && noneOfCond) ? 'block' : 'none';
+        empty.style.display = (!list.length && emptyUsed.style.display === 'none' && emptyStock.style.display === 'none') ? 'block' : 'none';
         A.initReveal();
       }
       renderBrandPills();
@@ -212,6 +249,7 @@
           grid.innerHTML = list.map(A.carCard).join('');
           empty.style.display = list.length ? 'none' : 'block';
           emptyUsed.style.display = 'none';
+          emptyStock.style.display = 'none';
           A.initReveal();
         } else {
           baseApply();

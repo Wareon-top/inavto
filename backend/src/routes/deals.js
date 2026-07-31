@@ -12,7 +12,7 @@ import { UPLOAD_DIR } from './upload.js'
 
 const router = Router()
 
-export const DEAL_STATUSES = ['search', 'bought', 'export', 'border', 'transit', 'customs', 'lab', 'epts', 'done']
+export const DEAL_STATUSES = ['search', 'bought', 'export', 'border', 'tranzit', 'transit', 'customs', 'lab', 'epts', 'done']
 
 /* Поля, которые редактирует админ в карточке */
 const FIELDS = [

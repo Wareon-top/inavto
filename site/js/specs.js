@@ -18,12 +18,15 @@ window.INAVTO.SPEC_GROUPS = [
     ['colorBody', 'Цвет кузова'],
     ['colorInterior', 'Цвет салона'],
     ['mileage', 'Пробег'],
+    ['vin', 'VIN'],
   ]],
   ['engine', 'Двигатель', [
     ['type', 'Тип двигателя'],
     ['volume', 'Объём двигателя'],
     ['power', 'Мощность'],
     ['torque', 'Крутящий момент'],
+    ['battery', 'Батарея'],
+    ['range', 'Запас хода'],
     ['eco', 'Экологический стандарт'],
     ['fuel', 'Тип топлива'],
     ['consumption', 'Средний расход топлива'],
@@ -75,12 +78,81 @@ window.INAVTO.CAR_OPTIONS = [
   'Атмосферная подсветка салона',
 ];
 
-/* HTML подробной карточки. Пустые поля и пустые группы не выводятся,
-   поэтому карточку можно заполнять постепенно. */
+/* Автокарточка: собираем разделы из данных, которые уже есть у машины
+   в каталоге. Ничего не выдумываем — только то, что заполнено. */
+window.INAVTO.autoSpecs = function (car) {
+  if (!car) return {};
+  var val = function (v) { return v && v !== '—' ? String(v) : ''; };
+  var fuel = val(car.fuel);
+  var isEv = /электро/i.test(fuel);
+  var isHybrid = /гибрид/i.test(fuel);
+  var tags = car.tags || [];
+
+  var engineType = isEv ? 'Электрический'
+    : /EREV/i.test(fuel) ? 'Гибрид, последовательный (EREV)'
+    : /PHEV/i.test(fuel) ? 'Гибрид, подключаемый (PHEV)'
+    : isHybrid ? 'Гибрид'
+    : /дизель/i.test(fuel) ? 'Дизельный'
+    : fuel ? 'Бензиновый' : '';
+  var fuelType = isEv ? 'Электричество' : isHybrid ? 'Бензин + электричество' : fuel;
+
+  /* «Zeekr 7X» + марка «Zeekr» → модель «7X» */
+  var model = val(car.name);
+  if (car.brand && model.toLowerCase().indexOf(String(car.brand).toLowerCase()) === 0) {
+    model = model.slice(String(car.brand).length).trim() || model;
+  }
+
+  var mileage = '';
+  if (car.cond === 'used') {
+    mileage = car.mileage ? Number(car.mileage).toLocaleString('ru-RU') + ' км' : 'с пробегом';
+  } else if (car.cond) {
+    mileage = 'новый автомобиль';
+  }
+
+  return {
+    basic: {
+      brand: val(car.brand),
+      model: model,
+      year: car.year ? String(car.year) : '',
+      country: 'Китай',
+      body: val(car.body),
+      seats: tags.indexOf('7seats') > -1 ? '7' : '',
+      mileage: mileage,
+      vin: val(car.vin),
+    },
+    engine: {
+      type: engineType,
+      power: val(car.power),
+      battery: val(car.battery),
+      range: val(car.range),
+      fuel: fuelType,
+    },
+    trans: { drive: val(car.drive) },
+    dims: {},
+  };
+};
+
+/* HTML подробной карточки. Показываем всё, что известно: сначала данные
+   каталога, поверх — то, что заполнено вручную в админке. Пустые поля
+   и пустые группы не выводятся. */
 window.INAVTO.specSheetHTML = function (car, fallbackText) {
   var A = window.INAVTO;
-  var s = car && car.specs;
-  if (!s) return '';
+  var auto = A.autoSpecs(car);
+  var manual = (car && car.specs) || {};
+  var s = {
+    options: manual.options,
+    text: manual.text,
+  };
+  A.SPEC_GROUPS.forEach(function (g) {
+    var merged = {};
+    var a = auto[g[0]] || {};
+    var m = manual[g[0]] || {};
+    g[2].forEach(function (f) {
+      var v = m[f[0]] != null && String(m[f[0]]).trim() !== '' ? m[f[0]] : a[f[0]];
+      if (v != null && String(v).trim() !== '') merged[f[0]] = v;
+    });
+    s[g[0]] = merged;
+  });
   var esc = function (v) {
     return String(v == null ? '' : v)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

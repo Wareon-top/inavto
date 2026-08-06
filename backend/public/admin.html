@@ -146,7 +146,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v31.07-3</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v31.07-4</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -399,6 +399,7 @@ let LANG = localStorage.getItem('inavto_admin_lang') || 'ru';
 const DICT = {
 zh: {
   'Каталог — админка INAVTO ASIA': 'INAVTO ASIA — 车辆目录管理后台',
+  'Пустые поля сайт заполняет сам из карточки автомобиля: марка, модель, год, кузов, мощность, привод, батарея, запас хода, пробег. Здесь заполняйте только то, что хотите уточнить или добавить.': '留空的字段网站会根据车辆卡片自动填写：品牌、车型、年份、车身、功率、驱动、电池、续航、里程。此处只需填写需要补充或更正的内容。',
   "Основные характеристики": "基本参数",
   "Трансмиссия": "传动系统",
   "Габариты": "尺寸参数",
@@ -707,6 +708,7 @@ zh: {
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
+  'Пустые поля сайт заполняет сам из карточки автомобиля: марка, модель, год, кузов, мощность, привод, батарея, запас хода, пробег. Здесь заполняйте только то, что хотите уточнить или добавить.': 'Empty fields are filled in automatically from the car record: make, model, year, body, power, drivetrain, battery, range, mileage. Fill in here only what you want to refine or add.',
   "Основные характеристики": "Key specifications",
   "Трансмиссия": "Transmission",
   "Габариты": "Dimensions",
@@ -1887,10 +1889,12 @@ const SPEC_GROUPS = [
     ['brand', 'Марка'], ['model', 'Модель'], ['trim', 'Комплектация'], ['year', 'Год выпуска'],
     ['country', 'Страна производства'], ['body', 'Тип кузова'], ['seats', 'Количество мест'],
     ['colorBody', 'Цвет кузова'], ['colorInterior', 'Цвет салона'], ['mileage', 'Пробег'],
+    ['vin', 'VIN'],
   ]],
   ['engine', 'Двигатель', [
     ['type', 'Тип двигателя'], ['volume', 'Объём двигателя'], ['power', 'Мощность'],
-    ['torque', 'Крутящий момент'], ['eco', 'Экологический стандарт'], ['fuel', 'Тип топлива'],
+    ['torque', 'Крутящий момент'], ['battery', 'Батарея'], ['range', 'Запас хода'],
+    ['eco', 'Экологический стандарт'], ['fuel', 'Тип топлива'],
     ['consumption', 'Средний расход топлива'], ['tank', 'Объём топливного бака'],
   ]],
   ['trans', 'Трансмиссия', [
@@ -1916,6 +1920,7 @@ const CAR_OPTIONS = [
 
 function renderSpecForm() {
   $('spec-form').innerHTML =
+    `<div class="price-hint" style="margin:0 0 16px">${t('Пустые поля сайт заполняет сам из карточки автомобиля: марка, модель, год, кузов, мощность, привод, батарея, запас хода, пробег. Здесь заполняйте только то, что хотите уточнить или добавить.')}</div>` +
     SPEC_GROUPS.map(([gk, gname, fields]) =>
       `<h2 style="margin-top:4px">${t(gname)}</h2>
        <div class="grid g3" style="margin-bottom:16px">` +

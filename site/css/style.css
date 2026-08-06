@@ -405,7 +405,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .cg-thumb.active { border-color: var(--red); }
 
 /* ---------- Характеристики карточками ---------- */
-.spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* две колонки на широком экране, одна — на телефоне (длинные значения
+   вроде «Батарея 100 кВт·ч, запас хода 705 км» не рассыпаются по слогам) */
+.spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 .spec-item { background: var(--bg-2); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
 .spec-item span { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 5px; }
 .spec-item b { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
@@ -1471,4 +1473,17 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .commission .form-grid > * { min-width: 0; }
 @media (max-width: 860px) {
   .commission { grid-template-columns: 1fr; padding: 22px 18px; gap: 22px; }
+}
+
+/* ---------- Подробная карточка характеристик ---------- */
+.opt-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+.opt-list li { position: relative; padding-left: 26px; font-size: 14.5px; font-weight: 600; line-height: 1.45; }
+.opt-list li::before {
+  content: '✓'; position: absolute; left: 0; top: 0;
+  color: var(--green, #1f9d55); font-weight: 800;
+}
+.spec-text p { margin: 0 0 12px; }
+.spec-text p:last-child { margin-bottom: 0; }
+@media (max-width: 640px) {
+  .opt-list { grid-template-columns: 1fr; }
 }

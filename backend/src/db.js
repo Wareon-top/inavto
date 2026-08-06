@@ -140,6 +140,9 @@ for (const col of ["descr_zh TEXT DEFAULT ''", "descr_en TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 
+/* Подробная карточка характеристик (группы полей, опции, описание) — JSON. */
+try { db.exec("ALTER TABLE site_cars ADD COLUMN specs TEXT DEFAULT ''") } catch { /* колонка уже есть */ }
+
 /* «Автомобили в наличии в России»: флаг, город и VIN у машин каталога. */
 for (const col of ['stock INTEGER DEFAULT 0', "stock_city TEXT DEFAULT ''", "vin TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }

@@ -12,6 +12,8 @@ const DOMAIN = 'https://inavtoasia.ru' // боевой домен
 
 const win = {}
 new Function('window', fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8'))(win)
+/* специи-карточка: тот же код, что и на сайте — вёрстка не расходится */
+new Function('window', fs.readFileSync(path.join(ROOT, 'js/specs.js'), 'utf8'))(win)
 const { CARS } = win.INAVTO
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
@@ -53,6 +55,7 @@ function pageHTML(car) {
   specs.push(['Год', String(car.year)])
 
   const pills = `<div class="car-pills"><span>${esc(car.body)}</span><span>${esc(car.fuel)}</span><span>${car.year}</span><span class="${used ? 'state-used' : 'state-new'}">${used ? 'С пробегом' : 'Новый'}</span></div>`
+  const specSheet = win.INAVTO.specSheetHTML(car, car.desc)
   const specGrid = '<div class="spec-grid">' + specs.map(([k, v]) => `<div class="spec-item"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('') + '</div>'
   const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
   const cnyLine = car.priceCny ? `<div class="price-cny">≈ ¥ ${car.priceCny.toLocaleString('ru-RU')} цена в Китае</div>` : ''
@@ -162,9 +165,9 @@ function pageHTML(car) {
           <div data-car-gallery="${car.slug}">${galleryStaticHTML(car)}</div>
           <h1 class="h2" style="margin:22px 0 4px">${esc(car.name)} под заказ ${from}</h1>
           ${pills}
-          <p class="lead" style="font-size:16px;margin-top:12px">${esc(car.desc)}</p>
+          ${specSheet || `<p class="lead" style="font-size:16px;margin-top:12px">${esc(car.desc)}</p>
           <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
-          ${specGrid}
+          ${specGrid}`}
           <div style="margin-top:32px">
             ${faq.map(([q, a]) => `<div class="faq-item"><button class="faq-q">${esc(q)}</button><div class="faq-a">${esc(a)}</div></div>`).join('\n            ')}
           </div>
@@ -201,6 +204,7 @@ function pageHTML(car) {
   </section>` : ''}
 
   <script src="js/data.js"></script>
+  <script src="js/specs.js"></script>
   <script src="js/i18n.js"></script>
   <script>
     window.INAVTO_PAGE_INIT = function () {
@@ -496,6 +500,7 @@ const urls = [
   ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),
   ...CITIES.map((c) => `${DOMAIN}/gorod/${c[0]}.html`),
   `${DOMAIN}/blog/`,
+  `${DOMAIN}/blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html`,
   `${DOMAIN}/blog/utilsbor-2026.html`,
   `${DOMAIN}/blog/erev-vs-phev.html`,
   `${DOMAIN}/blog/kak-proverit-posrednika.html`,

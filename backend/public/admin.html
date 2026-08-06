@@ -146,7 +146,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v31.07-2</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v31.07-3</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -261,6 +261,10 @@
           <label>Описание English</label>
           <textarea id="f-desc-en" placeholder="Если оставить пустым, сайт сам соберёт описание на языке посетителя из характеристик."></textarea>
         </div>
+      </details>
+      <details style="margin-bottom:18px" id="spec-details">
+        <summary style="cursor:pointer;font-weight:600">Подробная карточка характеристик (показывается на странице автомобиля)</summary>
+        <div id="spec-form" style="margin-top:14px"></div>
       </details>
       <div style="margin-bottom:20px">
         <label>Фото (первое — главное; сжимаются автоматически)</label>
@@ -395,6 +399,58 @@ let LANG = localStorage.getItem('inavto_admin_lang') || 'ru';
 const DICT = {
 zh: {
   'Каталог — админка INAVTO ASIA': 'INAVTO ASIA — 车辆目录管理后台',
+  "Основные характеристики": "基本参数",
+  "Трансмиссия": "传动系统",
+  "Габариты": "尺寸参数",
+  "Марка": "品牌",
+  "Год выпуска": "生产年份",
+  "Страна производства": "生产国",
+  "Тип кузова": "车身类型",
+  "Количество мест": "座位数",
+  "Цвет кузова": "车身颜色",
+  "Цвет салона": "内饰颜色",
+  "Объём двигателя": "排量",
+  "Крутящий момент": "扭矩",
+  "Экологический стандарт": "排放标准",
+  "Тип топлива": "燃料类型",
+  "Средний расход топлива": "平均油耗",
+  "Объём топливного бака": "油箱容积",
+  "Коробка передач": "变速箱",
+  "Разгон 0–100 км/ч": "0–100 km/h 加速",
+  "Максимальная скорость": "最高车速",
+  "Длина": "长度",
+  "Ширина": "宽度",
+  "Высота": "高度",
+  "Колёсная база": "轴距",
+  "Клиренс": "离地间隙",
+  "Снаряжённая масса": "整备质量",
+  "Размер шин": "轮胎规格",
+  "Объём багажника": "后备箱容积",
+  "Светодиодная оптика": "LED 大灯",
+  "Дневные ходовые огни": "日间行车灯",
+  "Панорамная крыша / люк": "全景天窗",
+  "Кожаный салон": "真皮内饰",
+  "Электропривод передних сидений": "前排电动座椅",
+  "Подогрев передних сидений": "前排座椅加热",
+  "Вентиляция сидений": "座椅通风",
+  "Память сидений": "座椅记忆",
+  "Многофункциональный руль": "多功能方向盘",
+  "Цифровая приборная панель": "全液晶仪表",
+  "Мультимедийная система": "多媒体系统",
+  "Беспроводная зарядка смартфона": "手机无线充电",
+  "Климат-контроль": "自动空调",
+  "Камера 360°": "360° 全景影像",
+  "Передние и задние парктроники": "前后泊车雷达",
+  "Адаптивный круиз-контроль": "自适应巡航",
+  "Система удержания в полосе": "车道保持系统",
+  "Контроль слепых зон": "盲区监测",
+  "Система автоматического экстренного торможения": "自动紧急制动",
+  "Электропривод багажника": "电动尾门",
+  "Бесключевой доступ": "无钥匙进入",
+  "Кнопка запуска двигателя": "一键启动",
+  "Атмосферная подсветка салона": "氛围灯",
+  "Подробная карточка характеристик (показывается на странице автомобиля)": "详细参数卡（显示在车辆页面）",
+  "Свободный текст: чем хорош автомобиль, история, состояние.": "自由文本：车辆亮点、车史、状况。",
   'Личный кабинет клиента': '客户个人中心',
   'Скопировать ссылку для клиента': '复制客户链接',
   'ссылка ещё не создавалась': '链接尚未创建',
@@ -651,6 +707,58 @@ zh: {
 },
 en: {
   'Каталог — админка INAVTO ASIA': 'Catalog — INAVTO ASIA admin',
+  "Основные характеристики": "Key specifications",
+  "Трансмиссия": "Transmission",
+  "Габариты": "Dimensions",
+  "Марка": "Make",
+  "Год выпуска": "Model year",
+  "Страна производства": "Country of manufacture",
+  "Тип кузова": "Body type",
+  "Количество мест": "Seats",
+  "Цвет кузова": "Exterior colour",
+  "Цвет салона": "Interior colour",
+  "Объём двигателя": "Engine displacement",
+  "Крутящий момент": "Torque",
+  "Экологический стандарт": "Emission standard",
+  "Тип топлива": "Fuel type",
+  "Средний расход топлива": "Average fuel consumption",
+  "Объём топливного бака": "Fuel tank capacity",
+  "Коробка передач": "Gearbox",
+  "Разгон 0–100 км/ч": "0–100 km/h",
+  "Максимальная скорость": "Top speed",
+  "Длина": "Length",
+  "Ширина": "Width",
+  "Высота": "Height",
+  "Колёсная база": "Wheelbase",
+  "Клиренс": "Ground clearance",
+  "Снаряжённая масса": "Curb weight",
+  "Размер шин": "Tyre size",
+  "Объём багажника": "Boot capacity",
+  "Светодиодная оптика": "LED headlights",
+  "Дневные ходовые огни": "Daytime running lights",
+  "Панорамная крыша / люк": "Panoramic roof / sunroof",
+  "Кожаный салон": "Leather interior",
+  "Электропривод передних сидений": "Power front seats",
+  "Подогрев передних сидений": "Heated front seats",
+  "Вентиляция сидений": "Ventilated seats",
+  "Память сидений": "Seat memory",
+  "Многофункциональный руль": "Multifunction steering wheel",
+  "Цифровая приборная панель": "Digital instrument cluster",
+  "Мультимедийная система": "Infotainment system",
+  "Беспроводная зарядка смартфона": "Wireless phone charging",
+  "Климат-контроль": "Climate control",
+  "Камера 360°": "360° camera",
+  "Передние и задние парктроники": "Front and rear parking sensors",
+  "Адаптивный круиз-контроль": "Adaptive cruise control",
+  "Система удержания в полосе": "Lane keeping assist",
+  "Контроль слепых зон": "Blind spot monitoring",
+  "Система автоматического экстренного торможения": "Automatic emergency braking",
+  "Электропривод багажника": "Power tailgate",
+  "Бесключевой доступ": "Keyless entry",
+  "Кнопка запуска двигателя": "Engine start button",
+  "Атмосферная подсветка салона": "Ambient interior lighting",
+  "Подробная карточка характеристик (показывается на странице автомобиля)": "Detailed spec sheet (shown on the car page)",
+  "Свободный текст: чем хорош автомобиль, история, состояние.": "Free text: what is good about the car, history, condition.",
   'Личный кабинет клиента': 'Client portal',
   'Скопировать ссылку для клиента': 'Copy client link',
   'ссылка ещё не создавалась': 'link not created yet',
@@ -1772,6 +1880,88 @@ async function loadDealDocs(id) {
   }));
 }
 
+/* ---------- Подробная карточка характеристик ----------
+   Список полей повторяет site/js/specs.js — там же вёрстка для сайта. */
+const SPEC_GROUPS = [
+  ['basic', 'Основные характеристики', [
+    ['brand', 'Марка'], ['model', 'Модель'], ['trim', 'Комплектация'], ['year', 'Год выпуска'],
+    ['country', 'Страна производства'], ['body', 'Тип кузова'], ['seats', 'Количество мест'],
+    ['colorBody', 'Цвет кузова'], ['colorInterior', 'Цвет салона'], ['mileage', 'Пробег'],
+  ]],
+  ['engine', 'Двигатель', [
+    ['type', 'Тип двигателя'], ['volume', 'Объём двигателя'], ['power', 'Мощность'],
+    ['torque', 'Крутящий момент'], ['eco', 'Экологический стандарт'], ['fuel', 'Тип топлива'],
+    ['consumption', 'Средний расход топлива'], ['tank', 'Объём топливного бака'],
+  ]],
+  ['trans', 'Трансмиссия', [
+    ['gearbox', 'Коробка передач'], ['drive', 'Привод'],
+    ['accel', 'Разгон 0–100 км/ч'], ['maxSpeed', 'Максимальная скорость'],
+  ]],
+  ['dims', 'Габариты', [
+    ['length', 'Длина'], ['width', 'Ширина'], ['height', 'Высота'], ['wheelbase', 'Колёсная база'],
+    ['clearance', 'Клиренс'], ['weight', 'Снаряжённая масса'], ['tires', 'Размер шин'],
+    ['trunk', 'Объём багажника'],
+  ]],
+];
+const CAR_OPTIONS = [
+  'Светодиодная оптика', 'Дневные ходовые огни', 'Панорамная крыша / люк', 'Кожаный салон',
+  'Электропривод передних сидений', 'Подогрев передних сидений', 'Вентиляция сидений',
+  'Память сидений', 'Многофункциональный руль', 'Цифровая приборная панель',
+  'Мультимедийная система', 'Apple CarPlay / Android Auto', 'Беспроводная зарядка смартфона',
+  'Климат-контроль', 'Камера 360°', 'Передние и задние парктроники', 'Адаптивный круиз-контроль',
+  'Система удержания в полосе', 'Контроль слепых зон',
+  'Система автоматического экстренного торможения', 'Электропривод багажника',
+  'Бесключевой доступ', 'Кнопка запуска двигателя', 'Атмосферная подсветка салона',
+];
+
+function renderSpecForm() {
+  $('spec-form').innerHTML =
+    SPEC_GROUPS.map(([gk, gname, fields]) =>
+      `<h2 style="margin-top:4px">${t(gname)}</h2>
+       <div class="grid g3" style="margin-bottom:16px">` +
+      fields.map(([fk, label]) =>
+        `<div><label>${t(label)}</label><input id="sp-${gk}-${fk}"></div>`).join('') +
+      `</div>`).join('') +
+    `<h2>${t('Комплектация')}</h2>
+     <div class="tags" id="spec-options" style="margin-bottom:16px">` +
+    CAR_OPTIONS.map((o) =>
+      `<label><input type="checkbox" value="${escHtml(o)}"> ${t(o)}</label>`).join('') +
+    `</div>
+     <div style="margin-bottom:6px"><label>${t('Описание')}</label>
+       <textarea id="sp-text" rows="5" placeholder="${t('Свободный текст: чем хорош автомобиль, история, состояние.')}"></textarea></div>`;
+}
+
+function fillSpecForm(car) {
+  const s = (car && car.specs) || {};
+  SPEC_GROUPS.forEach(([gk, , fields]) => {
+    const data = s[gk] || {};
+    fields.forEach(([fk]) => { $(`sp-${gk}-${fk}`).value = data[fk] == null ? '' : data[fk]; });
+  });
+  const opts = Array.isArray(s.options) ? s.options : [];
+  $('spec-options').querySelectorAll('input').forEach((i) => { i.checked = opts.includes(i.value); });
+  $('sp-text').value = s.text || '';
+  /* карточка заполнена — раскрываем блок, чтобы её было видно */
+  $('spec-details').open = !!(car && car.specs);
+}
+
+/* Пустые группы не отправляем — карточка на сайте показывает только заполненное */
+function readSpecForm() {
+  const out = {};
+  SPEC_GROUPS.forEach(([gk, , fields]) => {
+    const g = {};
+    fields.forEach(([fk]) => {
+      const v = $(`sp-${gk}-${fk}`).value.trim();
+      if (v) g[fk] = v;
+    });
+    if (Object.keys(g).length) out[gk] = g;
+  });
+  const opts = [...$('spec-options').querySelectorAll('input:checked')].map((i) => i.value);
+  if (opts.length) out.options = opts;
+  const text = $('sp-text').value.trim();
+  if (text) out.text = text;
+  return Object.keys(out).length ? out : null;
+}
+
 /* ---------- Форма ---------- */
 const translit = (s) => s.toLowerCase()
   .replace(/[ё]/g,'e').replace(/[а]/g,'a').replace(/[б]/g,'b').replace(/[в]/g,'v').replace(/[г]/g,'g')
@@ -1785,6 +1975,7 @@ const translit = (s) => s.toLowerCase()
 
 $('f-tags').innerHTML = TAGS.map(([v, l]) =>
   `<label><input type="checkbox" value="${v}"> ${t(l)}</label>`).join('');
+renderSpecForm();
 
 function openForm(car) {
   editing = car ? car.slug : null;
@@ -1811,6 +2002,7 @@ function openForm(car) {
   $('f-cny').value = car && car.priceCny ? car.priceCny : '';
   $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
   $('f-desc').value = car ? car.desc : '';
+  fillSpecForm(car);
   $('f-desc-zh').value = car ? (car.descZh || '') : '';
   $('f-desc-en').value = car ? (car.descEn || '') : '';
   $('f-hidden').checked = car ? car.hidden : false;
@@ -1898,6 +2090,7 @@ $('saveBtn').onclick = async () => {
     price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
     price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
     desc: $('f-desc').value.trim(),
+    specs: readSpecForm(),
     descZh: $('f-desc-zh').value.trim(),
     descEn: $('f-desc-en').value.trim(),
     tags: [...$('f-tags').querySelectorAll('input:checked')].map((i) => i.value),

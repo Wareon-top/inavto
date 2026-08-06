@@ -38,6 +38,7 @@ const rowToCar = (r) => ({
   sort: r.sort,
   cond: r.cond === 'used' ? 'used' : 'new',
   mileage: r.mileage || 0,
+  specs: (() => { try { return r.specs ? JSON.parse(r.specs) : null } catch { return null } })(),
   stock: r.stock ? 1 : 0,
   stockCity: r.stock_city || '',
   vin: r.vin || '',
@@ -60,7 +61,7 @@ router.get('/all', adminOnly, (req, res) => {
 
 const FIELDS = ['brand', 'name', 'body', 'fuel', 'power', 'drive', 'range', 'battery',
   'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden',
-  'cond', 'mileage', 'descr_zh', 'descr_en', 'stock', 'stock_city', 'vin']
+  'cond', 'mileage', 'descr_zh', 'descr_en', 'stock', 'stock_city', 'vin', 'specs']
 
 function carPayload(body) {
   const p = {}
@@ -86,6 +87,12 @@ function carPayload(body) {
   p.hidden = body.hidden ? 1 : 0
   p.cond = body.cond === 'used' ? 'used' : 'new'
   p.mileage = Math.max(0, Math.round(Number(body.mileage) || 0))
+  /* Подробная карточка: объект групп/опций/описания. Пустая — не храним. */
+  p.specs = ''
+  if (body.specs && typeof body.specs === 'object') {
+    const t = JSON.stringify(body.specs)
+    if (t.length <= 20000) p.specs = t
+  }
   p.stock = body.stock ? 1 : 0
   p.stock_city = String(body.stockCity ?? body.stock_city ?? '').trim().slice(0, 60)
   p.vin = String(body.vin || '').trim().toUpperCase().slice(0, 32)

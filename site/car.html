@@ -58,6 +58,7 @@
   </section>
 
   <script src="js/data.js"></script>
+  <script src="js/specs.js"></script>
   <script src="js/i18n.js"></script>
   <script>
     window.INAVTO_PAGE_INIT = function () {
@@ -88,14 +89,19 @@
 
       const cnyLine = car.priceCny ? '<div class="price-cny">≈ ¥ ' + car.priceCny.toLocaleString('ru-RU') + ' цена в Китае</div>' : '';
 
+      /* Подробная карточка (если заполнена в админке) вместо короткого блока */
+      const sheet = A.specSheetHTML ? A.specSheetHTML(car, A.localDesc(car)) : '';
+      const specsBlock = sheet || `
+          <p class="lead" style="font-size:16px;margin-top:12px">${A.localDesc(car)}</p>
+          <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
+          ${A.specGrid(specs)}`;
+
       document.getElementById('car-wrap').innerHTML = `
         <div>
           ${A.carGallery(car)}
           <h1 class="h2" style="margin:22px 0 4px">${car.name}</h1>
           ${A.carPills(car)}
-          <p class="lead" style="font-size:16px;margin-top:12px">${A.localDesc(car)}</p>
-          <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
-          ${A.specGrid(specs)}
+          ${specsBlock}
         </div>
         <div class="calc-panel calc-result reveal">
           <div class="badge badge-green" style="margin-bottom:14px">${stock ? 'в наличии — можно забрать сегодня' : 'доступен к заказу'}</div>

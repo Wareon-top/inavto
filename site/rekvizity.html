@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Реквизиты ООО «ИНАВТО АЗИЯ» — ИНН, ОГРН, контакты | INAVTO ASIA</title>
+  <meta name="description" content="Официальные реквизиты компании INAVTO ASIA: полное наименование, ИНН, КПП, ОГРН, телефон и e-mail. Работаем по договору с физическими и юридическими лицами.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="INAVTO ASIA">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Реквизиты ООО «ИНАВТО АЗИЯ» — ИНН, ОГРН, контакты | INAVTO ASIA">
+  <meta property="og:description" content="Официальные реквизиты компании INAVTO ASIA: полное наименование, ИНН, КПП, ОГРН, телефон и e-mail. Работаем по договору с физическими и юридическими лицами.">
+  <meta property="og:url" content="https://inavtoasia.ru/rekvizity.html">
+  <meta property="og:image" content="https://inavtoasia.ru/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="noindex, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    window.INAVTO_YM_ID = 111046600;
+    ym(111046600, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/111046600" style="position:absolute; left:-9999px;" alt=""></div></noscript>
+  <!-- /Yandex.Metrika counter -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="rekvizity">
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs"><a href="index.html">Главная</a> / Реквизиты</div>
+      <h1 class="h1" style="font-size:clamp(26px,4vw,40px)">Реквизиты компании</h1>
+      <p class="lead" style="margin-top:14px;max-width:640px">Работаем официально: договор, оплата по счёту и инвойсу, полный пакет документов на автомобиль.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:16px">
+    <div class="container">
+      <div class="req-table" id="req-table"></div>
+      <p class="form-note" style="margin-top:18px;max-width:640px">Реквизиты для оплаты по конкретной сделке менеджер присылает вместе со счётом. Проверяйте, что платёж уходит на счёт ООО «ИНАВТО АЗИЯ» — мы никогда не просим переводы на личные карты.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2 class="h2">Нужен договор или счёт?</h2>
+          <p class="lead">Пришлём шаблон договора на проверку до того, как вы что-то решите. Работаем с физическими и юридическими лицами.</p>
+        </div>
+        <div class="cta-banner-actions">
+          <button class="btn btn-red" data-quiz-open>Запросить договор</button>
+          <a class="btn btn-ghost" href="kontakty.html">Контакты</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      var A = window.INAVTO, C = A.COMPANY || {}, K = A.CONTACTS || {};
+      var rows = [
+        ['Полное наименование', C.full, ''],
+        ['Сокращённое наименование', C.short, ''],
+        ['ИНН', C.inn, 'mono'],
+        ['КПП', C.kpp, 'mono'],
+        ['ОГРН', C.ogrn, 'mono'],
+        ['Юридический адрес', C.address, ''],
+        ['Руководитель', C.director, ''],
+        ['Банк', C.bank, ''],
+        ['БИК', C.bik, 'mono'],
+        ['Расчётный счёт', C.account, 'mono'],
+        ['Корреспондентский счёт', C.corrAccount, 'mono'],
+        ['Телефон', K.phone, ''],
+        ['E-mail', K.email, ''],
+        ['Сайт', 'inavtoasia.ru', ''],
+      ].filter(function (r) { return r[1]; });
+      document.getElementById('req-table').innerHTML = rows.map(function (r) {
+        return '<div class="k">' + r[0] + '</div><div class="v ' + r[2] + '">' + r[1] + '</div>';
+      }).join('');
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>

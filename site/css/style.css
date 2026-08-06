@@ -1487,3 +1487,26 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 @media (max-width: 640px) {
   .opt-list { grid-template-columns: 1fr; }
 }
+
+/* ---------- Реквизиты в подвале ---------- */
+.footer-legal {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline;
+  border-top: 1px solid var(--line-2); margin-top: 30px; padding-top: 18px;
+  font-size: 13px; color: var(--muted-2, #8a94a6);
+}
+.footer-legal b { color: inherit; font-weight: 800; }
+.footer-legal a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.footer-legal a:hover { color: #fff; }
+.footer-docs { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+
+/* ---------- Таблица реквизитов ---------- */
+.req-table { display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; }
+.req-table > div { background: var(--card, #fff); padding: 13px 18px; font-size: 15px; }
+.req-table .k { color: var(--muted); font-size: 13.5px; }
+.req-table .v { font-weight: 700; }
+.req-table .v.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: .02em; }
+@media (max-width: 560px) {
+  .req-table { grid-template-columns: 1fr; }
+  .req-table .k { padding-bottom: 0; }
+  .req-table .v { padding-top: 4px; }
+}

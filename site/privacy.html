@@ -49,7 +49,8 @@
   <section class="section" style="padding-top:16px">
     <div class="container">
       <div class="prose">
-        <p>Настоящая политика определяет порядок обработки персональных данных посетителей сайта INAVTO ASIA (далее — «Сайт») в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+        <p>Настоящая политика определяет порядок обработки персональных данных посетителей сайта inavtoasia.ru (далее — «Сайт») в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+        <p><b>Оператор персональных данных:</b> <span id="pp-operator"></span></p>
 
         <h2>1. Какие данные мы собираем</h2>
         <ul>
@@ -84,6 +85,17 @@
 
   <script src="js/data.js"></script>
   <script src="js/i18n.js"></script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      var C = window.INAVTO.COMPANY || {}, K = window.INAVTO.CONTACTS || {};
+      var parts = [C.full || 'INAVTO ASIA'];
+      if (C.inn) parts.push('ИНН ' + C.inn);
+      if (C.ogrn) parts.push('ОГРН ' + C.ogrn);
+      if (C.address) parts.push('адрес: ' + C.address);
+      if (K.email) parts.push('e-mail: ' + K.email);
+      document.getElementById('pp-operator').textContent = parts.join(', ') + '.';
+    };
+  </script>
   <script src="js/main.js"></script>
 </body>
 </html>

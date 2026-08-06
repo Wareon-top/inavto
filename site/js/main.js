@@ -127,6 +127,7 @@
 
   /* ---------- Layout: футер + плавающие кнопки ---------- */
   function renderFooter() {
+    const C0 = A.COMPANY || {};
     const el = document.createElement('div');
     el.innerHTML = `
       <footer class="footer">
@@ -162,9 +163,21 @@
               <a href="mailto:${C.email}">${C.email}</a>
             </div>
           </div>
+          <div class="footer-legal">
+            <b>${C0.short}</b>
+            <span>ИНН ${C0.inn}</span>
+            <span>КПП ${C0.kpp}</span>
+            <span>ОГРН ${C0.ogrn}</span>
+            ${C0.address ? `<span>${C0.address}</span>` : ''}
+            <a href="rekvizity.html">Все реквизиты</a>
+          </div>
           <div class="footer-bottom">
             <span>© ${new Date().getFullYear()} INAVTO ASIA. Все цены на сайте ориентировочные и не являются публичной офертой.</span>
-            <span><a href="privacy.html">Политика конфиденциальности</a></span>
+            <span class="footer-docs">
+              <a href="privacy.html">Политика конфиденциальности</a>
+              <a href="soglasie.html">Согласие на обработку данных</a>
+              <a href="usloviya.html">Пользовательское соглашение</a>
+            </span>
           </div>
         </div>
       </footer>
@@ -545,7 +558,7 @@
     const l = document.createElement('label');
     l.className = 'consent';
     l.innerHTML = '<input type="checkbox" name="consent" required>' +
-      '<span>Я согласен на обработку <a href="privacy.html" target="_blank" rel="noopener">персональных данных</a></span>';
+      '<span>Я согласен на обработку <a href="soglasie.html" target="_blank" rel="noopener">персональных данных</a></span>';
     l.querySelector('input').addEventListener('change', () => l.classList.remove('error'));
     const btn = form.querySelector('button[type=submit]');
     if (btn) form.insertBefore(l, btn); else form.appendChild(l);

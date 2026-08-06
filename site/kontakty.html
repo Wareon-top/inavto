@@ -68,6 +68,18 @@
     </div>
   </section>
 
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:20px">
+        <div class="divider-label">Реквизиты</div>
+        <h2 class="h2" style="margin-top:14px">Работаем официально</h2>
+        <p class="lead">Договор, счёт и полный пакет документов на автомобиль. Оплата — только на расчётный счёт компании.</p>
+      </div>
+      <div class="req-table" id="req-short"></div>
+      <p style="margin-top:16px"><a class="btn btn-ghost btn-sm" href="rekvizity.html">Все реквизиты</a></p>
+    </div>
+  </section>
+
   <script src="js/data.js"></script>
   <script src="js/i18n.js"></script>
   <script>
@@ -83,6 +95,18 @@
       document.getElementById('contact-cards').innerHTML = cards.map(c =>
         '<a class="feature reveal" href="' + c[3] + '"' + (c[3].startsWith('http') ? ' target="_blank" rel="noopener"' : '') + '>' +
         '<div class="icon">' + c[0] + '</div><h3>' + c[1] + '</h3><p>' + c[2] + '</p></a>').join('');
+
+      var CO = A.COMPANY || {};
+      var rows = [
+        ['Наименование', CO.short, ''],
+        ['ИНН', CO.inn, 'mono'],
+        ['КПП', CO.kpp, 'mono'],
+        ['ОГРН', CO.ogrn, 'mono'],
+        ['Юридический адрес', CO.address, ''],
+      ].filter(function (r) { return r[1]; });
+      document.getElementById('req-short').innerHTML = rows.map(function (r) {
+        return '<div class="k">' + r[0] + '</div><div class="v ' + r[2] + '">' + r[1] + '</div>';
+      }).join('');
     };
   </script>
   <script src="js/main.js"></script>

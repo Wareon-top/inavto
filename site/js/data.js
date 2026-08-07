@@ -118,7 +118,7 @@ window.INAVTO.CARS = [
   },
   {
     slug: 'geely-monjaro', brand: 'Geely', name: 'Geely Monjaro', country: 'china',
-    body: 'Кроссовер', fuel: 'Бензин', power: '238 л.с.', drive: 'Полный',
+    body: 'Кроссовер', fuel: 'Бензин', power: '238 л.с.', volume: '2.0 л (турбо)', drive: 'Полный',
     range: '—', battery: '—', price: 3.3, year: 2025,
     tags: ['petrol', 'suv'], grad: ['#41454f', '#171a20'],
     desc: 'Флагманский бензиновый кроссовер Geely на платформе Volvo CMA: 2.0 турбо, полный привод BorgWarner, тихий и богатый салон.'
@@ -146,7 +146,7 @@ window.INAVTO.CARS = [
   },
   {
     slug: 'tank-500', brand: 'Tank', name: 'Tank 500', country: 'china',
-    body: 'Внедорожник', fuel: 'Гибрид (HEV)', power: '354 л.с.', drive: 'Полный',
+    body: 'Внедорожник', fuel: 'Гибрид (HEV)', power: '354 л.с.', volume: '2.0 л (турбо)', drive: 'Полный',
     range: '—', battery: '—', price: 5.0, year: 2025,
     tags: ['hybrid', 'suv', 'offroad', '7seats'], grad: ['#3a3d38', '#141612'],
     desc: 'Рамный внедорожник премиум-класса: гибрид 2.0T + электромотор, блокировки, семь мест и салон бизнес-уровня.'

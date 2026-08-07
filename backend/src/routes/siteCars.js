@@ -21,6 +21,7 @@ const rowToCar = (r) => ({
   body: r.body,
   fuel: r.fuel,
   power: r.power,
+  volume: r.engine_volume || '',
   drive: r.drive,
   range: r.range || '—',
   battery: r.battery || '—',
@@ -61,6 +62,7 @@ router.get('/all', adminOnly, (req, res) => {
 
 const FIELDS = ['brand', 'name', 'body', 'fuel', 'power', 'drive', 'range', 'battery',
   'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden',
+  'engine_volume',
   'cond', 'mileage', 'descr_zh', 'descr_en', 'stock', 'stock_city', 'vin', 'specs']
 
 function carPayload(body) {
@@ -70,6 +72,7 @@ function carPayload(body) {
   p.body = String(body.body || 'Кроссовер')
   p.fuel = String(body.fuel || 'Бензин')
   p.power = String(body.power || '')
+  p.engine_volume = String(body.volume ?? body.engine_volume ?? '').trim().slice(0, 40)
   p.drive = String(body.drive || '')
   p.range = String(body.range || '—')
   p.battery = String(body.battery || '—')

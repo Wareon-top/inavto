@@ -140,6 +140,9 @@ for (const col of ["descr_zh TEXT DEFAULT ''", "descr_en TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 
+/* Объём двигателя (см³ или «2.0 л») — показывается в разделе «Двигатель». */
+try { db.exec("ALTER TABLE site_cars ADD COLUMN engine_volume TEXT DEFAULT ''") } catch { /* колонка уже есть */ }
+
 /* Подробная карточка характеристик (группы полей, опции, описание) — JSON. */
 try { db.exec("ALTER TABLE site_cars ADD COLUMN specs TEXT DEFAULT ''") } catch { /* колонка уже есть */ }
 

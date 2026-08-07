@@ -122,6 +122,7 @@ window.INAVTO.autoSpecs = function (car) {
     },
     engine: {
       type: engineType,
+      volume: val(car.volume),
       power: val(car.power),
       battery: val(car.battery),
       range: val(car.range),

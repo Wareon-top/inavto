@@ -501,6 +501,7 @@ const urls = [
   ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),
   ...CITIES.map((c) => `${DOMAIN}/gorod/${c[0]}.html`),
   `${DOMAIN}/blog/`,
+  `${DOMAIN}/blog/lixiang-l7-ili-l9.html`,
   `${DOMAIN}/blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html`,
   `${DOMAIN}/blog/utilsbor-2026.html`,
   `${DOMAIN}/blog/erev-vs-phev.html`,

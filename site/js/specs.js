@@ -86,7 +86,6 @@ window.INAVTO.autoSpecs = function (car) {
   var fuel = val(car.fuel);
   var isEv = /электро/i.test(fuel);
   var isHybrid = /гибрид/i.test(fuel);
-  var tags = car.tags || [];
 
   var engineType = isEv ? 'Электрический'
     : /EREV/i.test(fuel) ? 'Гибрид, последовательный (EREV)'
@@ -116,7 +115,8 @@ window.INAVTO.autoSpecs = function (car) {
       year: car.year ? String(car.year) : '',
       country: 'Китай',
       body: val(car.body),
-      seats: tags.indexOf('7seats') > -1 ? '7' : '',
+      /* число мест не выводим автоматически: тег «7seats» — это категория
+         фильтра «много мест», а не точное значение (у L9, например, шесть) */
       mileage: mileage,
       vin: val(car.vin),
     },

@@ -495,7 +495,7 @@ if (dostavka.includes('<!-- GEO-LINKS:START -->')) {
 
 const staticPages = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
   'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'vydannye-avto.html', 'o-kompanii.html', 'kontakty.html',
-  'rekvizity.html', 'privacy.html', 'soglasie.html', 'usloviya.html']
+  'rekvizity.html']
 const urls = [
   ...staticPages.map((p) => `${DOMAIN}/${p}`),
   ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),

@@ -16,6 +16,10 @@ new Function('window', fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8'))(w
 new Function('window', fs.readFileSync(path.join(ROOT, 'js/specs.js'), 'utf8'))(win)
 const { CARS } = win.INAVTO
 
+/* Даты для разметки товара: цена действует с сегодняшнего дня на год вперёд */
+const TODAY = new Date().toISOString().slice(0, 10)
+const PRICE_VALID_UNTIL = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10)
+
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 const priceRub = (m) => Math.round(m * 1_000_000)
 const fmtPrice = (m) => m.toFixed(1).replace('.', ',')
@@ -60,21 +64,49 @@ function pageHTML(car) {
   const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
   const cnyLine = car.priceCny ? `<div class="price-cny">≈ ¥ ${car.priceCny.toLocaleString('ru-RU')} цена в Китае</div>` : ''
 
+  /* Разметка товара для Google. Обязательное поле image: фото модели,
+     если оно есть в каталоге, иначе фирменное изображение сайта. */
+  const photo = Array.isArray(car.photos) && car.photos[0] ? car.photos[0] : ''
+  const imageUrl = photo
+    ? (/^https?:/.test(photo) ? photo : `${DOMAIN}${photo.startsWith('/') ? '' : '/'}${photo}`)
+    : `${DOMAIN}/img/og-image.jpg`
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: car.name,
     description: desc,
+    image: [imageUrl],
     brand: { '@type': 'Brand', name: car.brand },
-    category: car.body,
+    /* категория из товарной таксономии Google — свободный текст она не принимает */
+    category: 'Vehicles & Parts > Vehicles > Motor Vehicles > Cars, Trucks & Vans',
     offers: {
       '@type': 'Offer',
       priceCurrency: 'RUB',
       price: priceRub(car.price),
-      priceValidUntil: '2026-12-31',
+      validFrom: TODAY,
+      priceValidUntil: PRICE_VALID_UNTIL,
       itemCondition: used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
       availability: 'https://schema.org/PreOrder',
       url: `${DOMAIN}/cars/${car.slug}.html`,
+      seller: { '@type': 'Organization', name: 'INAVTO ASIA' },
+      /* доставка входит в цену «под ключ», срок 30–60 дней по России */
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'RUB' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'RU' },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' },
+          transitTime: { '@type': 'QuantitativeValue', minValue: 30, maxValue: 60, unitCode: 'DAY' },
+        },
+      },
+      /* автомобиль привозится под конкретный заказ: возврат после выдачи
+         не предусмотрен (условия отказа до выкупа — в договоре) */
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'RU',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+      },
     },
   }
   const breadcrumbLd = {

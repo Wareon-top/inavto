@@ -112,6 +112,8 @@ chown -R inavto:inavto "$DATA"
 say "Выкладываю сайт в $WWW…"
 mkdir -p "$WWW"
 rsync -a --delete "$APP/site/" "$WWW/"
+# Бэкенд дописывает сюда страницы машин из каталога админки — нужны права
+chown -R inavto:inavto "$WWW"
 
 # ---------- 8. Служба бэкенда (systemd) ----------
 say "Настраиваю службу inavto (автозапуск бэкенда)…"

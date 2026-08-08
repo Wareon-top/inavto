@@ -25,6 +25,8 @@ fi
 
 say "Выкладываю статику сайта…"
 rsync -a --delete "$APP/site/" "$WWW/"
+# Бэкенд дописывает сюда страницы машин из каталога админки — нужны права
+chown -R inavto:inavto "$WWW"
 
 say "Перезапускаю бэкенд…"
 systemctl restart inavto

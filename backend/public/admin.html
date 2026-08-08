@@ -146,7 +146,7 @@
 <body>
 
 <header class="bar"><div class="wrap">
-  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v06.08-1</small></div>
+  <div class="logo">INAVTO<span>ASIA</span> <small style="letter-spacing:.04em">· админка каталога</small> <small id="build" style="opacity:.5">v08.08-1</small></div>
   <div style="display:flex;align-items:center;gap:16px">
     <div class="langs" role="group" aria-label="Язык">
       <button type="button" class="lang" data-lang="ru">Рус</button>
@@ -193,6 +193,7 @@
         <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
         <button class="btn ghost sm" id="photoCsvBtn" title="Загрузить фото по ссылкам (images.csv)">Импорт фото по ссылкам</button>
         <input type="file" id="photoCsvFile" accept=".csv,text/csv" hidden>
+        <button class="btn ghost sm" id="seoBtn" title="Создать отдельную страницу в поиске для каждой машины каталога">Обновить страницы для Google</button>
         <button class="btn ghost sm" id="logoutBtn">Выйти</button>
         <button class="btn red" id="addBtn">+ Добавить автомобиль</button>
       </div>
@@ -2249,6 +2250,17 @@ $('photoCsvFile').addEventListener('change', async () => {
   } catch (err) { msg(t('Не удалось: ') + t(err.message)); }
   $('photoCsvBtn').disabled = false;
 });
+
+/* ---------- Страницы машин для поисковиков ---------- */
+$('seoBtn').onclick = async () => {
+  $('seoBtn').disabled = true;
+  msg(t('Собираю страницы…'), true);
+  try {
+    const r = await api('/api/site-cars/rebuild-pages', { method: 'POST' });
+    msg(t('Готово. Страниц машин в поиске: ') + r.total + ' (' + t('обновлено: ') + r.written + ')', true);
+  } catch (err) { msg(t('Не удалось: ') + t(err.message)); }
+  $('seoBtn').disabled = false;
+};
 
 /* ---------- Импорт стартового каталога ---------- */
 $('importBtn').onclick = async () => {

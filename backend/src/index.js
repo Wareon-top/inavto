@@ -12,6 +12,7 @@ import dealsRouter from './routes/deals.js'
 import docsRouter from './routes/docs.js'
 import lkRouter from './routes/lk.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
+import { rebuildSitePages } from './sitegen.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -49,4 +50,11 @@ initBot()
 
 app.listen(PORT, () => {
   console.log(`[INAVTO] Backend running on http://localhost:${PORT}`)
+  /* Страницы машин для поисковиков: выкладка сайта (rsync) их затирает,
+     поэтому восстанавливаем их при каждом старте службы. */
+  rebuildSitePages()
+    .then((r) => console.log(r.ok
+      ? `[INAVTO] Страницы каталога: ${r.total} (обновлено ${r.written}, удалено ${r.removed})`
+      : `[INAVTO] Страницы каталога не пересобраны: ${r.reason}`))
+    .catch((e) => console.error('[INAVTO] Ошибка генерации страниц:', e.message))
 })

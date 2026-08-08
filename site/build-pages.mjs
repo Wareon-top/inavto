@@ -43,20 +43,32 @@ function galleryStaticHTML(car) {
   return `<div class="car-gallery" data-gallery><div class="cg-main" style="background:${grad}"><span class="cg-brand">${esc(car.brand)}</span><span class="cg-flag">China</span>${main}${nav}</div>${thumbs}</div>`
 }
 
-function pageHTML(car) {
+function pageHTML(car, allCars) {
+  /* Список для блока «Похожие»: из базы каталога, если страницу строит
+     бэкенд, иначе — встроенный в data.js */
+  const list = Array.isArray(allCars) && allCars.length ? allCars : CARS
   const from = 'из Китая'
   const catUrl = 'catalog.html'
   const catName = 'Авто из Китая'
   const used = car.cond === 'used'
-  const stateNote = used ? 'с пробегом' : 'новый автомобиль'
-  const title = `${car.name} купить под заказ ${from} — цена под ключ | INAVTO ASIA`
-  const desc = `${car.name} (${car.body.toLowerCase()}, ${car.fuel.toLowerCase()}, ${car.power}) под заказ ${from} с доставкой под ключ в Россию: от ${fmtPrice(car.price)} млн ₽ с растаможкой, СБКТС и гарантиями по договору. Срок 30–60 дней.`
+  const stock = !!car.stock
+  const city = String(car.stockCity || '').trim()
+  const title = stock
+    ? `${car.name} в наличии в России${city ? ' — ' + city : ''} — купить | INAVTO ASIA`
+    : `${car.name} купить под заказ ${from} — цена под ключ | INAVTO ASIA`
+  const desc = stock
+    ? `${car.name} (${car.body.toLowerCase()}, ${car.fuel.toLowerCase()}, ${car.power}) — уже в России${city ? ', ' + city : ''}: растаможен, с документами, цена ${fmtPrice(car.price)} млн ₽. Можно осмотреть и забрать сегодня.`
+    : `${car.name} (${car.body.toLowerCase()}, ${car.fuel.toLowerCase()}, ${car.power}) под заказ ${from} с доставкой под ключ в Россию: от ${fmtPrice(car.price)} млн ₽ с растаможкой, СБКТС и гарантиями по договору. Срок 30–60 дней.`
 
   const specs = [['Мощность', car.power], ['Привод', car.drive]]
   if (car.range !== '—') specs.push(['Запас хода', car.range])
   if (car.battery !== '—') specs.push(['Батарея', car.battery])
-  if (used && car.mileage) specs.push(['Пробег', Number(car.mileage).toLocaleString('ru-RU') + ' км'])
+  if ((used || stock) && car.mileage) specs.push(['Пробег', Number(car.mileage).toLocaleString('ru-RU') + ' км'])
   specs.push(['Год', String(car.year)])
+  if (stock) {
+    specs.unshift(['Город', city || 'Россия'])
+    if (car.vin) specs.push(['VIN', car.vin])
+  }
 
   const pills = `<div class="car-pills"><span>${esc(car.body)}</span><span>${esc(car.fuel)}</span><span>${car.year}</span><span class="${used ? 'state-used' : 'state-new'}">${used ? 'С пробегом' : 'Новый'}</span></div>`
   const specSheet = win.INAVTO.specSheetHTML(car, car.desc)
@@ -86,7 +98,7 @@ function pageHTML(car) {
       validFrom: TODAY,
       priceValidUntil: PRICE_VALID_UNTIL,
       itemCondition: used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
-      availability: 'https://schema.org/PreOrder',
+      availability: stock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
       url: `${DOMAIN}/cars/${car.slug}.html`,
       seller: { '@type': 'Organization', name: 'INAVTO ASIA' },
       /* доставка входит в цену «под ключ», срок 30–60 дней по России */
@@ -119,11 +131,25 @@ function pageHTML(car) {
     ],
   }
 
-  const similar = CARS
-    .filter((c) => c.slug !== car.slug && c.country === car.country && (c.body === car.body || c.brand === car.brand))
-    .slice(0, 3)
+  /* Похожие: сначала та же марка или тип кузова, добиваем ближайшими по цене —
+     чтобы на каждой странице каталога были живые ссылки на соседние. */
+  const others = list.filter((c) => c.slug !== car.slug)
+  const similar = others.filter((c) => c.body === car.body || c.brand === car.brand).slice(0, 3)
+  if (similar.length < 3) {
+    const byPrice = others
+      .filter((c) => !similar.includes(c))
+      .sort((a, b) => Math.abs(a.price - car.price) - Math.abs(b.price - car.price))
+    similar.push(...byPrice.slice(0, 3 - similar.length))
+  }
 
-  const faq = [
+  const faq = stock ? [
+    [`Сколько стоит ${car.name}?`,
+      `${fmtPrice(car.price)} млн ₽. Автомобиль уже в России, растаможен, утильсбор оплачен — доплат за логистику и таможню не будет.`],
+    [`Можно ли посмотреть ${car.name} перед покупкой?`,
+      `Да. Автомобиль находится ${city ? 'в городе ' + city : 'в России'} — договоримся об осмотре в удобное время, покажем автомобиль и документы.`],
+    ['Какие документы передаются с автомобилем?',
+      'Договор купли-продажи, таможенные документы, СБКТС и электронный ПТС — полный пакет, готовый для постановки на учёт в ГИБДД.'],
+  ] : [
     [`Сколько стоит ${car.name} под ключ?`,
       `От ${fmtPrice(car.price)} млн ₽ — уже с логистикой, таможенной пошлиной, утильсбором, СБКТС/ЭПТС и нашей комиссией. Точная цена зависит от комплектации и вашего города — пришлём расчёт по заявке в течение дня.`],
     [`Какой срок доставки ${car.name} ${from}?`,
@@ -195,7 +221,7 @@ function pageHTML(car) {
       <div class="calc-layout">
         <div>
           <div data-car-gallery="${car.slug}">${galleryStaticHTML(car)}</div>
-          <h1 class="h2" style="margin:22px 0 4px">${esc(car.name)} под заказ ${from}</h1>
+          <h1 class="h2" style="margin:22px 0 4px">${esc(car.name)} ${stock ? 'в наличии в России' : 'под заказ ' + from}</h1>
           ${pills}
           ${specSheet || `<p class="lead" style="font-size:16px;margin-top:12px">${esc(car.desc)}</p>
           <div class="divider-label" style="margin:28px 0 14px">Характеристики</div>
@@ -205,18 +231,21 @@ function pageHTML(car) {
           </div>
         </div>
         <div class="calc-panel calc-result reveal">
-          <div class="badge badge-green" style="margin-bottom:14px">доступен к заказу</div>
-          <div class="muted" style="font-size:13.5px">Цена «под ключ» с доставкой и растаможкой</div>
+          <div class="badge badge-green" style="margin-bottom:14px">${stock ? 'в наличии — можно забрать сегодня' : 'доступен к заказу'}</div>
+          <div class="muted" style="font-size:13.5px">${stock ? 'Цена — автомобиль уже в России' : 'Цена «под ключ» с доставкой и растаможкой'}</div>
           <div class="calc-total" style="padding-top:6px"><span></span><b>от ${fmtPrice(car.price)} млн ₽</b></div>
           ${cnyLine}
-          <div class="calc-row" style="margin-top:14px"><span>Срок доставки</span><b>30–60 дней</b></div>
-          <div class="calc-row"><span>Фиксация цены</span><b>в договоре</b></div>
+          ${stock
+    ? `<div class="calc-row" style="margin-top:14px"><span>Срок передачи</span><b>сегодня</b></div>
+          <div class="calc-row"><span>Где находится</span><b>${esc(city || 'Россия')}</b></div>`
+    : `<div class="calc-row" style="margin-top:14px"><span>Срок доставки</span><b>30–60 дней</b></div>
+          <div class="calc-row"><span>Фиксация цены</span><b>в договоре</b></div>`}
           <div class="calc-row" style="border:none"><span>Оплата</span><b>по инвойсу через банк</b></div>
-          <form class="form-grid" data-lead-form="Заявка на ${esc(car.name)}" data-brand="${esc(car.name)}" style="margin-top:18px">
+          <form class="form-grid" data-lead-form="${stock ? 'Бронь: ' : 'Заявка на '}${esc(car.name)}" data-brand="${esc(car.name)}" style="margin-top:18px">
             <div class="form-field"><input name="name" placeholder="Ваше имя" required></div>
             <div class="form-field"><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
-            <button class="btn btn-red btn-block" type="submit">Узнать точную цену</button>
-            <div class="form-note">Пришлём актуальный расчёт с учётом комплектации и вашего города. Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
+            <button class="btn btn-red btn-block" type="submit">${stock ? 'Забронировать' : 'Узнать точную цену'}</button>
+            <div class="form-note">${stock ? 'Закрепим автомобиль за вами и свяжемся в ближайшее время.' : 'Пришлём актуальный расчёт с учётом комплектации и вашего города.'} Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
           </form>
           <div class="price-trust">
             <span>${CHECK}Договор с фиксацией цены и сроков</span>
@@ -255,12 +284,6 @@ function pageHTML(car) {
 </body>
 </html>
 `
-}
-
-const outDir = path.join(ROOT, 'cars')
-fs.mkdirSync(outDir, { recursive: true })
-for (const car of CARS) {
-  fs.writeFileSync(path.join(outDir, `${car.slug}.html`), pageHTML(car))
 }
 
 
@@ -498,16 +521,58 @@ function geoHTML(city, i) {
 `
 }
 
-const geoDir = path.join(ROOT, 'gorod')
-fs.mkdirSync(geoDir, { recursive: true })
-CITIES.forEach((city, i) => {
-  fs.writeFileSync(path.join(geoDir, `${city[0]}.html`), geoHTML(city, i))
-})
+/* ---------------------------------------------------------------
+   Экспорт для сервера: бэкенд генерирует страницы машин из базы
+   (каталог админки), используя ровно тот же шаблон, что и здесь.
+   --------------------------------------------------------------- */
+export { pageHTML as carPageHTML, geoHTML, CITIES, DOMAIN }
 
-/* Хаб городов на странице «Доставка» — блок между маркерами */
-const dostavkaPath = path.join(ROOT, 'dostavka.html')
-let dostavka = fs.readFileSync(dostavkaPath, 'utf8')
-const hub = `<!-- GEO-LINKS:START -->
+export const STATIC_PAGES = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
+  'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'vydannye-avto.html', 'o-kompanii.html',
+  'kontakty.html', 'rekvizity.html']
+
+export const BLOG_URLS = [
+  'blog/',
+  'blog/lixiang-l7-ili-l9.html',
+  'blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html',
+  'blog/utilsbor-2026.html',
+  'blog/erev-vs-phev.html',
+  'blog/kak-proverit-posrednika.html',
+]
+
+/* Карта сайта: статические страницы + переданные слаги машин + города + блог */
+export function sitemapXML(carSlugs) {
+  const urls = [
+    ...STATIC_PAGES.map((p) => `${DOMAIN}/${p}`),
+    ...carSlugs.map((slug) => `${DOMAIN}/cars/${slug}.html`),
+    ...CITIES.map((c) => `${DOMAIN}/gorod/${c[0]}.html`),
+    ...BLOG_URLS.map((u) => `${DOMAIN}/${u}`),
+  ]
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
+    urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`
+}
+
+export const robotsTxt = () =>
+  `User-agent: *\nAllow: /\nDisallow: /car.html\nSitemap: ${DOMAIN}/sitemap.xml\n`
+
+/* ---------------- Сборка из командной строки (локально) ---------------- */
+function buildAll() {
+  const outDir = path.join(ROOT, 'cars')
+  fs.mkdirSync(outDir, { recursive: true })
+  for (const car of CARS) {
+    fs.writeFileSync(path.join(outDir, `${car.slug}.html`), pageHTML(car))
+  }
+
+  const geoDir = path.join(ROOT, 'gorod')
+  fs.mkdirSync(geoDir, { recursive: true })
+  CITIES.forEach((city, i) => {
+    fs.writeFileSync(path.join(geoDir, `${city[0]}.html`), geoHTML(city, i))
+  })
+
+  /* Хаб городов на странице «Доставка» — блок между маркерами */
+  const dostavkaPath = path.join(ROOT, 'dostavka.html')
+  let dostavka = fs.readFileSync(dostavkaPath, 'utf8')
+  const hub = `<!-- GEO-LINKS:START -->
   <section class="section" style="padding-top:0">
     <div class="container">
       <div class="section-head">
@@ -520,28 +585,16 @@ const hub = `<!-- GEO-LINKS:START -->
     </div>
   </section>
   <!-- GEO-LINKS:END -->`
-if (dostavka.includes('<!-- GEO-LINKS:START -->')) {
-  dostavka = dostavka.replace(/<!-- GEO-LINKS:START -->[\s\S]*?<!-- GEO-LINKS:END -->/, hub)
-  fs.writeFileSync(dostavkaPath, dostavka)
+  if (dostavka.includes('<!-- GEO-LINKS:START -->')) {
+    dostavka = dostavka.replace(/<!-- GEO-LINKS:START -->[\s\S]*?<!-- GEO-LINKS:END -->/, hub)
+    fs.writeFileSync(dostavkaPath, dostavka)
+  }
+
+  const slugs = CARS.map((c) => c.slug)
+  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemapXML(slugs))
+  fs.writeFileSync(path.join(ROOT, 'robots.txt'), robotsTxt())
+  console.log(`OK: ${CARS.length} model pages, ${CITIES.length} geo pages, sitemap.xml, robots.txt`)
 }
 
-const staticPages = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
-  'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'vydannye-avto.html', 'o-kompanii.html', 'kontakty.html',
-  'rekvizity.html']
-const urls = [
-  ...staticPages.map((p) => `${DOMAIN}/${p}`),
-  ...CARS.map((c) => `${DOMAIN}/cars/${c.slug}.html`),
-  ...CITIES.map((c) => `${DOMAIN}/gorod/${c[0]}.html`),
-  `${DOMAIN}/blog/`,
-  `${DOMAIN}/blog/lixiang-l7-ili-l9.html`,
-  `${DOMAIN}/blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html`,
-  `${DOMAIN}/blog/utilsbor-2026.html`,
-  `${DOMAIN}/blog/erev-vs-phev.html`,
-  `${DOMAIN}/blog/kak-proverit-posrednika.html`,
-]
-fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`)
-fs.writeFileSync(path.join(ROOT, 'robots.txt'),
-  `User-agent: *\nAllow: /\nDisallow: /car.html\nSitemap: ${DOMAIN}/sitemap.xml\n`)
-
-console.log(`OK: ${CARS.length} model pages, ${CITIES.length} geo pages, sitemap.xml (${urls.length} URLs), robots.txt`)
+/* Запуск напрямую (node build-pages.mjs), а не импорт из бэкенда */
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) buildAll()

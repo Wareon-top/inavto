@@ -6,6 +6,8 @@ import db from '../db.js'
 import { adminOnly } from '../auth.js'
 import { UPLOAD_DIR } from './upload.js'
 import { toWebp, sha256 } from '../imageimport/optimizer.mjs'
+import { rowToCar } from '../carRow.js'
+import { rebuildSitePages, scheduleSiteRebuild, staticSlugs } from '../sitegen.js'
 
 const router = Router()
 
@@ -13,42 +15,17 @@ const IMG_W = parseInt(process.env.IMAGES_WIDTH || '1600', 10)
 const IMG_Q = parseInt(process.env.IMAGES_QUALITY || '85', 10)
 const IMG_MAX = parseInt(process.env.IMAGES_MAX_PER_CAR || '20', 10)
 
-const rowToCar = (r) => ({
-  slug: r.slug,
-  brand: r.brand,
-  name: r.name,
-  country: 'china',
-  body: r.body,
-  fuel: r.fuel,
-  power: r.power,
-  volume: r.engine_volume || '',
-  drive: r.drive,
-  range: r.range || '—',
-  battery: r.battery || '—',
-  price: r.price_rub,
-  priceCny: r.price_cny || 0,
-  priceUsd: r.price_usd || 0,
-  year: r.year,
-  tags: JSON.parse(r.tags || '[]'),
-  grad: JSON.parse(r.grad || '["#37424e","#141a20"]'),
-  desc: r.descr || '',
-  descZh: r.descr_zh || '',
-  descEn: r.descr_en || '',
-  photos: JSON.parse(r.photos || '[]'),
-  hidden: Boolean(r.hidden),
-  sort: r.sort,
-  cond: r.cond === 'used' ? 'used' : 'new',
-  mileage: r.mileage || 0,
-  specs: (() => { try { return r.specs ? JSON.parse(r.specs) : null } catch { return null } })(),
-  stock: r.stock ? 1 : 0,
-  stockCity: r.stock_city || '',
-  vin: r.vin || '',
-})
-
-/* Публично: каталог для сайта (только видимые) */
+/* Публично: каталог для сайта (только видимые).
+   page: 1 — у машины есть отдельная страница /cars/<slug>.html, каталог
+   ведёт ссылку на неё (лучше для поиска), иначе — на служебный car.html. */
 router.get('/', (req, res) => {
   const rows = db.prepare('SELECT * FROM site_cars WHERE hidden = 0 ORDER BY sort, created_at').all()
-  res.json(rows.map(rowToCar))
+  const pages = staticSlugs()
+  res.json(rows.map((r) => {
+    const car = rowToCar(r)
+    if (pages.has(car.slug)) car.page = 1
+    return car
+  }))
 })
 
 /* Проверка ключа админки */
@@ -111,6 +88,7 @@ router.post('/', adminOnly, (req, res) => {
   if (exists) return res.status(409).json({ error: 'Такой слаг уже есть' })
   db.prepare(`INSERT INTO site_cars (slug, ${FIELDS.join(', ')})
     VALUES (?, ${FIELDS.map(() => '?').join(', ')})`).run(slug, ...FIELDS.map((f) => p[f]))
+  scheduleSiteRebuild()
   res.status(201).json({ ok: true, slug })
 })
 
@@ -120,12 +98,25 @@ router.put('/:slug', adminOnly, (req, res) => {
   const r = db.prepare(`UPDATE site_cars SET ${FIELDS.map((f) => f + '=?').join(', ')},
     updated_at = datetime('now') WHERE slug = ?`).run(...FIELDS.map((f) => p[f]), req.params.slug)
   if (!r.changes) return res.status(404).json({ error: 'Не найдено' })
+  scheduleSiteRebuild()
   res.json({ ok: true })
 })
 
 router.delete('/:slug', adminOnly, (req, res) => {
   db.prepare('DELETE FROM site_cars WHERE slug = ?').run(req.params.slug)
+  scheduleSiteRebuild()
   res.json({ ok: true })
+})
+
+/* Пересобрать страницы машин прямо сейчас (кнопка в админке) */
+router.post('/rebuild-pages', adminOnly, async (req, res) => {
+  try {
+    const r = await rebuildSitePages()
+    if (!r.ok) return res.status(503).json({ error: r.reason })
+    res.json(r)
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
 })
 
 /* Массовая загрузка фото по ссылкам (из админки).
@@ -177,6 +168,7 @@ router.post('/import-photos', adminOnly, async (req, res) => {
       .run(JSON.stringify(photos), slug)
     out.cars++
   }
+  scheduleSiteRebuild()
   res.json(out)
 })
 
@@ -194,6 +186,7 @@ router.post('/import', adminOnly, (req, res) => {
     insert.run(slug, ...FIELDS.map((f) => p[f]))
     n++
   }
+  scheduleSiteRebuild()
   res.json({ ok: true, imported: n })
 })
 

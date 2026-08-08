@@ -294,7 +294,9 @@
   };
 
   /* ---------- Карточка авто ---------- */
-  A.carUrl = (car) => (A.STATIC_SLUGS && A.STATIC_SLUGS.has(car.slug))
+  /* Своя страница есть у встроенных моделей и у машин каталога, для которых
+     её сгенерировал бэкенд (car.page). Остальные открываем через car.html. */
+  A.carUrl = (car) => (car.page || (A.STATIC_SLUGS && A.STATIC_SLUGS.has(car.slug)))
     ? 'cars/' + car.slug + '.html'
     : 'car.html?slug=' + car.slug;
 

@@ -83,6 +83,18 @@ window.INAVTO.CAR_OPTIONS = [
 window.INAVTO.autoSpecs = function (car) {
   if (!car) return {};
   var val = function (v) { return v && v !== '—' ? String(v) : ''; };
+  /* Если в каталоге значение введено голым числом («147», «2.0») —
+     дописываем единицу измерения. Значения с единицами не трогаем. */
+  var withUnit = function (v, unit) {
+    var s = val(v);
+    return s && /^[\d.,]+$/.test(s) ? s + ' ' + unit : s;
+  };
+  /* Объём: «2.0» → литры, «1998» → см³ */
+  var volumeVal = function (v) {
+    var s = val(v);
+    if (!s || !/^[\d.,]+$/.test(s)) return s;
+    return parseFloat(s.replace(',', '.')) < 25 ? s + ' л' : s + ' см³';
+  };
   var fuel = val(car.fuel);
   var isEv = /электро/i.test(fuel);
   var isHybrid = /гибрид/i.test(fuel);
@@ -122,10 +134,10 @@ window.INAVTO.autoSpecs = function (car) {
     },
     engine: {
       type: engineType,
-      volume: val(car.volume),
-      power: val(car.power),
-      battery: val(car.battery),
-      range: val(car.range),
+      volume: volumeVal(car.volume),
+      power: withUnit(car.power, 'л.с.'),
+      battery: withUnit(car.battery, 'кВт·ч'),
+      range: withUnit(car.range, 'км'),
       fuel: fuelType,
     },
     trans: { drive: val(car.drive) },

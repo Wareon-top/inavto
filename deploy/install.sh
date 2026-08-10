@@ -169,6 +169,7 @@ server {
     }
     location ^~ /uploads/ { proxy_pass http://127.0.0.1:3000; }
     location = /admin     { proxy_pass http://127.0.0.1:3000; }
+    location ^~ /status/  { proxy_pass http://127.0.0.1:3000; }
 
     # Картинки, шрифты, PDF — кэш подольше.
     location ~* \.(webp|png|jpe?g|svg|ico|woff2?|pdf)$ { expires 14d; add_header Cache-Control "public"; }

@@ -246,6 +246,12 @@
         <div><label>Цена, $</label><input id="f-usd" type="number" step="500" min="0" placeholder="31000">
           <div class="price-hint">Необязательно</div></div>
       </div>
+      <div class="grid g2" style="margin-bottom:6px">
+        <div><label>Горящий лот: прежняя цена, млн ₽</label><input id="f-hot-old" type="number" step="0.1" min="0" placeholder="4.8">
+          <div class="price-hint">Лот появится на сайте только если прежняя цена выше текущей</div></div>
+        <div><label>Горящий лот: действует до</label><input id="f-hot-deadline" type="datetime-local">
+          <div class="price-hint">После срока лот автоматически перестанет показываться как горящий</div></div>
+      </div>
       <div style="margin:14px 0 18px">
         <label>Теги (фильтры каталога)</label>
         <div class="tags" id="f-tags"></div>
@@ -1467,7 +1473,7 @@ function openDeal(id) {
 }
 
 /* Адрес личного кабинета клиента (поддомен, скрыт от основного сайта) */
-const LK_BASE = 'https://lk.inavtoasia.ru/?k=';
+const LK_BASE = location.origin + '/status/';
 
 function renderDealCard(d) {
   const isNew = d.id == null;
@@ -2044,6 +2050,8 @@ function openForm(car) {
   $('f-rub').value = car ? car.price : '';
   $('f-cny').value = car && car.priceCny ? car.priceCny : '';
   $('f-usd').value = car && car.priceUsd ? car.priceUsd : '';
+  $('f-hot-old').value = car && car.hot ? car.hot.oldPrice : '';
+  $('f-hot-deadline').value = car && car.hot && car.hot.deadline ? String(car.hot.deadline).slice(0, 16) : '';
   $('f-desc').value = car ? car.desc : '';
   fillSpecForm(car);
   $('f-desc-zh').value = car ? (car.descZh || '') : '';
@@ -2133,6 +2141,10 @@ $('saveBtn').onclick = async () => {
     vin: $('f-vin').value.trim(),
     price_rub: parseFloat(String($('f-rub').value).replace(',', '.')) || 0,
     price_cny: +$('f-cny').value || 0, price_usd: +$('f-usd').value || 0,
+    hot: {
+      oldPrice: parseFloat(String($('f-hot-old').value).replace(',', '.')) || 0,
+      deadline: $('f-hot-deadline').value.trim(),
+    },
     desc: $('f-desc').value.trim(),
     specs: readSpecForm(),
     descZh: $('f-desc-zh').value.trim(),
@@ -2158,7 +2170,7 @@ $('saveBtn').onclick = async () => {
 };
 
 /* ---------- Импорт из CSV (выгрузка поставщика / Excel) ---------- */
-const CSV_HEADERS = 'slug;name;brand;body;fuel;power;volume;drive;range;battery;price_rub;price_cny;price_usd;year;cond;mileage;tags;desc;stock;stock_city;vin';
+const CSV_HEADERS = 'slug;name;brand;body;fuel;power;volume;drive;range;battery;price_rub;price_cny;price_usd;year;cond;mileage;tags;desc;stock;stock_city;vin;hot_old_price;hot_deadline';
 $('csvTplBtn').onclick = () => {
   const rows = [
     CSV_HEADERS,
@@ -2217,6 +2229,7 @@ async function csvToCars(file) {
       desc: g('desc'),
       stock: /^(1|да|yes|true)$/i.test(g('stock')) ? 1 : 0,
       stockCity: g('stock_city'),
+      hot: { oldPrice: num(g('hot_old_price')), deadline: g('hot_deadline') },
       vin: g('vin'),
     };
   }).filter(Boolean);

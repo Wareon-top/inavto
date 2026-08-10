@@ -41,6 +41,7 @@ const FIELDS = ['brand', 'name', 'body', 'fuel', 'power', 'drive', 'range', 'bat
   'price_rub', 'price_cny', 'price_usd', 'year', 'tags', 'grad', 'descr', 'photos', 'sort', 'hidden',
   'engine_volume',
   'cond', 'mileage', 'descr_zh', 'descr_en', 'stock', 'stock_city', 'vin', 'specs']
+  .concat(['hot_old_price', 'hot_deadline'])
 
 function carPayload(body) {
   const p = {}
@@ -76,6 +77,13 @@ function carPayload(body) {
   p.stock = body.stock ? 1 : 0
   p.stock_city = String(body.stockCity ?? body.stock_city ?? '').trim().slice(0, 60)
   p.vin = String(body.vin || '').trim().toUpperCase().slice(0, 32)
+  const hot = body.hot && typeof body.hot === 'object' ? body.hot : body
+  p.hot_old_price = Math.max(0, Number(hot.oldPrice ?? hot.hot_old_price) || 0)
+  p.hot_deadline = String(hot.deadline ?? hot.hot_deadline ?? '').trim().slice(0, 32)
+  if (p.hot_old_price <= p.price_rub) {
+    p.hot_old_price = 0
+    p.hot_deadline = ''
+  }
   return p
 }
 

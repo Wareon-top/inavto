@@ -66,6 +66,8 @@ db.exec(`
     hidden INTEGER DEFAULT 0,
     cond TEXT DEFAULT 'new',
     mileage INTEGER DEFAULT 0,
+    hot_old_price REAL DEFAULT 0,
+    hot_deadline TEXT DEFAULT '',
     updated_at TEXT DEFAULT (datetime('now')),
     created_at TEXT DEFAULT (datetime('now'))
   );
@@ -148,6 +150,13 @@ try { db.exec("ALTER TABLE site_cars ADD COLUMN specs TEXT DEFAULT ''") } catch 
 
 /* «Автомобили в наличии в России»: флаг, город и VIN у машин каталога. */
 for (const col of ['stock INTEGER DEFAULT 0', "stock_city TEXT DEFAULT ''", "vin TEXT DEFAULT ''"]) {
+  try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
+}
+
+/* Честные «горящие лоты»: показываются только когда менеджер явно задал
+   прежнюю цену и будущий срок действия. Миграция добавляет пустые поля и
+   не меняет ни одной существующей карточки каталога. */
+for (const col of ['hot_old_price REAL DEFAULT 0', "hot_deadline TEXT DEFAULT ''"]) {
   try { db.exec(`ALTER TABLE site_cars ADD COLUMN ${col}`) } catch { /* колонка уже есть */ }
 }
 

@@ -260,7 +260,8 @@
 
     /* ---------- Загрузка ---------- */
     async function load() {
-      TOKEN = new URLSearchParams(location.search).get('k') || '';
+      TOKEN = new URLSearchParams(location.search).get('k') ||
+        (location.pathname.match(/^\/status\/([A-Za-z0-9_-]{20,64})\/?$/) || [])[1] || '';
       if (!/^[A-Za-z0-9_-]{20,64}$/.test(TOKEN)) return failScreen();
       try {
         const r = await fetch('/api/lk/' + encodeURIComponent(TOKEN));

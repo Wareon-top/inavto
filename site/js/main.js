@@ -59,6 +59,42 @@
       x.classList.toggle('on', A.favs.has(b.dataset.fav)));
   });
 
+  /* ---------- Сравнение моделей (до трёх, сохраняется между страницами) ---------- */
+  const COMPARE_KEY = 'inavto_compare';
+  const compareList = () => {
+    try {
+      const value = JSON.parse(localStorage.getItem(COMPARE_KEY)) || [];
+      return Array.isArray(value) ? value.slice(0, 3) : [];
+    } catch (e) { return []; }
+  };
+  A.compare = {
+    list: compareList,
+    has: (slug) => compareList().includes(slug),
+    toggle(slug) {
+      let list = compareList();
+      if (list.includes(slug)) list = list.filter((x) => x !== slug);
+      else {
+        if (list.length >= 3) return { list, full: true };
+        list.push(slug);
+      }
+      try { localStorage.setItem(COMPARE_KEY, JSON.stringify(list)); } catch (e) { /* — */ }
+      document.dispatchEvent(new CustomEvent('inavto:compare'));
+      return { list, full: false };
+    },
+    clear() {
+      try { localStorage.removeItem(COMPARE_KEY); } catch (e) { /* — */ }
+      document.dispatchEvent(new CustomEvent('inavto:compare'));
+    },
+  };
+
+  const hotInfo = (car) => {
+    if (!car || !car.hot || !(Number(car.hot.oldPrice) > Number(car.price))) return null;
+    const deadline = new Date(car.hot.deadline);
+    if (!Number.isFinite(deadline.getTime()) || deadline.getTime() <= Date.now()) return null;
+    return { oldPrice: Number(car.hot.oldPrice), deadline };
+  };
+  A.hotInfo = hotInfo;
+
   /* ---------- Layout: шапка ---------- */
   const page = document.body.dataset.page || '';
   const navLinks = [
@@ -278,6 +314,74 @@
       const gal = arrow.closest('[data-gallery]');
       const cur = [...gal.querySelectorAll('.cg-thumb')].findIndex((t) => t.classList.contains('active'));
       galleryGo(gal, cur + (arrow.hasAttribute('data-gallery-next') ? 1 : -1));
+      return;
+    }
+    const mainImage = e.target.closest('.cg-main-img');
+    if (mainImage) {
+      openGalleryLightbox(mainImage.closest('[data-gallery]'));
+    }
+  });
+
+  let lightboxState = null;
+  function galleryUrls(gal) {
+    const thumbs = [...gal.querySelectorAll('.cg-thumb')].map((thumb) =>
+      thumb.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''));
+    if (thumbs.length) return thumbs;
+    const image = gal.querySelector('.cg-main-img');
+    return image && image.src ? [image.src] : [];
+  }
+  function paintLightbox() {
+    if (!lightboxState) return;
+    const box = document.getElementById('gallery-lightbox');
+    const total = lightboxState.urls.length;
+    lightboxState.index = (lightboxState.index + total) % total;
+    box.querySelector('img').src = lightboxState.urls[lightboxState.index];
+    box.querySelector('[data-lightbox-count]').textContent = `${lightboxState.index + 1} / ${total}`;
+    box.querySelectorAll('[data-lightbox-prev], [data-lightbox-next]').forEach((b) => { b.hidden = total < 2; });
+  }
+  function closeGalleryLightbox() {
+    const box = document.getElementById('gallery-lightbox');
+    if (box) box.classList.remove('open');
+    lightboxState = null;
+    document.body.style.overflow = '';
+  }
+  function openGalleryLightbox(gal) {
+    const urls = galleryUrls(gal);
+    if (!urls.length) return;
+    let box = document.getElementById('gallery-lightbox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'gallery-lightbox';
+      box.className = 'gallery-lightbox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-label', 'Просмотр фотографий автомобиля');
+      box.innerHTML = `<button class="gl-close" type="button" data-lightbox-close aria-label="Закрыть">✕</button><button class="gl-nav gl-prev" type="button" data-lightbox-prev aria-label="Предыдущее фото">${CHEV_L}</button><img alt="Фото автомобиля"><button class="gl-nav gl-next" type="button" data-lightbox-next aria-label="Следующее фото">${CHEV_R}</button><span class="gl-count" data-lightbox-count></span>`;
+      document.body.appendChild(box);
+    }
+    const current = gal.querySelector('.cg-thumb.active');
+    lightboxState = { urls, index: current ? +current.dataset.galleryThumb : 0 };
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    paintLightbox();
+    box.querySelector('[data-lightbox-close]').focus();
+  }
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-lightbox-close]') || e.target.id === 'gallery-lightbox') closeGalleryLightbox();
+    if (e.target.closest('[data-lightbox-prev]') && lightboxState) { lightboxState.index--; paintLightbox(); }
+    if (e.target.closest('[data-lightbox-next]') && lightboxState) { lightboxState.index++; paintLightbox(); }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (lightboxState) {
+      if (e.key === 'Escape') closeGalleryLightbox();
+      if (e.key === 'ArrowLeft') { lightboxState.index--; paintLightbox(); }
+      if (e.key === 'ArrowRight') { lightboxState.index++; paintLightbox(); }
+      return;
+    }
+    if (e.key === 'Escape') {
+      const compare = document.getElementById('compare-modal');
+      if (compare) compare.classList.remove('open');
+      document.body.style.overflow = '';
     }
   });
 
@@ -337,6 +441,8 @@
     const stock = !!car.stock;
     const priceNote = stock ? 'в наличии, под ключ' : used ? 'с пробегом, под ключ' : 'новый, под ключ';
     const fav = A.favs.has(car.slug);
+    const compared = A.compare.has(car.slug);
+    const hot = hotInfo(car);
     const specs = stock
       ? `<li><span>Город</span><b>${car.stockCity || 'Россия'}</b></li>
          ${car.mileage ? `<li><span>Пробег</span><b>${Number(car.mileage).toLocaleString('ru-RU')} км</b></li>` : `<li><span>Мощность</span><b>${car.power}</b></li>`}
@@ -352,17 +458,125 @@
           <button class="fav-btn${fav ? ' on' : ''}" data-fav="${car.slug}" aria-label="В избранное" title="В избранное">${ICONS.heart}</button>
         </div>
         <div class="car-sub">${car.body} · ${car.fuel}</div>
+        ${hot ? `<div class="hot-badge">Горящий лот · экономия ${(hot.oldPrice - car.price).toFixed(1).replace('.', ',')} млн ₽</div>` : ''}
         <ul class="car-specs">${specs}</ul>
         ${stock ? '<div class="stock-today">Можно забрать сегодня</div>' : ''}
         <div class="car-price-row">
-          <div class="car-price num">от ${car.price.toFixed(1).replace('.', ',')} млн ₽<small>${priceNote}</small></div>
+          <div class="car-price num">от ${car.price.toFixed(1).replace('.', ',')} млн ₽${hot ? `<del>${hot.oldPrice.toFixed(1).replace('.', ',')} млн ₽</del><small data-hot-deadline="${hot.deadline.toISOString()}">до конца предложения</small>` : `<small>${priceNote}</small>`}</div>
         </div>
+        <button class="compare-btn${compared ? ' on' : ''}" type="button" data-compare="${car.slug}" aria-pressed="${compared}">${compared ? '✓ В сравнении' : '+ Сравнить'}</button>
         ${stock
           ? `<a class="btn btn-red btn-sm" data-goal="reserve_click" href="${A.carUrl(car)}">Забронировать</a>`
           : `<a class="btn btn-ghost btn-sm" href="${A.carUrl(car)}">Подробнее</a>`}
       </div>
     </article>`;
   };
+
+  function formatCompareValue(car, key) {
+    if (key === 'price') return 'от ' + car.price.toFixed(1).replace('.', ',') + ' млн ₽';
+    if (key === 'mileage') return car.mileage ? Number(car.mileage).toLocaleString('ru-RU') + ' км' : '—';
+    return car[key] || '—';
+  }
+
+  function renderCompareModal() {
+    let modal = document.getElementById('compare-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'compare-modal';
+      modal.className = 'compare-overlay';
+      modal.innerHTML = '<div class="compare-dialog" role="dialog" aria-modal="true" aria-labelledby="compare-title"><button class="modal-close" data-compare-close aria-label="Закрыть">✕</button><div data-compare-content></div></div>';
+      document.body.appendChild(modal);
+    }
+    const cars = A.compare.list().map((slug) => A.CARS.find((c) => c.slug === slug)).filter(Boolean);
+    const fields = [
+      ['Кузов', 'body'], ['Тип двигателя', 'fuel'], ['Мощность', 'power'],
+      ['Привод', 'drive'], ['Запас хода', 'range'], ['Батарея', 'battery'],
+      ['Год', 'year'], ['Пробег', 'mileage'], ['Цена под ключ', 'price'],
+    ];
+    modal.querySelector('[data-compare-content]').innerHTML = `
+      <div class="overline">До трёх автомобилей</div>
+      <h2 class="h2" id="compare-title">Сравнение моделей</h2>
+      ${cars.length ? `<div class="compare-scroll"><table class="compare-table">
+        <thead><tr><th>Характеристика</th>${cars.map((c) => `<th>${c.name}<button type="button" data-compare="${c.slug}" aria-label="Убрать ${c.name}">×</button></th>`).join('')}</tr></thead>
+        <tbody>${fields.map(([label, key]) => `<tr><th>${label}</th>${cars.map((c) => `<td>${formatCompareValue(c, key)}</td>`).join('')}</tr>`).join('')}</tbody>
+        <tfoot><tr><th></th>${cars.map((c) => `<td><a class="btn btn-ghost btn-sm" href="${A.carUrl(c)}">Открыть модель</a></td>`).join('')}</tr></tfoot>
+      </table></div>` : '<p class="lead">Добавьте автомобили из каталога — они появятся здесь рядом.</p>'}
+    `;
+    return modal;
+  }
+
+  function refreshCompareUi() {
+    const list = A.compare.list();
+    document.querySelectorAll('[data-compare]').forEach((button) => {
+      if (button.closest('.compare-table')) return;
+      const on = list.includes(button.dataset.compare);
+      button.classList.toggle('on', on);
+      button.setAttribute('aria-pressed', String(on));
+      button.textContent = on ? '✓ В сравнении' : '+ Сравнить';
+    });
+    let bar = document.getElementById('compare-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'compare-bar';
+      bar.className = 'compare-bar';
+      document.body.appendChild(bar);
+    }
+    bar.classList.toggle('show', list.length > 0);
+    bar.innerHTML = `<span>Выбрано для сравнения: <b>${list.length}/3</b></span><div><button class="btn btn-ghost btn-sm" type="button" data-compare-clear>Очистить</button><button class="btn btn-red btn-sm" type="button" data-compare-open>Сравнить</button></div>`;
+  }
+
+  document.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-compare]');
+    if (button) {
+      e.preventDefault();
+      const result = A.compare.toggle(button.dataset.compare);
+      if (result.full) {
+        const modal = renderCompareModal();
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      return;
+    }
+    if (e.target.closest('[data-compare-open]')) {
+      const modal = renderCompareModal();
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      A.goal('compare_used');
+      return;
+    }
+    if (e.target.closest('[data-compare-clear]')) { A.compare.clear(); return; }
+    if (e.target.closest('[data-compare-close]') || e.target.id === 'compare-modal') {
+      const modal = document.getElementById('compare-modal');
+      if (modal) modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+  document.addEventListener('inavto:compare', () => {
+    refreshCompareUi();
+    const modal = document.getElementById('compare-modal');
+    if (modal && modal.classList.contains('open')) renderCompareModal();
+  });
+
+  function updateHotCountdowns() {
+    document.querySelectorAll('[data-hot-deadline]').forEach((el) => {
+      const left = new Date(el.dataset.hotDeadline).getTime() - Date.now();
+      if (left <= 0) { el.textContent = 'предложение завершено'; return; }
+      const days = Math.floor(left / 864e5);
+      const hours = Math.floor((left % 864e5) / 36e5);
+      const mins = Math.floor((left % 36e5) / 6e4);
+      el.textContent = days ? `осталось ${days} д. ${hours} ч.` : `осталось ${hours} ч. ${mins} мин.`;
+    });
+  }
+
+  function renderHotLots() {
+    const root = document.querySelector('[data-hot-lots]');
+    if (!root) return;
+    const cars = A.CARS.filter((car) => hotInfo(car)).slice(0, 5);
+    root.hidden = !cars.length;
+    const grid = root.querySelector('[data-hot-grid]');
+    if (grid && cars.length) grid.innerHTML = cars.map(A.carCard).join('');
+    updateHotCountdowns();
+  }
 
   /* ---------- Квиз: две ветки — частник и бизнес ---------- */
   const QUIZ_BRANCHES = {
@@ -820,6 +1034,40 @@
     } catch (e) { /* сервер молчит — показываем встроенный каталог */ }
   }
 
+  /* ---------- Exit-intent: desktop, один раз за вкладку ---------- */
+  function initExitIntent() {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    try { if (sessionStorage.getItem('inavto_exit_seen')) return; } catch (e) { /* — */ }
+    let armed = false;
+    const arm = () => { armed = true; };
+    const timer = setTimeout(arm, 8000);
+    document.addEventListener('mouseout', (e) => {
+      if (!armed || e.relatedTarget || e.clientY > 8) return;
+      if (document.querySelector('.modal-backdrop.open, .compare-overlay.open, .gallery-lightbox.open')) return;
+      armed = false;
+      clearTimeout(timer);
+      try { sessionStorage.setItem('inavto_exit_seen', '1'); } catch (err) { /* — */ }
+      const overlay = document.createElement('div');
+      overlay.className = 'exit-overlay open';
+      overlay.innerHTML = `<div class="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"><button class="modal-close" type="button" data-exit-close aria-label="Закрыть">✕</button><div class="overline">Бесплатная консультация</div><h2 class="h2" id="exit-title">Уходите без расчёта?</h2><p class="lead">Напишите модель и бюджет — менеджер пришлёт актуальные варианты и цены «под ключ» в Telegram.</p><div class="exit-actions"><a class="btn btn-red" href="${C.telegram}" target="_blank" rel="noopener" data-goal="exit_tg">Получить расчёт в Telegram</a><button class="btn btn-ghost" type="button" data-exit-quiz>Подобрать на сайте</button></div><p class="form-note">Без рассылок и выдуманного дефицита. Ответим в рабочее время.</p></div>`;
+      document.body.appendChild(overlay);
+      document.body.style.overflow = 'hidden';
+      A.goal('exit_view');
+    });
+    document.addEventListener('click', (e) => {
+      const overlay = e.target.closest('.exit-overlay');
+      if (!overlay) return;
+      if (e.target.closest('[data-exit-close]') || e.target === overlay) {
+        overlay.remove(); document.body.style.overflow = ''; return;
+      }
+      if (e.target.closest('[data-exit-quiz]')) {
+        overlay.remove(); document.body.style.overflow = '';
+        const quiz = document.querySelector('[data-quiz-open]');
+        if (quiz) quiz.click();
+      }
+    });
+  }
+
   /* ---------- Старт ---------- */
   document.addEventListener('DOMContentLoaded', async () => {
     await loadRemoteCatalog();
@@ -840,6 +1088,11 @@
     initMagnetic();
     initHeroReveal();
     initCookie();
+    renderHotLots();
+    refreshCompareUi();
+    updateHotCountdowns();
+    setInterval(updateHotCountdowns, 60000);
+    initExitIntent();
   });
 
   /* ---------- Cookie-уведомление ---------- */

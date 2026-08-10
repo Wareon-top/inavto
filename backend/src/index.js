@@ -57,6 +57,13 @@ app.get('/lk', (_, res) => {
   res.set('Cache-Control', 'no-cache')
   res.sendFile(path.join(ROOT, '../public/lk.html'))
 })
+app.get('/status/:token', (req, res) => {
+  if (!/^[A-Za-z0-9_-]{20,64}$/.test(String(req.params.token || ''))) {
+    return res.status(404).send('Not found')
+  }
+  res.set('Cache-Control', 'no-cache')
+  res.sendFile(path.join(ROOT, '../public/lk.html'))
+})
 
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }))
 

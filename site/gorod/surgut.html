@@ -6,6 +6,7 @@
   <base href="../">
   <title>Авто из Китая в Сургуте — под заказ с доставкой под ключ | INAVTO ASIA</title>
   <meta name="description" content="Новые автомобили из Китая под заказ с доставкой в Сургуте: фиксированная цена в договоре, растаможка, СБКТС/ЭПТС, срок 35–55 дней. Комиссия 70 000 ₽, расчёт под ключ за день.">
+  <meta name="robots" content="noindex,follow">
   <link rel="canonical" href="https://inavtoasia.ru/gorod/surgut.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="INAVTO ASIA">
@@ -74,6 +75,7 @@
     </div>
   </section>
 
+
   <section class="section" style="padding-top:0">
     <div class="container">
       <div class="section-head">
@@ -81,7 +83,7 @@
         <h2 class="h2" style="margin-top:14px">Популярные модели под заказ</h2>
         <p class="lead">Цены «под ключ» — с логистикой, таможней и нашей комиссией. Привезём и любую другую модель с рынка Китая.</p>
       </div>
-      <div class="cars-grid" data-geo-cars="zeekr-001,zeekr-7x,lixiang-l7,lixiang-l9,byd-song-plus,byd-seal"></div>
+      <div class="cars-grid" data-geo-cars></div>
       <div style="text-align:center;margin-top:36px"><a class="btn btn-white" href="catalog.html">Открыть весь каталог</a></div>
     </div>
   </section>
@@ -105,16 +107,7 @@
         <a href="gorod/sankt-peterburg.html">Санкт-Петербург</a>
         <a href="gorod/novosibirsk.html">Новосибирск</a>
         <a href="gorod/ekaterinburg.html">Екатеринбург</a>
-        <a href="gorod/kazan.html">Казань</a>
-        <a href="gorod/nizhniy-novgorod.html">Нижний Новгород</a>
-        <a href="gorod/krasnoyarsk.html">Красноярск</a>
-        <a href="gorod/chelyabinsk.html">Челябинск</a>
-        <a href="gorod/samara.html">Самара</a>
-        <a href="gorod/ufa.html">Уфа</a>
-        <a href="gorod/rostov-na-donu.html">Ростов-на-Дону</a>
-        <a href="gorod/omsk.html">Омск</a>
         <a href="gorod/krasnodar.html">Краснодар</a>
-        <a href="gorod/voronezh.html">Воронеж</a>
         <a href="dostavka.html"><b>Все города →</b></a>
       </div>
     </div>
@@ -141,9 +134,7 @@
     window.INAVTO_PAGE_INIT = function () {
       var A = window.INAVTO;
       var grid = document.querySelector('[data-geo-cars]');
-      if (grid) grid.innerHTML = grid.dataset.geoCars.split(',')
-        .map(function (s) { return A.CARS.find(function (c) { return c.slug === s; }); })
-        .filter(Boolean).map(A.carCard).join('');
+      if (grid && A.CATALOG_FROM_API) grid.innerHTML = A.CARS.slice(0, 6).map(A.carCard).join('');
     };
   </script>
   <script src="js/main.js"></script>

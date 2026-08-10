@@ -1,25 +1,45 @@
-import axios from 'axios'
-
 const BASE = import.meta.env.VITE_API_URL || '/api'
 
-const api = axios.create({ baseURL: BASE, timeout: 8000 })
+async function request(path, options = {}) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+  try {
+    const response = await fetch(BASE + path, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    })
+    if (!response.ok) throw new Error(`API ${response.status}`)
+    return await response.json()
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+function queryString(filters) {
+  const params = new URLSearchParams()
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') params.set(key, value)
+  })
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
 
 export async function getCars(filters = {}) {
-  const { data } = await api.get('/cars', { params: filters })
-  return data
+  return request('/cars' + queryString(filters))
 }
 
 export async function getCarById(id) {
-  const { data } = await api.get(`/cars/${id}`)
-  return data
+  return request(`/cars/${encodeURIComponent(id)}`)
 }
 
 export async function submitSelection(form) {
-  const { data } = await api.post('/selections', form)
-  return data
+  return request('/selections', { method: 'POST', body: JSON.stringify(form) })
 }
 
 export async function getOrderById(id) {
-  const { data } = await api.get(`/orders/${id}`)
-  return data
+  return request(`/orders/${encodeURIComponent(id)}`)
 }

@@ -34,13 +34,13 @@ clean() {
 say "Ставлю системные пакеты (nginx, git, rsync)…"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y -qq
-apt-get install -y -qq nginx git rsync curl ca-certificates openssl >/dev/null
+apt-get install -y -qq nginx git rsync curl ca-certificates openssl sqlite3 >/dev/null
 
 # ---------- 2. Node.js 22 ----------
 NEED_NODE=1
 if command -v node >/dev/null 2>&1; then
   MAJOR=$(node -v | sed 's/^v\([0-9]*\).*/\1/')
-  [ "$MAJOR" -ge 20 ] && NEED_NODE=0
+  [ "$MAJOR" = 22 ] && NEED_NODE=0
 fi
 if [ "$NEED_NODE" = 1 ]; then
   say "Ставлю Node.js 22…"

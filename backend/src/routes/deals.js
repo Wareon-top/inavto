@@ -21,11 +21,20 @@ const FIELDS = [
   'from_city', 'to_city', 'ship_date', 'customs_post', 'carrier', 'container', 'eta', 'rep',
 ]
 
-const parse = (row) => row && ({
-  ...row,
-  photos: JSON.parse(row.photos || '[]'),
-  log: JSON.parse(row.log || '[]'),
-})
+const parse = (row) => {
+  if (!row) return row
+  const docs = db.prepare('SELECT id, name FROM docs WHERE deal_id = ? ORDER BY id DESC').all(row.id)
+  const docByName = new Map(docs.map((doc) => [doc.name, doc.id]))
+  return {
+    ...row,
+    photos: JSON.parse(row.photos || '[]'),
+    log: JSON.parse(row.log || '[]').map((entry) => {
+      if (entry.type !== 'doc') return entry
+      const id = entry.doc_id || docByName.get(entry.text)
+      return { ...entry, doc_id: id, url: id ? `/api/docs/${id}/file` : null }
+    }),
+  }
+}
 
 /* Представителю не показываем контакты клиента — только имя.
    Токен личного кабинета — тоже только админу. */

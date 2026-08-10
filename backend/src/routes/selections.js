@@ -4,15 +4,27 @@ import { notifyAdmin } from '../bot.js'
 import { adminOnly, roleOf } from '../auth.js'
 
 const router = Router()
+const clean = (value, max) => String(value ?? '').trim().slice(0, max)
+const html = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[char])
 
 router.post('/', async (req, res) => {
-  const { budget, brand, body, fuel, name, phone, city, note, tg_user_id } = req.body
+  const name = clean(req.body?.name, 120)
+  const phone = clean(req.body?.phone, 120)
+  const budget = clean(req.body?.budget, 120)
+  const brand = clean(req.body?.brand, 160)
+  const body = clean(req.body?.body, 80)
+  const fuel = clean(req.body?.fuel, 80)
+  const city = clean(req.body?.city, 120)
+  const note = clean(req.body?.note, 2000)
+  const tg_user_id = clean(req.body?.tg_user_id, 80)
   if (!name || !phone) return res.status(400).json({ error: 'name and phone required' })
 
   const result = db.prepare(`
     INSERT INTO selections (budget, brand, body, fuel, name, phone, city, note, tg_user_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(budget, brand, body, fuel, name, phone, city, note || null, tg_user_id || null)
+  `).run(budget || null, brand || null, body || null, fuel || null, name, phone, city || null, note || null, tg_user_id || null)
 
   /* Заявку добавил менеджер из CRM — в Telegram не дублируем */
   if (roleOf(req) === 'admin') {
@@ -22,16 +34,16 @@ router.post('/', async (req, res) => {
   const lines = [
     `🚗 <b>Новая заявка на подбор</b> #${result.lastInsertRowid}`,
     ``,
-    `👤 <b>Клиент:</b> ${name}`,
-    `📞 <b>Контакт:</b> ${phone}`,
+    `👤 <b>Клиент:</b> ${html(name)}`,
+    `📞 <b>Контакт:</b> ${html(phone)}`,
   ]
-  if (city) lines.push(`🏙 <b>Город:</b> ${city}`)
+  if (city) lines.push(`🏙 <b>Город:</b> ${html(city)}`)
   lines.push(``)
-  if (budget) lines.push(`💰 <b>Бюджет:</b> ${budget}`)
-  if (brand) lines.push(`🏷 <b>Интересует:</b> ${brand}`)
-  if (body) lines.push(`🚙 <b>Кузов:</b> ${body}`)
-  if (fuel) lines.push(`⛽ <b>Двигатель:</b> ${fuel}`)
-  if (note) lines.push(`📝 <b>Детали:</b> ${note}`)
+  if (budget) lines.push(`💰 <b>Бюджет:</b> ${html(budget)}`)
+  if (brand) lines.push(`🏷 <b>Интересует:</b> ${html(brand)}`)
+  if (body) lines.push(`🚙 <b>Кузов:</b> ${html(body)}`)
+  if (fuel) lines.push(`⛽ <b>Двигатель:</b> ${html(fuel)}`)
+  if (note) lines.push(`📝 <b>Детали:</b> ${html(note)}`)
 
   await notifyAdmin(lines.join('\n'))
 

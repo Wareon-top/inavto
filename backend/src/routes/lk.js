@@ -4,7 +4,10 @@
    о клиенте, без закупочной цены в юанях, без внутренней логистики
    и служебных комментариев. */
 import { Router } from 'express'
+import fs from 'fs'
+import path from 'path'
 import db from '../db.js'
+import { UPLOAD_DIR } from './upload.js'
 
 const router = Router()
 
@@ -30,14 +33,14 @@ function catalogPhoto(car) {
   return null
 }
 
-const clientOrder = (r) => {
+const clientOrder = (r, token) => {
   const log = JSON.parse(r.log || '[]')
   const photos = JSON.parse(r.photos || '[]')
   const docs = db.prepare(`
     SELECT id, name, url, size, ext, created_at FROM docs
     WHERE deal_id = ? AND client_visible = 1
     ORDER BY created_at DESC, id DESC
-  `).all(r.id)
+  `).all(r.id).map((doc) => ({ ...doc, url: `/api/lk/${token}/docs/${doc.id}` }))
   return {
     order: 'IA-' + r.id,
     car: r.car,
@@ -62,6 +65,23 @@ const clientOrder = (r) => {
   }
 }
 
+router.get('/:token/docs/:id', (req, res) => {
+  const t = String(req.params.token || '')
+  if (!TOKEN_RE.test(t)) return res.status(404).json({ error: 'Не найдено' })
+  const owner = db.prepare('SELECT id, client_phone FROM deals WHERE client_token = ?').get(t)
+  if (!owner) return res.status(404).json({ error: 'Не найдено' })
+  const doc = db.prepare(`
+    SELECT d.*, deals.client_phone FROM docs d
+    JOIN deals ON deals.id = d.deal_id
+    WHERE d.id = ? AND d.client_visible = 1
+  `).get(req.params.id)
+  const belongs = doc && (doc.deal_id === owner.id || (owner.client_phone && doc.client_phone === owner.client_phone))
+  if (!belongs) return res.status(404).json({ error: 'Не найдено' })
+  const file = path.join(UPLOAD_DIR, 'docs', path.basename(doc.url))
+  if (!fs.existsSync(file)) return res.status(404).json({ error: 'Файл не найден' })
+  res.download(file, doc.name)
+})
+
 router.get('/:token', (req, res) => {
   const t = String(req.params.token || '')
   if (!TOKEN_RE.test(t)) return res.status(404).json({ error: 'Не найдено' })
@@ -76,7 +96,7 @@ router.get('/:token', (req, res) => {
   res.json({
     ok: true,
     client: { name: row.client_name },
-    orders: rows.map(clientOrder),
+    orders: rows.map((order) => clientOrder(order, t)),
   })
 })
 

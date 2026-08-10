@@ -1,17 +1,26 @@
+import crypto from 'crypto'
+
+function sameToken(got, expected) {
+  if (!got || !expected) return false
+  const a = Buffer.from(got)
+  const b = Buffer.from(expected)
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+
 /* Доступ в админку: заголовок Authorization: Bearer <ADMIN_TOKEN из .env> */
 export function adminOnly(req, res, next) {
   const token = process.env.ADMIN_TOKEN
   if (!token) return res.status(503).json({ error: 'ADMIN_TOKEN is not configured on the server' })
   const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
-  if (got !== token) return res.status(401).json({ error: 'Unauthorized' })
+  if (!sameToken(got, token)) return res.status(401).json({ error: 'Unauthorized' })
   next()
 }
 
 /* Роль по токену: admin (ADMIN_TOKEN) или staff (STAFF_TOKEN — китайский представитель). */
 export function roleOf(req) {
   const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
-  if (process.env.ADMIN_TOKEN && got === process.env.ADMIN_TOKEN) return 'admin'
-  if (process.env.STAFF_TOKEN && got === process.env.STAFF_TOKEN) return 'staff'
+  if (sameToken(got, process.env.ADMIN_TOKEN)) return 'admin'
+  if (sameToken(got, process.env.STAFF_TOKEN)) return 'staff'
   return null
 }
 

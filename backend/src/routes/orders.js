@@ -7,13 +7,13 @@ const router = Router()
 
 const VALID_STATUSES = ['search', 'found', 'bought', 'shipping', 'customs', 'delivery', 'done']
 
-router.get('/:id', (req, res) => {
+router.get('/:id', adminOnly, (req, res) => {
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id)
   if (!order) return res.status(404).json({ error: 'Order not found' })
   res.json(order)
 })
 
-router.get('/', (req, res) => {
+router.get('/', adminOnly, (req, res) => {
   const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all()
   res.json(orders)
 })

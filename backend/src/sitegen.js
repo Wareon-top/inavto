@@ -17,6 +17,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import db from './db.js'
 import { rowToCar } from './carRow.js'
+import { catalogSitemapSlugs } from './sitemapPolicy.js'
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
 /* Исходники сайта в репозитории (для шаблона и списка встроенных моделей) */
@@ -76,7 +77,7 @@ export async function rebuildSitePages() {
 
   const visible = rows.filter((r) => !r.hidden).map(rowToCar)
   const dbSlugs = new Set(rows.map((r) => r.slug))
-  const visibleSlugs = visible.map((c) => c.slug)
+  const visibleSlugs = catalogSitemapSlugs(rows)
 
   /* Страницы моделей, которых в базе нет вовсе, оставляем как есть:
      они пришли из репозитория (js/data.js) и остаются рабочими. */
@@ -99,11 +100,14 @@ export async function rebuildSitePages() {
     try { fs.unlinkSync(path.join(outDir, `${slug}.html`)); removed++ } catch { /* уже удалена */ }
   }
 
-  writeIfChanged(path.join(WWW_DIR, 'sitemap.xml'), sitemapXML([...visibleSlugs, ...extra]))
+  /* В sitemap публикуем только актуальные видимые машины из базы. Файлы
+     встроенных моделей из репозитория сохраняем для обратной совместимости,
+     но не предлагаем Google как часть действующего каталога. */
+  writeIfChanged(path.join(WWW_DIR, 'sitemap.xml'), sitemapXML(visibleSlugs))
   writeIfChanged(path.join(WWW_DIR, 'robots.txt'), robotsTxt())
   dropSlugCache()
 
-  return { ok: true, total: keep.size, written, removed }
+  return { ok: true, total: visibleSlugs.length, preserved: extra.length, written, removed }
 }
 
 let timer = null

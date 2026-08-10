@@ -32,6 +32,7 @@ const EXT_BY_MIME = {
 const OK_EXTS = new Set(Object.values(EXT_BY_MIME))
 
 const cleanName = (s) => String(s || 'file').replace(/[\\/:*?"<>|]/g, '_').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 180) || 'file'
+const forApi = (doc) => ({ ...doc, url: `/api/docs/${doc.id}/file` })
 
 /* ---------- Папки (только админ) ---------- */
 router.get('/folders', adminOnly, (_, res) => {
@@ -86,13 +87,24 @@ router.get('/', staffOnly, (req, res) => {
   const { deal_id, folder_id } = req.query
   if (deal_id) {
     const items = db.prepare('SELECT * FROM docs WHERE deal_id = ? ORDER BY created_at DESC, id DESC').all(deal_id)
-    return res.json(items)
+    return res.json(items.map(forApi))
   }
   if (req.role !== 'admin') return res.status(401).json({ error: 'Unauthorized' })
   const items = folder_id
     ? db.prepare('SELECT * FROM docs WHERE folder_id = ? ORDER BY created_at DESC, id DESC').all(folder_id)
     : db.prepare('SELECT * FROM docs WHERE folder_id IS NULL AND deal_id IS NULL ORDER BY created_at DESC, id DESC').all()
-  res.json(items)
+  res.json(items.map(forApi))
+})
+
+/* Файлы документов не раздаются как публичная статика. Админ и сотрудник
+   скачивают их через этот маршрут с тем же Bearer-токеном, что и API. */
+router.get('/:id/file', staffOnly, (req, res) => {
+  const doc = db.prepare('SELECT * FROM docs WHERE id = ?').get(req.params.id)
+  if (!doc) return res.status(404).json({ error: 'Не найдено' })
+  if (req.role !== 'admin' && !doc.deal_id) return res.status(401).json({ error: 'Unauthorized' })
+  const file = path.join(UPLOAD_DIR, 'docs', path.basename(doc.url))
+  if (!fs.existsSync(file)) return res.status(404).json({ error: 'Файл не найден' })
+  res.download(file, doc.name)
 })
 
 /* Загрузка: { name, data: dataURL, folder_id? | deal_id? }.
@@ -127,8 +139,9 @@ router.post('/', staffOnly, (req, res) => {
     INSERT INTO docs (folder_id, deal_id, name, url, size, ext, uploaded_by, client_visible)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(dealId ? null : folderId, dealId, name, url, buf.length, ext, req.role, clientVisible)
-  if (dealId) addLog(dealId, { role: req.role, type: 'doc', text: name, url })
-  res.status(201).json({ id: r.lastInsertRowid, url, ok: true })
+  const secureUrl = `/api/docs/${r.lastInsertRowid}/file`
+  if (dealId) addLog(dealId, { role: req.role, type: 'doc', text: name, doc_id: r.lastInsertRowid, url: secureUrl })
+  res.status(201).json({ id: r.lastInsertRowid, url: secureUrl, ok: true })
 })
 
 /* Видимость документа в личном кабинете клиента (только вложения сделок) */

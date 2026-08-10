@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import express from 'express'
-import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { initBot } from './bot.js'
@@ -13,27 +12,42 @@ import docsRouter from './routes/docs.js'
 import lkRouter from './routes/lk.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 import { rebuildSitePages } from './sitegen.js'
+import { adminOnly, staffOnly } from './auth.js'
+import {
+  apiLimiter,
+  clientCabinetLimiter,
+  corsMiddleware,
+  leadLimiter,
+  securityHeaders,
+} from './security.js'
 
-const app = express()
+export const app = express()
 const PORT = process.env.PORT || 3000
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
 
-app.use(cors())
-/* 80mb: документы (PDF/сканы) идут base64 — файл до 50 МБ превращается в ~67 МБ JSON */
-app.use(express.json({ limit: '80mb' }))
+app.disable('x-powered-by')
+app.set('trust proxy', 1)
+app.use(securityHeaders)
+app.use(corsMiddleware())
+app.use('/api', apiLimiter)
 
-app.use('/api/cars', carsRouter)
-app.use('/api/selections', selectionsRouter)
-app.use('/api/orders', ordersRouter)
-app.use('/api/site-cars', siteCarsRouter)
-app.use('/api/deals', dealsRouter)
-app.use('/api/docs', docsRouter)
-app.use('/api/lk', lkRouter)
-app.use('/api/upload', uploadRouter)
+const smallJson = express.json({ limit: '256kb' })
+/* Документы (PDF/сканы) идут base64: файл до 50 МБ превращается в ~67 МБ JSON. */
+const largeJson = express.json({ limit: '80mb' })
+
+app.use('/api/cars', smallJson, carsRouter)
+app.use('/api/selections', leadLimiter, smallJson, selectionsRouter)
+app.use('/api/orders', adminOnly, smallJson, ordersRouter)
+app.use('/api/site-cars', smallJson, siteCarsRouter)
+app.use('/api/deals', staffOnly, largeJson, dealsRouter)
+app.use('/api/docs', staffOnly, largeJson, docsRouter)
+app.use('/api/lk', clientCabinetLimiter, lkRouter)
+app.use('/api/upload', adminOnly, largeJson, uploadRouter)
 
 /* Админка, личный кабинет клиента и загруженные фото.
    HTML отдаём с no-cache: браузер каждый раз сверяется с сервером (304,
    если не менялось) — после обновления не нужно чистить кэш. */
+app.use('/uploads/docs', (_, res) => res.status(404).json({ error: 'Not found' }))
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d' }))
 app.get('/admin', (_, res) => {
   res.set('Cache-Control', 'no-cache')
@@ -46,15 +60,29 @@ app.get('/lk', (_, res) => {
 
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }))
 
-initBot()
-
-app.listen(PORT, () => {
-  console.log(`[INAVTO] Backend running on http://localhost:${PORT}`)
-  /* Страницы машин для поисковиков: выкладка сайта (rsync) их затирает,
-     поэтому восстанавливаем их при каждом старте службы. */
-  rebuildSitePages()
-    .then((r) => console.log(r.ok
-      ? `[INAVTO] Страницы каталога: ${r.total} (обновлено ${r.written}, удалено ${r.removed})`
-      : `[INAVTO] Страницы каталога не пересобраны: ${r.reason}`))
-    .catch((e) => console.error('[INAVTO] Ошибка генерации страниц:', e.message))
+app.use((error, _req, res, _next) => {
+  if (error?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request body is too large' })
+  }
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    return res.status(400).json({ error: 'Invalid JSON' })
+  }
+  console.error('[INAVTO] Unhandled request error:', error)
+  res.status(500).json({ error: 'Internal server error' })
 })
+
+export function start() {
+  initBot()
+  return app.listen(PORT, () => {
+    console.log(`[INAVTO] Backend running on http://localhost:${PORT}`)
+    /* Страницы машин для поисковиков: выкладка сайта (rsync) их затирает,
+       поэтому восстанавливаем их при каждом старте службы. */
+    rebuildSitePages()
+      .then((r) => console.log(r.ok
+        ? `[INAVTO] Страницы каталога: ${r.total} (обновлено ${r.written}, удалено ${r.removed})`
+        : `[INAVTO] Страницы каталога не пересобраны: ${r.reason}`))
+      .catch((e) => console.error('[INAVTO] Ошибка генерации страниц:', e.message))
+  })
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) start()

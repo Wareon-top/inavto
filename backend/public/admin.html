@@ -1083,6 +1083,30 @@ async function api(path, opts = {}) {
   return data;
 }
 
+async function downloadProtected(url, name) {
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) throw new Error(t('Не удалось скачать файл'));
+  const objectUrl = URL.createObjectURL(await r.blob());
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = name || 'document';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
+document.addEventListener('click', async (e) => {
+  const link = e.target.closest('[data-doc-download]');
+  if (!link) return;
+  e.preventDefault();
+  try {
+    await downloadProtected(link.dataset.docDownload, link.dataset.docName);
+  } catch (error) {
+    msg(error.message);
+  }
+});
+
 /* ---------- Вход: полный ключ (админ) или ключ представителя (staff) ---------- */
 async function tryLogin() {
   try {
@@ -1529,7 +1553,7 @@ function renderDealCard(d) {
       else if (e.type === 'comment') body2 = escHtml(e.text);
       else if (e.type === 'photos') body2 = t('Загружено фото: ') + escHtml(e.text);
       else if (e.type === 'doc') body2 = '📎 ' + (e.url
-        ? `<a href="${escHtml(e.url)}" target="_blank" rel="noopener">${t('Документ: ')}${escHtml(e.text)}</a>`
+        ? `<a href="#" data-doc-download="${escHtml(e.url)}" data-doc-name="${escHtml(e.text)}">${t('Документ: ')}${escHtml(e.text)}</a>`
         : t('Документ: ') + escHtml(e.text));
       else if (e.type === 'client_msg') body2 = '💬 ' + t('Сообщение клиенту: ') + escHtml(e.text);
       else body2 = t('Сделка создана');
@@ -1789,7 +1813,7 @@ function renderDocs() {
       <td class="rowname"><b>${docIcon(d.ext)} ${escHtml(d.name)}</b><small>${fmtSize(d.size)}</small></td>
       <td class="crm-date">${fmtDT(d.created_at)}</td>
       <td><div class="actions">
-        <a class="btn ghost sm" href="${d.url}" target="_blank" rel="noopener" download="${escHtml(d.name)}">${t('Скачать')}</a>
+        <a class="btn ghost sm" href="#" data-doc-download="${escHtml(d.url)}" data-doc-name="${escHtml(d.name)}">${t('Скачать')}</a>
         <button class="btn ghost sm" data-docdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>
       </div></td>
     </tr>`).join('');
@@ -1866,7 +1890,7 @@ async function loadDealDocs(id) {
   box.innerHTML = (items.length
     ? `<div class="doc-rows">` + items.map((d) => `
         <div class="doc-row">
-          <a href="${d.url}" target="_blank" rel="noopener" download="${escHtml(d.name)}">${docIcon(d.ext)} ${escHtml(d.name)}</a>
+          <a href="#" data-doc-download="${escHtml(d.url)}" data-doc-name="${escHtml(d.name)}">${docIcon(d.ext)} ${escHtml(d.name)}</a>
           <small>${fmtSize(d.size)} · ${fmtDT(d.created_at)}</small>
           ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dcv="${d.id}" data-vis="${d.client_visible ? 1 : 0}">${d.client_visible ? '👁 ' + t('виден клиенту') : '🚫 ' + t('скрыт от клиента')}</button>` : ''}
           ${ROLE === 'admin' ? `<button type="button" class="btn ghost sm" data-dealdocdel="${d.id}" style="color:var(--red);border-color:var(--red)">✕</button>` : ''}

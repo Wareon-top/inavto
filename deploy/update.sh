@@ -7,11 +7,36 @@ set -euo pipefail
 
 APP=/opt/inavto
 WWW=/var/www/inavto
+DATA=/var/lib/inavto
+DB="$DATA/inavto.db"
+BACKUPS="$DATA/backups"
 
 say() { echo -e "\033[1;31m[INAVTO]\033[0m $*"; }
 
 [ "$(id -u)" = 0 ] || { echo "Запустите от root:  sudo bash $0"; exit 1; }
 cd "$APP"
+
+# До обновления кода делаем согласованный snapshot SQLite. Каталог, CRM,
+# сделки и документы остаются в /var/lib/inavto и никогда не попадают под
+# rsync --delete, но резервная копия защищает и от ошибочной миграции.
+CATALOG_BEFORE=""
+BACKUP_FILE=""
+if [ -f "$DB" ]; then
+  command -v sqlite3 >/dev/null 2>&1 || {
+    echo "Не найден sqlite3: сначала выполните deploy/install.sh"; exit 1;
+  }
+  mkdir -p "$BACKUPS"
+  BACKUP_FILE="$BACKUPS/inavto-$(date -u +%Y%m%dT%H%M%SZ).db"
+  say "Создаю резервную копию базы…"
+  sqlite3 "$DB" ".timeout 10000" ".backup '$BACKUP_FILE'"
+  CATALOG_BEFORE=$(sqlite3 "$BACKUP_FILE" "SELECT COUNT(*) FROM site_cars;")
+  [ -n "$CATALOG_BEFORE" ] || { echo "Не удалось проверить каталог в backup"; exit 1; }
+  chown inavto:inavto "$BACKUP_FILE"
+  chmod 600 "$BACKUP_FILE"
+  # Храним ежедневные/релизные snapshots 30 дней.
+  find "$BACKUPS" -maxdepth 1 -type f -name 'inavto-*.db' -mtime +30 -delete
+  say "Backup готов: $BACKUP_FILE (машин в каталоге: $CATALOG_BEFORE)"
+fi
 
 say "Забираю свежий код…"
 LOCK_BEFORE=$(md5sum backend/package-lock.json | cut -d' ' -f1)
@@ -41,6 +66,15 @@ for _ in $(seq 1 12); do
 done
 
 if [ "$ok" = 1 ]; then
+  if [ -n "$CATALOG_BEFORE" ]; then
+    CATALOG_AFTER=$(sqlite3 "$DB" "SELECT COUNT(*) FROM site_cars;")
+    if [ "$CATALOG_AFTER" != "$CATALOG_BEFORE" ]; then
+      say "КРИТИЧЕСКОЕ ПРЕДУПРЕЖДЕНИЕ: число машин изменилось: $CATALOG_BEFORE → $CATALOG_AFTER."
+      say "Автоматическое восстановление не выполнялось. Backup: $BACKUP_FILE"
+      exit 1
+    fi
+    say "Каталог проверен: $CATALOG_AFTER машин, данные сохранены."
+  fi
   say "Готово: сайт и бэкенд обновлены."
 else
   say "Внимание: бэкенд не ответил за 24 сек."

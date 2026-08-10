@@ -59,34 +59,6 @@
       x.classList.toggle('on', A.favs.has(b.dataset.fav)));
   });
 
-  /* ---------- Сравнение моделей (до трёх, сохраняется между страницами) ---------- */
-  const COMPARE_KEY = 'inavto_compare';
-  const compareList = () => {
-    try {
-      const value = JSON.parse(localStorage.getItem(COMPARE_KEY)) || [];
-      return Array.isArray(value) ? value.slice(0, 3) : [];
-    } catch (e) { return []; }
-  };
-  A.compare = {
-    list: compareList,
-    has: (slug) => compareList().includes(slug),
-    toggle(slug) {
-      let list = compareList();
-      if (list.includes(slug)) list = list.filter((x) => x !== slug);
-      else {
-        if (list.length >= 3) return { list, full: true };
-        list.push(slug);
-      }
-      try { localStorage.setItem(COMPARE_KEY, JSON.stringify(list)); } catch (e) { /* — */ }
-      document.dispatchEvent(new CustomEvent('inavto:compare'));
-      return { list, full: false };
-    },
-    clear() {
-      try { localStorage.removeItem(COMPARE_KEY); } catch (e) { /* — */ }
-      document.dispatchEvent(new CustomEvent('inavto:compare'));
-    },
-  };
-
   const hotInfo = (car) => {
     if (!car || !car.hot || !(Number(car.hot.oldPrice) > Number(car.price))) return null;
     const deadline = new Date(car.hot.deadline);
@@ -378,11 +350,6 @@
       if (e.key === 'ArrowRight') { lightboxState.index++; paintLightbox(); }
       return;
     }
-    if (e.key === 'Escape') {
-      const compare = document.getElementById('compare-modal');
-      if (compare) compare.classList.remove('open');
-      document.body.style.overflow = '';
-    }
   });
 
   A.carPills = function (car) {
@@ -441,7 +408,6 @@
     const stock = !!car.stock;
     const priceNote = stock ? 'в наличии, под ключ' : used ? 'с пробегом, под ключ' : 'новый, под ключ';
     const fav = A.favs.has(car.slug);
-    const compared = A.compare.has(car.slug);
     const hot = hotInfo(car);
     const specs = stock
       ? `<li><span>Город</span><b>${car.stockCity || 'Россия'}</b></li>
@@ -464,98 +430,12 @@
         <div class="car-price-row">
           <div class="car-price num">от ${car.price.toFixed(1).replace('.', ',')} млн ₽${hot ? `<del>${hot.oldPrice.toFixed(1).replace('.', ',')} млн ₽</del><small data-hot-deadline="${hot.deadline.toISOString()}">до конца предложения</small>` : `<small>${priceNote}</small>`}</div>
         </div>
-        <button class="compare-btn${compared ? ' on' : ''}" type="button" data-compare="${car.slug}" aria-pressed="${compared}">${compared ? '✓ В сравнении' : '+ Сравнить'}</button>
         ${stock
           ? `<a class="btn btn-red btn-sm" data-goal="reserve_click" href="${A.carUrl(car)}">Забронировать</a>`
           : `<a class="btn btn-ghost btn-sm" href="${A.carUrl(car)}">Подробнее</a>`}
       </div>
     </article>`;
   };
-
-  function formatCompareValue(car, key) {
-    if (key === 'price') return 'от ' + car.price.toFixed(1).replace('.', ',') + ' млн ₽';
-    if (key === 'mileage') return car.mileage ? Number(car.mileage).toLocaleString('ru-RU') + ' км' : '—';
-    return car[key] || '—';
-  }
-
-  function renderCompareModal() {
-    let modal = document.getElementById('compare-modal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'compare-modal';
-      modal.className = 'compare-overlay';
-      modal.innerHTML = '<div class="compare-dialog" role="dialog" aria-modal="true" aria-labelledby="compare-title"><button class="modal-close" data-compare-close aria-label="Закрыть">✕</button><div data-compare-content></div></div>';
-      document.body.appendChild(modal);
-    }
-    const cars = A.compare.list().map((slug) => A.CARS.find((c) => c.slug === slug)).filter(Boolean);
-    const fields = [
-      ['Кузов', 'body'], ['Тип двигателя', 'fuel'], ['Мощность', 'power'],
-      ['Привод', 'drive'], ['Запас хода', 'range'], ['Батарея', 'battery'],
-      ['Год', 'year'], ['Пробег', 'mileage'], ['Цена под ключ', 'price'],
-    ];
-    modal.querySelector('[data-compare-content]').innerHTML = `
-      <div class="overline">До трёх автомобилей</div>
-      <h2 class="h2" id="compare-title">Сравнение моделей</h2>
-      ${cars.length ? `<div class="compare-scroll"><table class="compare-table">
-        <thead><tr><th>Характеристика</th>${cars.map((c) => `<th>${c.name}<button type="button" data-compare="${c.slug}" aria-label="Убрать ${c.name}">×</button></th>`).join('')}</tr></thead>
-        <tbody>${fields.map(([label, key]) => `<tr><th>${label}</th>${cars.map((c) => `<td>${formatCompareValue(c, key)}</td>`).join('')}</tr>`).join('')}</tbody>
-        <tfoot><tr><th></th>${cars.map((c) => `<td><a class="btn btn-ghost btn-sm" href="${A.carUrl(c)}">Открыть модель</a></td>`).join('')}</tr></tfoot>
-      </table></div>` : '<p class="lead">Добавьте автомобили из каталога — они появятся здесь рядом.</p>'}
-    `;
-    return modal;
-  }
-
-  function refreshCompareUi() {
-    const list = A.compare.list();
-    document.querySelectorAll('[data-compare]').forEach((button) => {
-      if (button.closest('.compare-table')) return;
-      const on = list.includes(button.dataset.compare);
-      button.classList.toggle('on', on);
-      button.setAttribute('aria-pressed', String(on));
-      button.textContent = on ? '✓ В сравнении' : '+ Сравнить';
-    });
-    let bar = document.getElementById('compare-bar');
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'compare-bar';
-      bar.className = 'compare-bar';
-      document.body.appendChild(bar);
-    }
-    bar.classList.toggle('show', list.length > 0);
-    bar.innerHTML = `<span>Выбрано для сравнения: <b>${list.length}/3</b></span><div><button class="btn btn-ghost btn-sm" type="button" data-compare-clear>Очистить</button><button class="btn btn-red btn-sm" type="button" data-compare-open>Сравнить</button></div>`;
-  }
-
-  document.addEventListener('click', (e) => {
-    const button = e.target.closest('[data-compare]');
-    if (button) {
-      e.preventDefault();
-      const result = A.compare.toggle(button.dataset.compare);
-      if (result.full) {
-        const modal = renderCompareModal();
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-      }
-      return;
-    }
-    if (e.target.closest('[data-compare-open]')) {
-      const modal = renderCompareModal();
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      A.goal('compare_used');
-      return;
-    }
-    if (e.target.closest('[data-compare-clear]')) { A.compare.clear(); return; }
-    if (e.target.closest('[data-compare-close]') || e.target.id === 'compare-modal') {
-      const modal = document.getElementById('compare-modal');
-      if (modal) modal.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-  });
-  document.addEventListener('inavto:compare', () => {
-    refreshCompareUi();
-    const modal = document.getElementById('compare-modal');
-    if (modal && modal.classList.contains('open')) renderCompareModal();
-  });
 
   function updateHotCountdowns() {
     document.querySelectorAll('[data-hot-deadline]').forEach((el) => {
@@ -1043,7 +923,7 @@
     const timer = setTimeout(arm, 8000);
     document.addEventListener('mouseout', (e) => {
       if (!armed || e.relatedTarget || e.clientY > 8) return;
-      if (document.querySelector('.modal-backdrop.open, .compare-overlay.open, .gallery-lightbox.open')) return;
+      if (document.querySelector('.modal-backdrop.open, .gallery-lightbox.open')) return;
       armed = false;
       clearTimeout(timer);
       try { sessionStorage.setItem('inavto_exit_seen', '1'); } catch (err) { /* — */ }
@@ -1089,7 +969,6 @@
     initHeroReveal();
     initCookie();
     renderHotLots();
-    refreshCompareUi();
     updateHotCountdowns();
     setInterval(updateHotCountdowns, 60000);
     initExitIntent();

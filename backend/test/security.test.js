@@ -77,6 +77,25 @@ test('security checks do not modify the site catalog', async () => {
   assert.deepEqual(await response.json(), [])
 })
 
+test('admin can publish an explicitly dated hot lot without affecting other cars', async () => {
+  const response = await fetch(baseUrl + '/api/site-cars', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer test-admin-token',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      slug: 'stage-one-test', name: 'Stage One Test', brand: 'Test', price_rub: 3.5,
+      hot: { oldPrice: 4.1, deadline: '2027-01-01T12:00' },
+    }),
+  })
+  assert.equal(response.status, 201)
+
+  const catalog = await fetch(baseUrl + '/api/site-cars').then((r) => r.json())
+  assert.equal(catalog.length, 1)
+  assert.deepEqual(catalog[0].hot, { oldPrice: 4.1, deadline: '2027-01-01T12:00' })
+})
+
 test('documents require admin or client authorization without deleting stored files', async () => {
   const auth = {
     Authorization: 'Bearer test-admin-token',
@@ -114,6 +133,9 @@ test('documents require admin or client authorization without deleting stored fi
     method: 'POST', headers: auth, body: '{}',
   })
   const { token } = await linkResponse.json()
+  const publicStatusPage = await fetch(baseUrl + `/status/${token}`)
+  assert.equal(publicStatusPage.status, 200)
+  assert.match(await publicStatusPage.text(), /Личный кабинет — INAVTO ASIA/)
   const cabinet = await fetch(baseUrl + `/api/lk/${token}`)
   assert.equal(cabinet.status, 200)
   const cabinetData = await cabinet.json()

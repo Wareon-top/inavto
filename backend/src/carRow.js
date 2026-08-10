@@ -31,6 +31,9 @@ export const rowToCar = (r) => ({
   stock: r.stock ? 1 : 0,
   stockCity: r.stock_city || '',
   vin: r.vin || '',
+  hot: r.hot_old_price > r.price_rub && r.hot_deadline
+    ? { oldPrice: r.hot_old_price, deadline: r.hot_deadline }
+    : null,
 })
 
 export default rowToCar

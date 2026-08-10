@@ -43,6 +43,23 @@ LOCK_BEFORE=$(md5sum backend/package-lock.json | cut -d' ' -f1)
 git pull --ff-only
 LOCK_AFTER=$(md5sum backend/package-lock.json | cut -d' ' -f1)
 
+# Этап 1: человекочитаемые ссылки трекера /status/<код>. Старые установки
+# nginx дополняем безопасно: сохраняем конфиг и возвращаем его при ошибке.
+NGINX_SITE=/etc/nginx/sites-available/inavto
+if [ -f "$NGINX_SITE" ] && ! grep -q 'location \^~ /status/' "$NGINX_SITE"; then
+  NGINX_BACKUP="$NGINX_SITE.before-status"
+  cp "$NGINX_SITE" "$NGINX_BACKUP"
+  sed -i '/location = \/admin/a\    location ^~ /status/  { proxy_pass http://127.0.0.1:3000; }' "$NGINX_SITE"
+  if ! grep -q 'location \^~ /status/' "$NGINX_SITE" || ! nginx -t >/dev/null 2>&1; then
+    cp "$NGINX_BACKUP" "$NGINX_SITE"
+    nginx -t >/dev/null 2>&1 || true
+    echo "Не удалось безопасно добавить маршрут /status/ в nginx; конфиг восстановлен."
+    exit 1
+  fi
+  systemctl reload nginx
+  say "Маршрут клиентского трекера /status/ включён."
+fi
+
 if [ "$LOCK_BEFORE" != "$LOCK_AFTER" ]; then
   say "Обновляю зависимости бэкенда…"
   (cd backend && npm ci --omit=dev --no-audit --no-fund >/dev/null)

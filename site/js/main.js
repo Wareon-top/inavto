@@ -4,6 +4,7 @@
   const C = A.CONTACTS;
   // Backend Express (тот же, что у Telegram Mini App). Пусто = same-origin /api.
   const API_BASE = window.INAVTO_API || '';
+  A.CATALOG_FROM_API = false;
 
   /* Цели Яндекс.Метрики: задать window.INAVTO_YM_ID = <номер счётчика> */
   A.goal = function (name) {
@@ -910,8 +911,24 @@
             (typeof p === 'string' && p.startsWith('/')) ? API_BASE + p : p);
         });
         A.CARS = list;
+        A.CATALOG_FROM_API = true;
       }
     } catch (e) { /* сервер молчит — показываем встроенный каталог */ }
+  }
+
+  /* Городские страницы раньше содержали фиксированный список встроенных
+     моделей. Если такой модели уже нет в рабочем каталоге, Google всё равно
+     мог находить её через fallback. Всегда заменяем этот блок актуальными
+     данными API, а при недоступном API оставляем только ссылку на каталог. */
+  function renderGeoCatalog() {
+    const grid = document.querySelector('[data-geo-cars]');
+    if (!grid) return;
+    if (A.CATALOG_FROM_API) {
+      grid.innerHTML = A.CARS.slice(0, 6).map(A.carCard).join('');
+      return;
+    }
+    grid.innerHTML = '<div class="cell sp-12"><p>Актуальные модели и цены доступны в каталоге.</p>' +
+      '<a class="btn btn-white" href="catalog.html">Открыть каталог</a></div>';
   }
 
   /* ---------- Exit-intent: desktop, один раз за вкладку ---------- */
@@ -955,6 +972,7 @@
     renderFooter();
     renderQuizModal();
     if (typeof window.INAVTO_PAGE_INIT === 'function') window.INAVTO_PAGE_INIT();
+    renderGeoCatalog();
     // страницы (car.html) выставляют title после старта переводчика — доводим вручную
     if (window.INAVTO_I18N && window.INAVTO_I18N.tr) {
       const tt = window.INAVTO_I18N.tr(document.title);

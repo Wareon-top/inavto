@@ -677,19 +677,29 @@
         e.preventDefault();
         const messenger = f.messenger ? f.messenger.value : '';
         const comment = (f.querySelector('[name=comment]') && f.querySelector('[name=comment]').value || '').trim();
+        const car = (f.querySelector('[name=car]') && f.querySelector('[name=car]').value || '').trim();
+        const trim = (f.querySelector('[name=trim]') && f.querySelector('[name=trim]').value || '').trim();
+        const bodyParts = [];
+        if (car) bodyParts.push('Автомобиль: ' + car);
+        if (trim) bodyParts.push('Комплектация: ' + trim);
+        if (comment) bodyParts.push(comment);
+        if (messenger) bodyParts.push('связь: ' + messenger);
         const payload = {
           name: (f.name && f.name.value || '').trim() || '—',
           phone: (f.phone && f.phone.value || '').trim(),
           city: (f.city && f.city.value || '').trim(),
           budget: f.dataset.leadForm || 'заявка с сайта',
           brand: (f.dataset.brand || ''),
-          body: comment + (messenger ? (comment ? ' · ' : '') + 'связь: ' + messenger : ''),
+          body: bodyParts.join(' · '),
           fuel: '',
         };
         if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }
         if (!consentOK(f)) return;
         await submitLead(payload, f);
-        f.innerHTML = successHTML('Спасибо, заявка принята!', 'Мы перезвоним в ближайшее рабочее время (ежедневно 9:00–21:00 мск).');
+        f.innerHTML = successHTML(
+          f.dataset.successTitle || 'Спасибо, заявка принята!',
+          f.dataset.successMessage || 'Мы перезвоним в ближайшее рабочее время (ежедневно 9:00–21:00 мск).'
+        );
       });
     });
   }
@@ -745,7 +755,11 @@
   /* ---------- FAQ ---------- */
   function initFaq() {
     document.querySelectorAll('.faq-q').forEach((q) => {
-      q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+      q.setAttribute('aria-expanded', 'false');
+      q.addEventListener('click', () => {
+        const open = q.parentElement.classList.toggle('open');
+        q.setAttribute('aria-expanded', String(open));
+      });
     });
   }
   A.initFaq = initFaq;

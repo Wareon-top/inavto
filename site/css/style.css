@@ -1101,6 +1101,67 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .prose li { margin-bottom: 9px; line-height: 1.7; }
 .prose b, .prose strong { color: var(--ink); }
 
+/* ---------- Страница стоимости доставки ---------- */
+.section-soft { background: var(--bg-2); }
+.delivery-hero { margin-bottom: 0; }
+.delivery-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: end;
+  margin-top: 22px;
+}
+.delivery-intro > div:first-child { max-width: 78ch; }
+.delivery-intro > div:first-child > p + p { margin-top: 16px; color: var(--muted); line-height: 1.75; }
+.delivery-hero-action {
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+.delivery-hero-action .btn { width: 100%; }
+.delivery-hero-action p { margin-top: 14px; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
+.delivery-cost-grid .feature p + p { margin-top: 12px; }
+.delivery-numbered-list { margin: 14px 0 18px 20px; color: var(--muted); }
+.delivery-numbered-list li { margin-bottom: 8px; padding-left: 4px; font-size: 13.5px; line-height: 1.6; }
+.delivery-formula {
+  margin-top: 14px;
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.delivery-formula h3 { margin-bottom: 14px; font-size: 18px; }
+.delivery-formula p { max-width: 100ch; color: rgba(255,255,255,.72); line-height: 1.7; }
+.delivery-formula p + p { margin-top: 12px; font-size: 12.5px; }
+.delivery-formula strong { color: #fff; }
+.delivery-copy-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr); gap: clamp(30px, 6vw, 80px); align-items: start; }
+.delivery-note { padding: clamp(26px, 4vw, 42px); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-sm); }
+.delivery-note p { margin-top: 18px; color: var(--muted); line-height: 1.75; }
+.delivery-steps { grid-template-columns: repeat(4, 1fr); }
+.delivery-form-layout { align-items: center; }
+.delivery-form-layout .calc-panel { width: 100%; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row > * { min-width: 0; }
+.delivery-faq-wrap { max-width: 960px; }
+.delivery-faq .faq-a p { margin: 0; }
+
+@media (max-width: 1024px) {
+  .delivery-steps { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .delivery-intro, .delivery-copy-grid { grid-template-columns: 1fr; }
+  .delivery-hero-action { max-width: 520px; }
+}
+
+@media (max-width: 620px) {
+  .delivery-steps, .form-row { grid-template-columns: 1fr; }
+  .delivery-hero-action { padding: 20px; }
+  .delivery-formula { overflow-wrap: anywhere; }
+}
+
 /* ---------- Футер: светлый ---------- */
 .footer { padding: 72px 0 40px; background: transparent; border-top: 1px solid var(--line-2); color: var(--text); }
 .footer .logo b { color: var(--ink); }

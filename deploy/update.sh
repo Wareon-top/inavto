@@ -66,7 +66,14 @@ if [ "$LOCK_BEFORE" != "$LOCK_AFTER" ]; then
 fi
 
 say "Выкладываю статику сайта…"
-rsync -a --delete "$APP/site/" "$WWW/"
+# Карточки и sitemap генерируются из рабочей базы после запуска сервиса.
+# Не удаляем предыдущую исправную генерацию до того, как новая будет готова:
+# при ошибке запуска поисковые страницы останутся доступны.
+rsync -a --delete \
+  --exclude '/cars/' \
+  --exclude '/sitemap.xml' \
+  --exclude '/robots.txt' \
+  "$APP/site/" "$WWW/"
 # Бэкенд дописывает сюда страницы машин из каталога админки — нужны права
 chown -R inavto:inavto "$WWW"
 
@@ -83,6 +90,10 @@ for _ in $(seq 1 12); do
 done
 
 if [ "$ok" = 1 ]; then
+  systemctl is-active --quiet inavto || {
+    say "Сервис inavto не активен после перезапуска."
+    exit 1
+  }
   if [ -n "$CATALOG_BEFORE" ]; then
     CATALOG_AFTER=$(sqlite3 "$DB" "SELECT COUNT(*) FROM site_cars;")
     if [ "$CATALOG_AFTER" != "$CATALOG_BEFORE" ]; then
@@ -90,6 +101,24 @@ if [ "$ok" = 1 ]; then
       say "Автоматическое восстановление не выполнялось. Backup: $BACKUP_FILE"
       exit 1
     fi
+    say "Жду безопасную пересборку карточек и sitemap…"
+    site_ok=0
+    for _ in $(seq 1 15); do
+      if node "$APP/backend/tools/verify-catalog-site.mjs" \
+        --db "$DB" --www "$WWW" --expected-total "$CATALOG_BEFORE" --quiet; then
+        site_ok=1
+        break
+      fi
+      sleep 2
+    done
+    if [ "$site_ok" != 1 ]; then
+      node "$APP/backend/tools/verify-catalog-site.mjs" \
+        --db "$DB" --www "$WWW" --expected-total "$CATALOG_BEFORE" || true
+      say "Каталог или sitemap не прошли проверку. Предыдущие сгенерированные страницы не удалялись при выкладке."
+      exit 1
+    fi
+    node "$APP/backend/tools/verify-catalog-site.mjs" \
+      --db "$DB" --www "$WWW" --expected-total "$CATALOG_BEFORE"
     say "Каталог проверен: $CATALOG_AFTER машин, данные сохранены."
   fi
   say "Готово: сайт и бэкенд обновлены."

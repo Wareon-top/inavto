@@ -46,6 +46,12 @@
   function renderBlogArticleEnd() {
     const currentSlug = document.body.dataset.blogArticle;
     if (!currentSlug) return;
+    const heroContainer = document.querySelector('.page-hero .container');
+    const coverFigure = document.createElement('figure');
+    coverFigure.className = 'article-hero-cover';
+    coverFigure.hidden = true;
+    coverFigure.setAttribute('data-article-cover', '');
+    if (heroContainer) heroContainer.appendChild(coverFigure);
     const section = document.createElement('section');
     section.className = 'section article-next-section';
     section.setAttribute('aria-labelledby', 'article-next-title');
@@ -73,6 +79,11 @@
     document.body.insertBefore(section, firstScript || null);
     A.loadBlog().then((posts) => {
       const grid = section.querySelector('[data-related-blog]');
+      const current = posts.find((post) => post.slug === currentSlug);
+      if (current && typeof current.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(current.cover)) {
+        coverFigure.innerHTML = `<img src="${escBlog(current.cover)}" alt="Обложка статьи: ${escBlog(current.title)}" loading="eager" decoding="async">`;
+        coverFigure.hidden = false;
+      }
       const related = posts.filter((post) => post.slug !== currentSlug).slice(0, 3);
       if (!related.length) {
         section.querySelector('.article-related').remove();

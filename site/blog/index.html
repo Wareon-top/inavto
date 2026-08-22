@@ -50,37 +50,12 @@
 
   <section class="section" style="padding-top:0">
     <div class="container">
-      <div class="blog-grid">
-        <a class="blog-card reveal" href="blog/lixiang-l7-ili-l9.html">
-          <div class="bc-meta">Выбор модели · 7 мин</div>
-          <h3>Lixiang L7 или L9: что выбрать и сколько стоит под ключ в 2026</h3>
-          <p>Пять мест или шесть, разница в полтора миллиона, одинаковая мощность и важный нюанс с утильсбором — сравнение двух самых популярных «Лисянов».</p>
-          <span class="bc-more">Читать →</span>
-        </a>
-        <a class="blog-card reveal" href="blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html">
-          <div class="bc-meta">Деньги · 8 мин</div>
-          <h3>Сколько стоит привезти авто из Китая в 2026: полный разбор цены</h3>
-          <p>Семь слагаемых цены «под ключ», два подробных чека — новый кроссовер и «проходной» 3–5 лет — и четыре типичных обмана в сметах посредников.</p>
-          <span class="bc-more">Читать →</span>
-        </a>
-        <a class="blog-card reveal" href="blog/utilsbor-2026.html">
-          <div class="bc-meta">Деньги · 6 мин</div>
-          <h3>Утильсбор 2026: льгота до 160 л.с. и как она экономит сотни тысяч</h3>
-          <p>Почему две версии одной модели могут отличаться «под ключ» на полмиллиона, как считается утильсбор для физлиц и какие модели попадают под льготу.</p>
-          <span class="bc-more">Читать →</span>
-        </a>
-        <a class="blog-card reveal" href="blog/erev-vs-phev.html">
-          <div class="bc-meta">Технологии · 7 мин</div>
-          <h3>EREV или PHEV: какой гибрид выбрать для России</h3>
-          <p>Lixiang и Voyah против BYD DM-i: чем последовательный гибрид отличается от подключаемого, что происходит зимой и кому какой тип подходит.</p>
-          <span class="bc-more">Читать →</span>
-        </a>
-        <a class="blog-card reveal" href="blog/kak-proverit-posrednika.html">
-          <div class="bc-meta">Безопасность · 8 мин</div>
-          <h3>Как проверить компанию-посредника: 9 пунктов перед предоплатой</h3>
-          <p>Договор, инвойс, реквизиты, отчёты и другие признаки, по которым за 15 минут видно, кому можно доверить несколько миллионов рублей.</p>
-          <span class="bc-more">Читать →</span>
-        </a>
+      <div class="blog-grid" id="blog-list-public">
+        <a class="blog-card reveal" href="blog/lixiang-l7-ili-l9.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Выбор модели · 7 мин</span><h3>Lixiang L7 или L9: что выбрать и сколько стоит под ключ в 2026</h3><span class="blog-card-text">Пять мест или шесть, разница в полтора миллиона, одинаковая мощность и важный нюанс с утильсбором — сравнение двух самых популярных «Лисянов».</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Деньги · 8 мин</span><h3>Сколько стоит привезти авто из Китая в 2026: полный разбор цены</h3><span class="blog-card-text">Семь слагаемых цены «под ключ», два подробных чека — новый кроссовер и «проходной» 3–5 лет — и четыре типичных обмана в сметах посредников.</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/utilsbor-2026.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Деньги · 6 мин</span><h3>Утильсбор 2026: льгота до 160 л.с. и как она экономит сотни тысяч</h3><span class="blog-card-text">Почему две версии одной модели могут отличаться «под ключ» на полмиллиона, как считается утильсбор для физлиц и какие модели попадают под льготу.</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/erev-vs-phev.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Технологии · 7 мин</span><h3>EREV или PHEV: какой гибрид выбрать для России</h3><span class="blog-card-text">Lixiang и Voyah против BYD DM-i: чем последовательный гибрид отличается от подключаемого, что происходит зимой и кому какой тип подходит.</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/kak-proverit-posrednika.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Безопасность · 8 мин</span><h3>Как проверить компанию-посредника: 9 пунктов перед предоплатой</h3><span class="blog-card-text">Договор, инвойс, реквизиты, отчёты и другие признаки, по которым за 15 минут видно, кому можно доверить несколько миллионов рублей.</span><span class="bc-more">Читать →</span></div></a>
       </div>
     </div>
   </section>
@@ -102,7 +77,17 @@
 
   <script src="js/data.js"></script>
   <script src="js/i18n.js"></script>
-  <script>window.INAVTO_PAGE_INIT = function () {};</script>
+  <script>
+    window.INAVTO_PAGE_INIT = function () {
+      const list = document.getElementById('blog-list-public');
+      if (!list) return;
+      INAVTO.loadBlog().then((posts) => {
+        if (!posts.length) return;
+        list.innerHTML = posts.map(INAVTO.blogCard).join('');
+        INAVTO.initReveal();
+      });
+    };
+  </script>
   <script src="js/main.js"></script>
 </body>
 </html>

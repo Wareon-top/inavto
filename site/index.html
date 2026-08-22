@@ -265,6 +265,25 @@
     </div>
   </section>
 
+  <!-- БЛОГ: полезный контент после социальных каналов, до сервисного трекера -->
+  <section class="section" aria-labelledby="home-blog-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <div>
+          <div class="divider-label">Блог</div>
+          <h2 class="h2" id="home-blog-title">Разбираемся в покупке авто из Китая</h2>
+        </div>
+        <p class="lead">Понятные гайды о ценах, утильсборе, гибридах и безопасной покупке — без рекламной воды.</p>
+      </div>
+      <div class="blog-grid" id="home-blog-list">
+        <a class="blog-card reveal" href="blog/lixiang-l7-ili-l9.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Выбор модели · 7 мин</span><h3>Lixiang L7 или L9: что выбрать и сколько стоит под ключ в 2026</h3><span class="blog-card-text">Сравнение двух самых популярных «Лисянов»: места, цена и важный нюанс с утильсбором.</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Деньги · 8 мин</span><h3>Сколько стоит привезти авто из Китая в 2026: полный разбор цены</h3><span class="blog-card-text">Из чего складывается цена «под ключ» и как проверить смету посредника.</span><span class="bc-more">Читать →</span></div></a>
+        <a class="blog-card reveal" href="blog/utilsbor-2026.html"><span class="blog-card-cover"></span><div class="blog-card-copy"><span class="bc-meta">Деньги · 6 мин</span><h3>Утильсбор 2026: льгота до 160 л.с. и как она экономит сотни тысяч</h3><span class="blog-card-text">Как считается утильсбор и почему одна модель может стоить заметно дешевле.</span><span class="bc-more">Читать →</span></div></a>
+      </div>
+      <div class="blog-more reveal"><a class="btn btn-ghost" href="blog/index.html" data-goal="blog_more_click">Больше статей</a></div>
+    </div>
+  </section>
+
   <!-- ТРЕКЕР -->
   <section class="section">
     <div class="container">
@@ -424,6 +443,15 @@
         p.classList.add('active');
         drawCars(p.dataset.f);
       }));
+
+      /* Превью блога: после первой загрузки берёт обложки, заданные в админке.
+         В HTML выше остаётся статичный резерв на случай недоступности API. */
+      const homeBlog = document.getElementById('home-blog-list');
+      A.loadBlog().then((posts) => {
+        if (!posts.length || !homeBlog) return;
+        homeBlog.innerHTML = posts.slice(0, 3).map(A.blogCard).join('');
+        A.initReveal();
+      });
 
       /* Фичи — бенто-грид */
       const cells = [

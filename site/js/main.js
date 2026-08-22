@@ -21,7 +21,7 @@
   A.blogCard = function (post) {
     const cover = typeof post.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(post.cover)
       ? `<img src="${escBlog(post.cover)}" alt="" loading="lazy">` : '';
-    return `<a class="blog-card reveal" href="blog/${encodeURIComponent(post.slug)}.html">
+    return `<a class="blog-card reveal" href="blog/${encodeURIComponent(post.slug)}.html" data-goal="blog_related_click">
       <span class="blog-card-cover">${cover}</span>
       <div class="blog-card-copy">
         <span class="bc-meta">${escBlog(post.category)} · ${escBlog(post.readTime)}</span>
@@ -39,6 +39,49 @@
       return Array.isArray(posts) ? posts : [];
     } catch (_e) { return []; }
   };
+
+  /* Конверсионное продолжение статьи: внутренние страницы + другие материалы.
+     Атрибут data-blog-article ставится только на полноценных статьях, поэтому
+     блок не появляется на странице списка блога. */
+  function renderBlogArticleEnd() {
+    const currentSlug = document.body.dataset.blogArticle;
+    if (!currentSlug) return;
+    const section = document.createElement('section');
+    section.className = 'section article-next-section';
+    section.setAttribute('aria-labelledby', 'article-next-title');
+    section.innerHTML = `<div class="container">
+      <div class="article-next-panel reveal">
+        <div class="divider-label">Продолжить знакомство с INAVTO ASIA</div>
+        <h2 class="h2" id="article-next-title">Проверьте условия перед выбором автомобиля</h2>
+        <p class="lead">Перейдите к моделям и ценам или изучите, как устроены доставка, гарантии и выдача автомобилей клиентам.</p>
+        <nav class="article-path-grid" aria-label="Полезные разделы сайта">
+          <a class="article-path-card" href="catalog.html" data-goal="article_to_catalog"><small>Модели и цены</small><strong>Каталог автомобилей</strong><span>Смотреть каталог →</span></a>
+          <a class="article-path-card" href="garantii.html" data-goal="article_to_warranty"><small>Защита покупателя</small><strong>Гарантии компании</strong><span>Изучить гарантии →</span></a>
+          <a class="article-path-card" href="dostavka.html" data-goal="article_to_delivery"><small>Сроки и документы</small><strong>Доставка из Китая</strong><span>Как проходит доставка →</span></a>
+          <a class="article-path-card" href="index.html#delivered-home" data-goal="article_to_delivered"><small>Реальные результаты</small><strong>Выданные автомобили</strong><span>Посмотреть выдачи →</span></a>
+        </nav>
+      </div>
+      <div class="article-related reveal" aria-labelledby="article-related-title">
+        <div class="section-head">
+          <div><div class="divider-label">Читайте также</div><h2 class="h2" id="article-related-title">Вам может быть полезно</h2></div>
+          <a class="text-link" href="blog/index.html" data-goal="article_to_blog">Все статьи →</a>
+        </div>
+        <div class="blog-grid" data-related-blog></div>
+      </div>
+    </div>`;
+    const firstScript = document.querySelector('script[src="js/data.js"]');
+    document.body.insertBefore(section, firstScript || null);
+    A.loadBlog().then((posts) => {
+      const grid = section.querySelector('[data-related-blog]');
+      const related = posts.filter((post) => post.slug !== currentSlug).slice(0, 3);
+      if (!related.length) {
+        section.querySelector('.article-related').remove();
+        return;
+      }
+      grid.innerHTML = related.map(A.blogCard).join('');
+      A.initReveal();
+    });
+  }
 
   /* ---------- SVG-иконки ---------- */
   const ICONS = {
@@ -1011,6 +1054,7 @@
     renderHeader();
     renderFooter();
     renderQuizModal();
+    renderBlogArticleEnd();
     if (typeof window.INAVTO_PAGE_INIT === 'function') window.INAVTO_PAGE_INIT();
     renderGeoCatalog();
     // страницы (car.html) выставляют title после старта переводчика — доводим вручную

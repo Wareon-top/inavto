@@ -25,3 +25,27 @@ test('blog has a public API, admin cover controls and home preview', () => {
   assert.match(home, /Больше статей/)
   assert.match(blog, /id="blog-list-public"/)
 })
+
+test('every article continues into service pages and related reading', () => {
+  const main = read('site/js/main.js')
+  const css = read('site/css/style.css')
+  const slugs = [
+    'lixiang-l7-ili-l9',
+    'skolko-stoit-privezti-avto-iz-kitaya-2026',
+    'utilsbor-2026',
+    'erev-vs-phev',
+    'kak-proverit-posrednika',
+  ]
+
+  for (const slug of slugs) {
+    const article = read(`site/blog/${slug}.html`)
+    assert.match(article, new RegExp(`data-blog-article="${slug}"`))
+  }
+  assert.match(main, /href="catalog\.html" data-goal="article_to_catalog"/)
+  assert.match(main, /href="garantii\.html" data-goal="article_to_warranty"/)
+  assert.match(main, /href="dostavka\.html" data-goal="article_to_delivery"/)
+  assert.match(main, /href="index\.html#delivered-home" data-goal="article_to_delivered"/)
+  assert.match(main, /Читайте также/)
+  assert.match(main, /post\.slug !== currentSlug/)
+  assert.match(css, /\.article-path-grid/)
+})

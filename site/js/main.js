@@ -15,6 +15,31 @@
     } catch (e) { /* аналитика не должна ломать сайт */ }
   };
 
+  /* ---------- Блог: карточки берут единственную обложку из админки ---------- */
+  const escBlog = (value) => String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  A.blogCard = function (post) {
+    const cover = typeof post.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(post.cover)
+      ? `<img src="${escBlog(post.cover)}" alt="" loading="lazy">` : '';
+    return `<a class="blog-card reveal" href="blog/${encodeURIComponent(post.slug)}.html">
+      <span class="blog-card-cover">${cover}</span>
+      <div class="blog-card-copy">
+        <span class="bc-meta">${escBlog(post.category)} · ${escBlog(post.readTime)}</span>
+        <h3>${escBlog(post.title)}</h3>
+        <span class="blog-card-text">${escBlog(post.excerpt)}</span>
+        <span class="bc-more">Читать →</span>
+      </div>
+    </a>`;
+  };
+  A.loadBlog = async function () {
+    try {
+      const response = await fetch(API_BASE + '/api/blog');
+      if (!response.ok) return [];
+      const posts = await response.json();
+      return Array.isArray(posts) ? posts : [];
+    } catch (_e) { return []; }
+  };
+
   /* ---------- SVG-иконки ---------- */
   const ICONS = {
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',

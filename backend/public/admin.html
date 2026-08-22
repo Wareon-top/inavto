@@ -141,6 +141,18 @@
   .doc-row a { color:var(--ink); text-decoration:none; font-weight:700; font-size:13px; overflow-wrap:anywhere; flex:1 1 180px; min-width:140px; }
   .doc-row small { color:var(--muted2); margin-left:auto; white-space:nowrap; }
   .doc-row .btn { flex:none; }
+  /* ---- Блог ---- */
+  .blog-admin-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+  .blog-admin-card { background:var(--card); border:1px solid var(--line); display:grid; grid-template-columns:150px minmax(0,1fr); }
+  .blog-admin-cover { min-height:130px; background:linear-gradient(135deg,#17233b,#7c1713 70%,#d6291e); position:relative; overflow:hidden; }
+  .blog-admin-cover::after { content:'INAVTO ASIA'; position:absolute; left:12px; bottom:10px; color:rgba(255,255,255,.72); font-size:8px; font-weight:700; letter-spacing:.13em; }
+  .blog-admin-cover img { display:block; width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+  .blog-admin-copy { padding:14px; min-width:0; }
+  .blog-admin-copy h2 { margin:4px 0 8px; font-size:14px; line-height:1.35; text-transform:none; letter-spacing:0; }
+  .blog-admin-copy p { color:var(--muted); font-size:12px; line-height:1.5; margin-bottom:12px; }
+  .blog-admin-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+  @media (max-width:760px){ .blog-admin-list { grid-template-columns:1fr; } }
+  @media (max-width:420px){ .blog-admin-card { grid-template-columns:1fr; } .blog-admin-cover { min-height:160px; } }
 </style>
 </head>
 <body>
@@ -177,6 +189,7 @@
       <button type="button" class="tab" data-view="crm">CRM · Заявки <span class="tab-badge" id="crm-badge" style="display:none"></span></button>
       <button type="button" class="tab" data-view="deals">Журнал сделок</button>
       <button type="button" class="tab" data-view="docs">Документы</button>
+      <button type="button" class="tab" data-view="blog">Блог</button>
     </div>
 
     <div id="view-catalog">
@@ -301,6 +314,20 @@
     <p class="footer-note">Изменения появляются на сайте сразу после сохранения — обновите страницу сайта.
       Цена ₽ — «под ключ» в миллионах (например 4.2). Слаг — адрес страницы, латиницей: zeekr-7x.</p>
     </div><!-- /view-catalog -->
+
+    <!-- БЛОГ: одна обложка на каждую существующую статью -->
+    <div id="view-blog" style="display:none">
+      <div class="toolbar">
+        <div>
+          <h1>Блог</h1>
+          <span class="muted" id="blog-count"></span>
+        </div>
+        <button class="btn ghost sm" id="blog-refresh">Обновить</button>
+      </div>
+      <p class="sub">Загрузите одну обложку для каждой статьи. Она появится в блоге и в подборке на главной странице.</p>
+      <div class="blog-admin-list" id="blog-admin-list"></div>
+      <p class="footer-note">Новое изображение заменяет прежнюю обложку статьи. Рекомендуемый формат — горизонтальный, 16:9.</p>
+    </div><!-- /view-blog -->
 
     <!-- CRM: заявки клиентов -->
     <div id="view-crm" style="display:none">
@@ -1137,7 +1164,7 @@ async function tryLogin() {
   if (ROLE === 'staff') {
     /* Представитель: только журнал сделок, без каталога, заявок и контактов */
     $('who').textContent = t('режим представителя');
-    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm], .tab[data-view=docs]').forEach((b) => { b.style.display = 'none'; });
+    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm], .tab[data-view=docs], .tab[data-view=blog]').forEach((b) => { b.style.display = 'none'; });
     $('dealAddBtn').style.display = 'none';
     showView('deals');
   } else {
@@ -1239,10 +1266,12 @@ function showView(v) {
   $('view-crm').style.display = v === 'crm' ? '' : 'none';
   $('view-deals').style.display = v === 'deals' ? '' : 'none';
   $('view-docs').style.display = v === 'docs' ? '' : 'none';
+  $('view-blog').style.display = v === 'blog' ? '' : 'none';
   localStorage.setItem('inavto_admin_view', v);
   if (v === 'crm') loadLeads().catch((e) => msg(t(e.message)));
   if (v === 'deals') loadDeals().catch((e) => msg(t(e.message)));
   if (v === 'docs') loadDocs().catch((e) => msg(t(e.message)));
+  if (v === 'blog') loadBlog().catch((e) => msg(t(e.message)));
 }
 document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
 
@@ -1252,6 +1281,55 @@ const fmtDT = (s) => {
 };
 const escHtml = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/* ---------- Блог: только выбор и замена одной обложки на статью ---------- */
+let blogPosts = [];
+async function loadBlog() {
+  blogPosts = await api('/api/blog/all');
+  $('blog-count').textContent = blogPosts.length + ' статей';
+  $('blog-admin-list').innerHTML = blogPosts.map((post) => {
+    const fileId = 'blog-cover-' + post.slug;
+    const cover = post.cover
+      ? `<img src="${escHtml(post.cover)}" alt="">` : '';
+    return `<article class="blog-admin-card">
+      <div class="blog-admin-cover">${cover}</div>
+      <div class="blog-admin-copy">
+        <div class="muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em">${escHtml(post.category)} · ${escHtml(post.readTime)}</div>
+        <h2>${escHtml(post.title)}</h2>
+        <p>${post.cover ? 'Обложка установлена.' : 'Обложка пока не установлена.'}</p>
+        <div class="blog-admin-actions">
+          <label class="btn ghost sm" for="${fileId}">Загрузить обложку</label>
+          <input id="${fileId}" type="file" accept="image/jpeg,image/png,image/webp" data-blog-upload="${escHtml(post.slug)}" hidden>
+          ${post.cover ? `<button type="button" class="btn ghost sm" data-blog-remove="${escHtml(post.slug)}">Убрать</button>` : ''}
+          <a class="btn ghost sm" href="/blog/${encodeURIComponent(post.slug)}.html" target="_blank" rel="noopener">Открыть статью</a>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+$('blog-refresh').onclick = () => loadBlog().catch((e) => msg(t(e.message)));
+$('blog-admin-list').addEventListener('change', async (e) => {
+  const input = e.target.closest('[data-blog-upload]');
+  if (!input || !input.files?.[0]) return;
+  const file = input.files[0];
+  try {
+    const data = await resize(file, 1600, 0.84);
+    const uploaded = await api('/api/upload', { method: 'POST', body: JSON.stringify({ type: 'image/webp', data }) });
+    await api('/api/blog/' + encodeURIComponent(input.dataset.blogUpload), { method: 'PUT', body: JSON.stringify({ cover: uploaded.url }) });
+    msg('Обложка сохранена', true);
+    await loadBlog();
+  } catch (err) { msg('Обложка не загрузилась: ' + t(err.message)); }
+});
+$('blog-admin-list').addEventListener('click', async (e) => {
+  const button = e.target.closest('[data-blog-remove]');
+  if (!button || !confirm('Убрать обложку со страницы и главной?')) return;
+  try {
+    await api('/api/blog/' + encodeURIComponent(button.dataset.blogRemove), { method: 'PUT', body: JSON.stringify({ cover: '' }) });
+    msg('Обложка убрана', true);
+    await loadBlog();
+  } catch (err) { msg(t(err.message)); }
+});
 
 async function loadLeads() {
   leads = await api('/api/selections');

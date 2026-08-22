@@ -128,6 +128,19 @@ db.exec(`
     uploaded_by TEXT DEFAULT 'admin',
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS blog_posts (
+    slug TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    excerpt TEXT DEFAULT '',
+    category TEXT DEFAULT '',
+    read_time TEXT DEFAULT '',
+    cover TEXT DEFAULT '',
+    sort INTEGER DEFAULT 100,
+    published INTEGER DEFAULT 1,
+    updated_at TEXT DEFAULT (datetime('now')),
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:
@@ -171,6 +184,25 @@ try { db.exec('ALTER TABLE selections ADD COLUMN note TEXT') } catch { /* кол
 
 /* CRM в админке: внутренний комментарий менеджера по заявке. */
 try { db.exec('ALTER TABLE selections ADD COLUMN manager_note TEXT') } catch { /* колонка уже есть */ }
+
+/* Блог: тексты остаются статическими SEO-страницами, а этот реестр управляет
+   карточками и их единственной обложкой из админки. INSERT OR IGNORE не
+   перезаписывает уже загруженные администратором изображения. */
+const blogCount = db.prepare('SELECT COUNT(*) AS c FROM blog_posts').get()
+if (blogCount.c === 0) {
+  const insertBlog = db.prepare(`
+    INSERT INTO blog_posts (slug, title, excerpt, category, read_time, sort)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+  const posts = [
+    ['lixiang-l7-ili-l9', 'Lixiang L7 или L9: что выбрать и сколько стоит под ключ в 2026', 'Пять мест или шесть, разница в полтора миллиона, одинаковая мощность и важный нюанс с утильсбором — сравнение двух самых популярных «Лисянов».', 'Выбор модели', '7 мин', 10],
+    ['skolko-stoit-privezti-avto-iz-kitaya-2026', 'Сколько стоит привезти авто из Китая в 2026: полный разбор цены', 'Семь слагаемых цены «под ключ», два подробных чека — новый кроссовер и «проходной» 3–5 лет — и четыре типичных обмана в сметах посредников.', 'Деньги', '8 мин', 20],
+    ['utilsbor-2026', 'Утильсбор 2026: льгота до 160 л.с. и как она экономит сотни тысяч', 'Почему две версии одной модели могут отличаться «под ключ» на полмиллиона, как считается утильсбор для физлиц и какие модели попадают под льготу.', 'Деньги', '6 мин', 30],
+    ['erev-vs-phev', 'EREV или PHEV: какой гибрид выбрать для России', 'Lixiang и Voyah против BYD DM-i: чем последовательный гибрид отличается от подключаемого, что происходит зимой и кому какой тип подходит.', 'Технологии', '7 мин', 40],
+    ['kak-proverit-posrednika', 'Как проверить компанию-посредника: 9 пунктов перед предоплатой', 'Договор, инвойс, реквизиты, отчёты и другие признаки, по которым за 15 минут видно, кому можно доверить несколько миллионов рублей.', 'Безопасность', '8 мин', 50],
+  ]
+  db.transaction(() => posts.forEach((post) => insertBlog.run(...post)))()
+}
 
 // Seed demo cars if empty
 const count = db.prepare('SELECT COUNT(*) as c FROM cars').get()

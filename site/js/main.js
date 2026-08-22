@@ -167,6 +167,7 @@
               <h4>Связаться</h4>
               <a href="${C.phoneHref}">${C.phone}</a>
               <a href="${C.telegram}" target="_blank" rel="noopener">Telegram</a>
+              <a href="https://dzen.ru/id/6a885c029f2d295ebd3d35fe?share_to=link" target="_blank" rel="noopener noreferrer" data-goal="social_dzen_click">Дзен</a>
               <a href="${C.whatsapp}" target="_blank" rel="noopener">WhatsApp</a>
               ${C.max ? `<a href="${C.max}" target="_blank" rel="noopener">MAX</a>` : ''}
               <a href="mailto:${C.email}">${C.email}</a>

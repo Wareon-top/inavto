@@ -1636,6 +1636,88 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .footer-legal a:hover { color: #fff; }
 .footer-docs { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 
+/* ---------- Социальные сети на главной ---------- */
+.social-section { padding-top: 0; }
+.social-panel {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(520px, 1.1fr);
+  gap: clamp(34px, 6vw, 84px);
+  align-items: center;
+  padding: clamp(30px, 5vw, 64px);
+  border-radius: var(--radius);
+  color: #fff;
+  background:
+    radial-gradient(circle at 82% -15%, rgba(43, 108, 212, .55), transparent 38%),
+    linear-gradient(125deg, #101a30 0%, #17233b 58%, #202d49 100%);
+  box-shadow: var(--shadow);
+}
+.social-panel::before {
+  content: '';
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  left: -120px;
+  bottom: -180px;
+  border-radius: 50%;
+  border: 42px solid rgba(214, 41, 30, .38);
+  pointer-events: none;
+}
+.social-intro { position: relative; z-index: 1; }
+.social-intro .divider-label { color: #f7c325; }
+.social-intro .divider-label::after { background: rgba(255, 255, 255, .2); }
+.social-intro .h2 { margin-top: 16px; max-width: 620px; }
+.social-intro .lead { margin-top: 18px; color: rgba(255, 255, 255, .72); }
+.social-links { position: relative; z-index: 1; display: grid; gap: 14px; }
+.social-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  min-height: 118px;
+  padding: 22px 24px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  backdrop-filter: blur(10px);
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+}
+.social-card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .34); }
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 15px;
+}
+.social-icon svg { width: 30px; height: 30px; }
+.social-card-tg .social-icon { background: #229ed9; }
+.social-card-dzen .social-icon { color: #111; background: #fff; }
+.social-card-copy { min-width: 0; display: flex; flex-direction: column; }
+.social-card-copy small { margin-bottom: 4px; color: rgba(255, 255, 255, .62); font-size: 12px; }
+.social-card-copy strong { font-size: clamp(18px, 2vw, 23px); line-height: 1.2; }
+.social-card-copy > span { margin-top: 4px; color: rgba(255, 255, 255, .78); font-family: var(--font-mono); font-size: 11px; }
+.social-arrow { font-size: 24px; color: rgba(255, 255, 255, .68); transition: transform .25s ease, color .25s ease; }
+.social-card:hover .social-arrow { color: #fff; transform: translate(2px, -2px); }
+
+@media (max-width: 980px) {
+  .social-panel { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .social-panel { padding: 26px 18px; gap: 28px; border-radius: 14px; }
+  .social-card { grid-template-columns: 48px minmax(0, 1fr) auto; gap: 13px; min-height: 100px; padding: 17px 15px; }
+  .social-icon { width: 48px; height: 48px; border-radius: 12px; }
+  .social-icon svg { width: 25px; height: 25px; }
+  .social-card-copy small { font-size: 10.5px; }
+  .social-card-copy strong { font-size: 17px; }
+  .social-card-copy > span { font-size: 9.5px; }
+  .social-arrow { font-size: 20px; }
+}
+
 /* ---------- Таблица реквизитов ---------- */
 .req-table { display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; }
 .req-table > div { background: var(--card, #fff); padding: 13px 18px; font-size: 15px; }

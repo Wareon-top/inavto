@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
+import vm from 'node:vm'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -40,6 +41,7 @@ test('every article continues into service pages and related reading', () => {
   for (const slug of slugs) {
     const article = read(`site/blog/${slug}.html`)
     assert.match(article, new RegExp(`data-blog-article="${slug}"`))
+    assert.match(article, /js\/blog-translations\.js/)
   }
   assert.match(main, /href="catalog\.html" data-goal="article_to_catalog"/)
   assert.match(main, /href="garantii\.html" data-goal="article_to_warranty"/)
@@ -51,4 +53,26 @@ test('every article continues into service pages and related reading', () => {
   assert.match(main, /current\.cover/)
   assert.match(css, /\.article-path-grid/)
   assert.match(css, /\.article-hero-cover/)
+})
+
+test('all articles have complete English and Chinese translation packs', () => {
+  const context = { window: {} }
+  vm.runInNewContext(read('site/js/blog-translations.js'), context)
+  const packs = context.window.INAVTO_BLOG_TRANSLATIONS
+  const slugs = [
+    'lixiang-l7-ili-l9',
+    'skolko-stoit-privezti-avto-iz-kitaya-2026',
+    'utilsbor-2026',
+    'erev-vs-phev',
+    'kak-proverit-posrednika',
+  ]
+  for (const lang of ['en', 'zh']) {
+    assert.deepEqual(Object.keys(packs[lang]), slugs)
+    for (const slug of slugs) {
+      assert.ok(packs[lang][slug].prose.length > 900)
+      assert.equal(packs[lang][slug].cta.length, 4)
+    }
+  }
+  assert.ok(fs.statSync(path.join(root, 'site/img/article-next-banner.webp')).size > 80000)
+  assert.match(read('site/js/main.js'), /article-next-banner\.webp/)
 })

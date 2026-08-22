@@ -19,14 +19,19 @@
   const escBlog = (value) => String(value == null ? '' : value)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   A.blogCard = function (post) {
-    const cover = typeof post.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(post.cover)
-      ? `<img src="${escBlog(post.cover)}" alt="" loading="lazy">` : '';
-    return `<a class="blog-card reveal" href="blog/${encodeURIComponent(post.slug)}.html" data-goal="blog_related_click">
+    const locale = window.INAVTO_I18N && window.INAVTO_I18N.lang;
+    const translated = window.INAVTO_BLOG_TRANSLATIONS && window.INAVTO_BLOG_TRANSLATIONS[locale] &&
+      window.INAVTO_BLOG_TRANSLATIONS[locale][post.slug];
+    const view = translated ? { ...post, title: translated.title, excerpt: translated.excerpt,
+      category: translated.category, readTime: translated.readTime } : post;
+    const cover = typeof view.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(view.cover)
+      ? `<img src="${escBlog(view.cover)}" alt="" loading="lazy">` : '';
+    return `<a class="blog-card reveal" href="blog/${encodeURIComponent(view.slug)}.html" data-goal="blog_related_click">
       <span class="blog-card-cover">${cover}</span>
       <div class="blog-card-copy">
-        <span class="bc-meta">${escBlog(post.category)} · ${escBlog(post.readTime)}</span>
-        <h3>${escBlog(post.title)}</h3>
-        <span class="blog-card-text">${escBlog(post.excerpt)}</span>
+        <span class="bc-meta">${escBlog(view.category)} · ${escBlog(view.readTime)}</span>
+        <h3>${escBlog(view.title)}</h3>
+        <span class="blog-card-text">${escBlog(view.excerpt)}</span>
         <span class="bc-more">Читать →</span>
       </div>
     </a>`;
@@ -57,14 +62,26 @@
     section.setAttribute('aria-labelledby', 'article-next-title');
     section.innerHTML = `<div class="container">
       <div class="article-next-panel reveal">
-        <div class="divider-label">Продолжить знакомство с INAVTO ASIA</div>
-        <h2 class="h2" id="article-next-title">Проверьте условия перед выбором автомобиля</h2>
-        <p class="lead">Перейдите к моделям и ценам или изучите, как устроены доставка, гарантии и выдача автомобилей клиентам.</p>
+        <a class="article-next-banner" href="catalog.html" data-goal="article_banner_catalog">
+          <img src="img/article-next-banner.webp" alt="INAVTO ASIA — привезём автомобиль из Китая" loading="lazy">
+          <span>Перейти к автомобилям и ценам <b>→</b></span>
+        </a>
+        <div class="article-next-copy">
+          <div>
+            <div class="divider-label">Продолжить знакомство с INAVTO ASIA</div>
+            <h2 class="h2" id="article-next-title">Проверьте условия перед выбором автомобиля</h2>
+            <p class="lead">Сравните модели и цены, изучите договорные гарантии и посмотрите каждый этап доставки до вашего города.</p>
+          </div>
+          <div class="article-next-actions">
+            <a class="btn btn-red" href="catalog.html" data-goal="article_primary_catalog">Смотреть автомобили</a>
+            <a class="btn btn-white" href="calculator.html" data-goal="article_primary_calc">Рассчитать стоимость</a>
+          </div>
+        </div>
         <nav class="article-path-grid" aria-label="Полезные разделы сайта">
-          <a class="article-path-card" href="catalog.html" data-goal="article_to_catalog"><small>Модели и цены</small><strong>Каталог автомобилей</strong><span>Смотреть каталог →</span></a>
-          <a class="article-path-card" href="garantii.html" data-goal="article_to_warranty"><small>Защита покупателя</small><strong>Гарантии компании</strong><span>Изучить гарантии →</span></a>
-          <a class="article-path-card" href="dostavka.html" data-goal="article_to_delivery"><small>Сроки и документы</small><strong>Доставка из Китая</strong><span>Как проходит доставка →</span></a>
-          <a class="article-path-card" href="kak-my-rabotaem.html" data-goal="article_to_process"><small>От заявки до выдачи</small><strong>Как мы работаем</strong><span>Посмотреть этапы →</span></a>
+          <a class="article-path-card" href="catalog.html" data-goal="article_to_catalog"><i>01</i><small>Модели и цены</small><strong>Каталог автомобилей</strong><span>Смотреть каталог →</span></a>
+          <a class="article-path-card" href="garantii.html" data-goal="article_to_warranty"><i>02</i><small>Защита покупателя</small><strong>Гарантии компании</strong><span>Изучить гарантии →</span></a>
+          <a class="article-path-card" href="dostavka.html" data-goal="article_to_delivery"><i>03</i><small>Сроки и документы</small><strong>Доставка из Китая</strong><span>Как проходит доставка →</span></a>
+          <a class="article-path-card" href="kak-my-rabotaem.html" data-goal="article_to_process"><i>04</i><small>От заявки до выдачи</small><strong>Как мы работаем</strong><span>Посмотреть этапы →</span></a>
         </nav>
       </div>
       <div class="article-related reveal" aria-labelledby="article-related-title">
@@ -81,7 +98,8 @@
       const grid = section.querySelector('[data-related-blog]');
       const current = posts.find((post) => post.slug === currentSlug);
       if (current && typeof current.cover === 'string' && /^\/uploads\/[A-Za-z0-9._-]+$/.test(current.cover)) {
-        coverFigure.innerHTML = `<img src="${escBlog(current.cover)}" alt="Обложка статьи: ${escBlog(current.title)}" loading="eager" decoding="async">`;
+        const articleTitle = document.querySelector('.page-hero h1')?.textContent || current.title;
+        coverFigure.innerHTML = `<img src="${escBlog(current.cover)}" alt="Обложка статьи: ${escBlog(articleTitle)}" loading="eager" decoding="async">`;
         coverFigure.hidden = false;
       }
       const related = posts.filter((post) => post.slug !== currentSlug).slice(0, 3);

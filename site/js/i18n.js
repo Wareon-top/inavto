@@ -700,6 +700,28 @@
 "Нужен договор или счёт?": "需要合同或账单？",
 "Пришлём шаблон договора на проверку до того, как вы что-то решите. Работаем с физическими и юридическими лицами.": "在您做决定之前，我们会先发送合同模板供您审阅。个人和企业客户均可合作。",
 "Реквизиты для оплаты по конкретной сделке менеджер присылает вместе со счётом. Проверяйте, что платёж уходит на счёт ООО «ИНАВТО АЗИЯ» — мы никогда не просим переводы на личные карты.": "具体交易的付款资料由经理连同账单一并发送。请确认款项汇入 ООО «ИНАВТО АЗИЯ» 的对公账户 — 我们从不要求转账到个人银行卡。"
+,"Продолжить знакомство с INAVTO ASIA": "继续了解 INAVTO ASIA"
+,"Проверьте условия перед выбором автомобиля": "选车前，请先了解全部条件"
+,"Сравните модели и цены, изучите договорные гарантии и посмотрите каждый этап доставки до вашего города。": "比较车型与价格，了解合同保障，并查看车辆送达您所在城市的每个环节。"
+,"Сравните модели и цены, изучите договорные гарантии и посмотрите каждый этап доставки до вашего города.": "比较车型与价格，了解合同保障，并查看车辆送达您所在城市的每个环节。"
+,"Перейти к автомобилям и ценам": "查看车型与价格"
+,"INAVTO ASIA — привезём автомобиль из Китая": "INAVTO ASIA — 从中国一站式进口汽车"
+,"Смотреть автомобили": "查看车型"
+,"Модели и цены": "车型与价格"
+,"Каталог автомобилей": "车型目录"
+,"Смотреть каталог →": "查看目录 →"
+,"Защита покупателя": "客户保障"
+,"Гарантии компании": "公司保障"
+,"Изучить гарантии →": "了解保障 →"
+,"Сроки и документы": "期限与文件"
+,"Доставка из Китая": "从中国运输"
+,"Как проходит доставка →": "查看运输流程 →"
+,"От заявки до выдачи": "从咨询到交车"
+,"Посмотреть этапы →": "查看全部步骤 →"
+,"Читайте также": "相关阅读"
+,"Вам может быть полезно": "这些内容也许对您有帮助"
+,"Все статьи →": "全部文章 →"
+,"Читать →": "阅读 →"
 };
 
   var DICT_EN = {
@@ -1384,6 +1406,27 @@
 "Нужен договор или счёт?": "Need a contract or an invoice?",
 "Пришлём шаблон договора на проверку до того, как вы что-то решите. Работаем с физическими и юридическими лицами.": "We will send a contract template for review before you decide anything. We work with individuals and companies.",
 "Реквизиты для оплаты по конкретной сделке менеджер присылает вместе со счётом. Проверяйте, что платёж уходит на счёт ООО «ИНАВТО АЗИЯ» — мы никогда не просим переводы на личные карты.": "Payment details for a specific deal are sent by the manager together with the invoice. Make sure the payment goes to the account of OOO INAVTO ASIA — we never ask for transfers to personal cards."
+,"Продолжить знакомство с INAVTO ASIA": "Continue exploring INAVTO ASIA"
+,"Проверьте условия перед выбором автомобиля": "Review every condition before choosing your car"
+,"Сравните модели и цены, изучите договорные гарантии и посмотрите каждый этап доставки до вашего города.": "Compare models and prices, review the contractual guarantees and see every delivery stage to your city."
+,"Перейти к автомобилям и ценам": "View cars and prices"
+,"INAVTO ASIA — привезём автомобиль из Китая": "INAVTO ASIA — your car from China, delivered all-in"
+,"Смотреть автомобили": "View cars"
+,"Модели и цены": "Models and prices"
+,"Каталог автомобилей": "Vehicle catalogue"
+,"Смотреть каталог →": "View catalogue →"
+,"Защита покупателя": "Buyer protection"
+,"Гарантии компании": "Company guarantees"
+,"Изучить гарантии →": "Review guarantees →"
+,"Сроки и документы": "Timing and documents"
+,"Доставка из Китая": "Delivery from China"
+,"Как проходит доставка →": "See the delivery process →"
+,"От заявки до выдачи": "From request to handover"
+,"Посмотреть этапы →": "See all stages →"
+,"Читайте также": "Read next"
+,"Вам может быть полезно": "You may also find these useful"
+,"Все статьи →": "All articles →"
+,"Читать →": "Read →"
 };
 
   var D = lang === 'zh' ? DICT_ZH : DICT_EN;
@@ -1513,6 +1556,39 @@
 
   function start() {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    var slug = document.body && document.body.getAttribute('data-blog-article');
+    var blogPack = window.INAVTO_BLOG_TRANSLATIONS && window.INAVTO_BLOG_TRANSLATIONS[lang] &&
+      window.INAVTO_BLOG_TRANSLATIONS[lang][slug];
+    if (blogPack) {
+      var hero = document.querySelector('.page-hero');
+      var prose = document.querySelector('.prose');
+      var cta = document.querySelector('.cta-banner');
+      if (hero) {
+        var crumbs = hero.querySelector('.breadcrumbs');
+        if (crumbs) crumbs.innerHTML = '<a href="index.html">' + (lang === 'zh' ? '首页' : 'Home') + '</a> / <a href="blog/index.html">' + (lang === 'zh' ? '博客' : 'Blog') + '</a> / ' + blogPack.crumb;
+        var meta = hero.querySelector('.divider-label');
+        var heading = hero.querySelector('h1');
+        if (meta) meta.textContent = blogPack.meta;
+        if (heading) heading.textContent = blogPack.title;
+      }
+      if (prose) prose.innerHTML = blogPack.prose;
+      if (cta && blogPack.cta) {
+        var ctaTitle = cta.querySelector('h2');
+        var ctaLead = cta.querySelector('.lead');
+        var ctaActions = cta.querySelectorAll('.cta-banner-actions .btn');
+        if (ctaTitle) ctaTitle.textContent = blogPack.cta[0];
+        if (ctaLead) ctaLead.textContent = blogPack.cta[1];
+        if (ctaActions[0]) ctaActions[0].textContent = blogPack.cta[2];
+        if (ctaActions[1]) ctaActions[1].textContent = blogPack.cta[3];
+      }
+      document.title = blogPack.title + ' — INAVTO ASIA';
+      var description = document.querySelector('meta[name="description"]');
+      var ogTitle = document.querySelector('meta[property="og:title"]');
+      var ogDescription = document.querySelector('meta[property="og:description"]');
+      if (description) description.setAttribute('content', blogPack.excerpt);
+      if (ogTitle) ogTitle.setAttribute('content', blogPack.title);
+      if (ogDescription) ogDescription.setAttribute('content', blogPack.excerpt);
+    }
     walk(document.body);
     var t = tr(document.title);
     if (t !== null) document.title = t;

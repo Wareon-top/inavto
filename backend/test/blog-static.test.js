@@ -47,5 +47,8 @@ test('every article continues into service pages and related reading', () => {
   assert.match(main, /href="kak-my-rabotaem\.html" data-goal="article_to_process"/)
   assert.match(main, /Читайте также/)
   assert.match(main, /post\.slug !== currentSlug/)
+  assert.match(main, /data-article-cover/)
+  assert.match(main, /current\.cover/)
   assert.match(css, /\.article-path-grid/)
+  assert.match(css, /\.article-hero-cover/)
 })

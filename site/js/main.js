@@ -58,7 +58,7 @@
           <a class="article-path-card" href="catalog.html" data-goal="article_to_catalog"><small>Модели и цены</small><strong>Каталог автомобилей</strong><span>Смотреть каталог →</span></a>
           <a class="article-path-card" href="garantii.html" data-goal="article_to_warranty"><small>Защита покупателя</small><strong>Гарантии компании</strong><span>Изучить гарантии →</span></a>
           <a class="article-path-card" href="dostavka.html" data-goal="article_to_delivery"><small>Сроки и документы</small><strong>Доставка из Китая</strong><span>Как проходит доставка →</span></a>
-          <a class="article-path-card" href="index.html#delivered-home" data-goal="article_to_delivered"><small>Реальные результаты</small><strong>Выданные автомобили</strong><span>Посмотреть выдачи →</span></a>
+          <a class="article-path-card" href="kak-my-rabotaem.html" data-goal="article_to_process"><small>От заявки до выдачи</small><strong>Как мы работаем</strong><span>Посмотреть этапы →</span></a>
         </nav>
       </div>
       <div class="article-related reveal" aria-labelledby="article-related-title">

@@ -595,7 +595,7 @@ export { pageHTML as carPageHTML, geoHTML, CITIES, DOMAIN }
 
 export const STATIC_PAGES = ['', 'catalog.html', 'calculator.html', 'kak-my-rabotaem.html',
   'garantii.html', 'dostavka.html', 'dlya-biznesa.html', 'o-kompanii.html',
-  'kontakty.html', 'rekvizity.html']
+  'kontakty.html', 'rekvizity.html', 'delivery-stories.html']
 
 export const BLOG_URLS = [
   'blog/',

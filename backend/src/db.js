@@ -141,6 +141,28 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now')),
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  /* Реальные обновления по доставке. Записи публикует только администратор;
+     таблица намеренно не наполняется демонстрационными историями. */
+  CREATE TABLE IF NOT EXISTS delivery_stories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    vehicles TEXT DEFAULT '',
+    from_city TEXT DEFAULT '',
+    to_city TEXT DEFAULT '',
+    stage TEXT DEFAULT 'shipping',
+    story_date TEXT DEFAULT '',
+    excerpt TEXT DEFAULT '',
+    body TEXT DEFAULT '',
+    video_url TEXT DEFAULT '',
+    cover_url TEXT DEFAULT '',
+    featured INTEGER DEFAULT 0,
+    published INTEGER DEFAULT 0,
+    sort INTEGER DEFAULT 100,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:

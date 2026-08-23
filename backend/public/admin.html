@@ -151,8 +151,16 @@
   .blog-admin-copy h2 { margin:4px 0 8px; font-size:14px; line-height:1.35; text-transform:none; letter-spacing:0; }
   .blog-admin-copy p { color:var(--muted); font-size:12px; line-height:1.5; margin-bottom:12px; }
   .blog-admin-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+  .story-admin-form { display:none; margin-bottom:18px; }
+  .story-admin-form.open { display:block; }
+  .story-admin-list { display:grid; gap:10px; }
+  .story-admin-row { background:var(--card); border:1px solid var(--line); padding:14px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; }
+  .story-admin-row h2 { margin:4px 0; text-transform:none; letter-spacing:0; font-size:15px; }
+  .story-admin-row p { margin:0; color:var(--muted); font-size:12px; }
+  .story-admin-status { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
   @media (max-width:760px){ .blog-admin-list { grid-template-columns:1fr; } }
   @media (max-width:420px){ .blog-admin-card { grid-template-columns:1fr; } .blog-admin-cover { min-height:160px; } }
+  @media (max-width:560px){ .story-admin-row { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -190,6 +198,7 @@
       <button type="button" class="tab" data-view="deals">Журнал сделок</button>
       <button type="button" class="tab" data-view="docs">Документы</button>
       <button type="button" class="tab" data-view="blog">Блог</button>
+      <button type="button" class="tab" data-view="stories">Авто в пути</button>
     </div>
 
     <div id="view-catalog">
@@ -328,6 +337,24 @@
       <div class="blog-admin-list" id="blog-admin-list"></div>
       <p class="footer-note">Новое изображение заменяет прежнюю обложку статьи. Рекомендуемый формат — горизонтальный, 16:9.</p>
     </div><!-- /view-blog -->
+
+    <div id="view-stories" style="display:none">
+      <div class="toolbar"><div><h1>Автомобили в пути</h1><span class="muted" id="story-count"></span></div><div style="display:flex;gap:10px"><button class="btn ghost sm" id="story-refresh">Обновить</button><button class="btn red" id="story-add">+ Добавить видео</button></div></div>
+      <p class="sub">Публикуйте реальные обновления: маршрут, текущий этап, видео и краткий комментарий. На главной показываются только записи с отметкой «На главную».</p>
+      <form class="panel story-admin-form" id="story-form">
+        <h2 id="story-form-title">Новое видео</h2>
+        <div class="grid g2" style="margin-bottom:16px">
+          <div><label>Заголовок *</label><input id="story-title" required placeholder="Kia K3 и Audi Q3 отправились в Санкт-Петербург"></div><div><label>Адрес страницы (латиница) *</label><input id="story-slug" required pattern="[a-z0-9-]{2,100}" placeholder="kia-k3-audi-q3-horgos-spb"></div>
+          <div><label>Автомобили</label><input id="story-vehicles" placeholder="Kia K3 · Audi Q3"></div><div><label>Дата обновления</label><input id="story-date" type="date"></div>
+          <div><label>Откуда</label><input id="story-from" placeholder="Хоргос"></div><div><label>Куда</label><input id="story-to" placeholder="Санкт-Петербург"></div>
+          <div><label>Этап доставки</label><select id="story-stage"><option value="shipping">Отправка из Китая</option><option value="border">Граница</option><option value="transit">В пути по России</option><option value="customs">Таможня</option><option value="delivery">Доставка клиенту</option><option value="done">Автомобиль выдан</option></select></div><div><label>Порядок в ленте</label><input id="story-sort" type="number" min="0" value="100"></div>
+        </div>
+        <div style="margin-bottom:16px"><label>Краткое описание</label><textarea id="story-excerpt" placeholder="Что произошло и какой следующий этап доставки."></textarea></div><div style="margin-bottom:16px"><label>Полный текст публикации</label><textarea id="story-body" placeholder="Текст для страницы истории: без персональных данных клиента."></textarea></div>
+        <div class="grid g2" style="margin-bottom:16px"><div><label>Видео (MP4 / WebM / MOV, до 55 МБ)</label><input id="story-video-file" type="file" accept="video/mp4,video/webm,video/quicktime"><input id="story-video-url" type="url" placeholder="или безопасная ссылка на видео"></div><div><label>Обложка (JPEG / PNG / WebP)</label><input id="story-cover-file" type="file" accept="image/jpeg,image/png,image/webp"><input id="story-cover-url" type="url" placeholder="или безопасная ссылка на обложку"></div></div>
+        <div class="tags" style="margin-bottom:18px"><label><input id="story-published" type="checkbox" checked> Опубликовать</label><label><input id="story-featured" type="checkbox" checked> Показывать на главной</label></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn red" type="submit">Сохранить</button><button class="btn ghost" type="button" id="story-cancel">Отмена</button></div>
+      </form>
+      <div class="story-admin-list" id="story-admin-list"></div><p class="footer-note">Видео публикуется без автозапуска звука. Не добавляйте в текст, видео или обложку личные данные клиента без его согласия.</p>
+    </div><!-- /view-stories -->
 
     <!-- CRM: заявки клиентов -->
     <div id="view-crm" style="display:none">
@@ -1164,7 +1191,7 @@ async function tryLogin() {
   if (ROLE === 'staff') {
     /* Представитель: только журнал сделок, без каталога, заявок и контактов */
     $('who').textContent = t('режим представителя');
-    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm], .tab[data-view=docs], .tab[data-view=blog]').forEach((b) => { b.style.display = 'none'; });
+    document.querySelectorAll('.tab[data-view=catalog], .tab[data-view=crm], .tab[data-view=docs], .tab[data-view=blog], .tab[data-view=stories]').forEach((b) => { b.style.display = 'none'; });
     $('dealAddBtn').style.display = 'none';
     showView('deals');
   } else {
@@ -1267,11 +1294,13 @@ function showView(v) {
   $('view-deals').style.display = v === 'deals' ? '' : 'none';
   $('view-docs').style.display = v === 'docs' ? '' : 'none';
   $('view-blog').style.display = v === 'blog' ? '' : 'none';
+  $('view-stories').style.display = v === 'stories' ? '' : 'none';
   localStorage.setItem('inavto_admin_view', v);
   if (v === 'crm') loadLeads().catch((e) => msg(t(e.message)));
   if (v === 'deals') loadDeals().catch((e) => msg(t(e.message)));
   if (v === 'docs') loadDocs().catch((e) => msg(t(e.message)));
   if (v === 'blog') loadBlog().catch((e) => msg(t(e.message)));
+  if (v === 'stories') loadStories().catch((e) => msg(t(e.message)));
 }
 document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
 
@@ -1330,6 +1359,18 @@ $('blog-admin-list').addEventListener('click', async (e) => {
     await loadBlog();
   } catch (err) { msg(t(err.message)); }
 });
+
+/* ---------- Автомобили в пути: отдельная редакция реальных видео ---------- */
+let stories = []; let editingStoryId = null;
+const STORY_STAGES = { shipping: 'Отправка из Китая', border: 'Граница', transit: 'В пути по России', customs: 'Таможня', delivery: 'Доставка клиенту', done: 'Автомобиль выдан' };
+const storyValue = (id) => $(id).value.trim();
+const storyFileData = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onerror = () => reject(new Error('Не удалось прочитать файл')); reader.onload = () => resolve(reader.result); reader.readAsDataURL(file); });
+function showStoryForm(item = null) { editingStoryId = item?.id || null; $('story-form').reset(); $('story-form').classList.add('open'); $('story-form-title').textContent = item ? 'Редактировать видео' : 'Новое видео'; $('story-title').value = item?.title || ''; $('story-slug').value = item?.slug || ''; $('story-vehicles').value = item?.vehicles || ''; $('story-date').value = item?.storyDate || new Date().toISOString().slice(0, 10); $('story-from').value = item?.fromCity || ''; $('story-to').value = item?.toCity || ''; $('story-stage').value = item?.stage || 'shipping'; $('story-sort').value = item?.sort ?? 100; $('story-excerpt').value = item?.excerpt || ''; $('story-body').value = item?.body || ''; $('story-video-url').value = item?.videoUrl || ''; $('story-cover-url').value = item?.coverUrl || ''; $('story-published').checked = item?.published ?? true; $('story-featured').checked = item?.featured ?? true; $('story-title').focus(); }
+function hideStoryForm() { $('story-form').classList.remove('open'); editingStoryId = null; }
+async function loadStories() { stories = await api('/api/delivery-stories/all'); $('story-count').textContent = stories.length ? stories.length + ' публикаций' : 'Пока нет опубликованных видео'; $('story-admin-list').innerHTML = stories.length ? stories.map((s) => `<article class="story-admin-row"><div><div class="story-admin-status"><span class="badge ${s.published ? 'vis' : 'hid'}">${s.published ? 'опубликовано' : 'черновик'}</span>${s.featured ? '<span class="badge vis">главная</span>' : ''}<span class="muted">${escHtml(STORY_STAGES[s.stage] || s.stage)} · ${escHtml(s.storyDate || 'без даты')}</span></div><h2>${escHtml(s.title)}</h2><p>${escHtml([s.vehicles, s.fromCity && s.toCity ? s.fromCity + ' → ' + s.toCity : '', s.videoUrl ? 'видео добавлено' : 'без видео'].filter(Boolean).join(' · '))}</p></div><div class="actions"><button type="button" class="btn ghost sm" data-story-edit="${s.id}">Изменить</button><button type="button" class="btn ghost sm" data-story-delete="${s.id}">Удалить</button></div></article>`).join('') : '<div class="panel"><p class="muted">Добавьте первое реальное видео — после публикации оно появится в ленте и, при отметке, на главной странице.</p></div>'; }
+$('story-add').onclick = () => showStoryForm(); $('story-cancel').onclick = hideStoryForm; $('story-refresh').onclick = () => loadStories().catch((e) => msg(t(e.message)));
+$('story-admin-list').addEventListener('click', async (e) => { const edit = e.target.closest('[data-story-edit]'); const del = e.target.closest('[data-story-delete]'); if (edit) return showStoryForm(stories.find((s) => s.id === Number(edit.dataset.storyEdit))); if (del && confirm('Удалить эту публикацию? Загруженный медиафайл останется на сервере.')) { try { await api('/api/delivery-stories/' + del.dataset.storyDelete, { method: 'DELETE' }); msg('Публикация удалена', true); await loadStories(); } catch (err) { msg(t(err.message)); } } });
+$('story-form').addEventListener('submit', async (e) => { e.preventDefault(); const videoFile = $('story-video-file').files[0]; const coverFile = $('story-cover-file').files[0]; try { let videoUrl = storyValue('story-video-url'); let coverUrl = storyValue('story-cover-url'); if (videoFile) { msg('Загружаю видео…'); videoUrl = (await api('/api/upload', { method: 'POST', body: JSON.stringify({ type: videoFile.type, data: await storyFileData(videoFile) }) })).url; } if (coverFile) { msg('Загружаю обложку…'); coverUrl = (await api('/api/upload', { method: 'POST', body: JSON.stringify({ type: coverFile.type, data: await storyFileData(coverFile) }) })).url; } const body = { slug: storyValue('story-slug'), title: storyValue('story-title'), vehicles: storyValue('story-vehicles'), fromCity: storyValue('story-from'), toCity: storyValue('story-to'), stage: $('story-stage').value, storyDate: $('story-date').value, excerpt: storyValue('story-excerpt'), body: storyValue('story-body'), videoUrl, coverUrl, featured: $('story-featured').checked, published: $('story-published').checked, sort: Number($('story-sort').value) || 100 }; await api('/api/delivery-stories' + (editingStoryId ? '/' + editingStoryId : ''), { method: editingStoryId ? 'PUT' : 'POST', body: JSON.stringify(body) }); msg('Публикация сохранена', true); hideStoryForm(); await loadStories(); } catch (err) { msg('Публикация не сохранена: ' + t(err.message)); } });
 
 async function loadLeads() {
   leads = await api('/api/selections');

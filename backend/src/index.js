@@ -11,6 +11,7 @@ import dealsRouter from './routes/deals.js'
 import docsRouter from './routes/docs.js'
 import lkRouter from './routes/lk.js'
 import blogRouter from './routes/blog.js'
+import deliveryStoriesRouter from './routes/deliveryStories.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 import { rebuildSitePages } from './sitegen.js'
 import { adminOnly, staffOnly } from './auth.js'
@@ -44,6 +45,7 @@ app.use('/api/deals', staffOnly, largeJson, dealsRouter)
 app.use('/api/docs', staffOnly, largeJson, docsRouter)
 app.use('/api/lk', clientCabinetLimiter, lkRouter)
 app.use('/api/blog', smallJson, blogRouter)
+app.use('/api/delivery-stories', smallJson, deliveryStoriesRouter)
 app.use('/api/upload', adminOnly, largeJson, uploadRouter)
 
 /* Админка, личный кабинет клиента и загруженные фото.

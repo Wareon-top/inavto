@@ -36,6 +36,7 @@ test('every article continues into service pages and related reading', () => {
     'utilsbor-2026',
     'erev-vs-phev',
     'kak-proverit-posrednika',
+    'sbkts-epts-avto-iz-kitaya-2026',
   ]
 
   for (const slug of slugs) {
@@ -65,6 +66,7 @@ test('all articles have complete English and Chinese translation packs', () => {
     'utilsbor-2026',
     'erev-vs-phev',
     'kak-proverit-posrednika',
+    'sbkts-epts-avto-iz-kitaya-2026',
   ]
   for (const lang of ['en', 'zh']) {
     assert.deepEqual(Object.keys(packs[lang]), slugs)

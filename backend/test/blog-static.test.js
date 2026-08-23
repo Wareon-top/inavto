@@ -93,6 +93,8 @@ test('delivery stories are managed separately and surface only real published vi
   assert.match(route, /router\.delete\('\/:id', adminOnly/)
   assert.match(admin, /data-view="stories"/)
   assert.match(admin, /story-video-file/)
+  assert.match(admin, /storyVideoPoster/)
+  assert.doesNotMatch(admin, /story-cover-file/)
   assert.match(home, /data-delivery-stories-home/)
   assert.match(home, /stories\.filter\(\(story\) => story\.featured\)/)
   assert.match(list, /data-story-filters/)

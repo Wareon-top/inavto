@@ -604,6 +604,7 @@ export const BLOG_URLS = [
   'blog/utilsbor-2026.html',
   'blog/erev-vs-phev.html',
   'blog/kak-proverit-posrednika.html',
+  'blog/sbkts-epts-avto-iz-kitaya-2026.html',
 ]
 
 /* Карта сайта: статические страницы + переданные слаги машин + города + блог */

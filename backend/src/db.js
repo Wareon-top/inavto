@@ -226,6 +226,20 @@ if (blogCount.c === 0) {
   db.transaction(() => posts.forEach((post) => insertBlog.run(...post)))()
 }
 
+/* Новые SEO-статьи добавляем отдельно: этот INSERT выполняется и на уже
+   работающей базе, не затрагивая обложки и настройки существующих публикаций. */
+db.prepare(`
+  INSERT OR IGNORE INTO blog_posts (slug, title, excerpt, category, read_time, sort)
+  VALUES (?, ?, ?, ?, ?, ?)
+`).run(
+  'sbkts-epts-avto-iz-kitaya-2026',
+  'СБКТС и ЭПТС на авто из Китая в 2026 году: что получает владелец',
+  'Что подтверждает СБКТС, как устроен электронный паспорт и какие данные проверить перед постановкой ввезённого автомобиля на учёт.',
+  'Документы',
+  '8 мин',
+  5,
+)
+
 // Seed demo cars if empty
 const count = db.prepare('SELECT COUNT(*) as c FROM cars').get()
 if (count.c === 0) {

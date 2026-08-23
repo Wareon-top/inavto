@@ -45,6 +45,56 @@
     } catch (_e) { return []; }
   };
 
+  /* ---------- Автомобили в пути: реальные обновления из админки ---------- */
+  const STORY_STAGES = {
+    shipping: 'Отправка из Китая', border: 'Граница', transit: 'В пути по России',
+    customs: 'Таможня', delivery: 'Доставка клиенту', done: 'Автомобиль выдан',
+  };
+  const storyMedia = (value) => typeof value === 'string' && /^(?:\/uploads\/[A-Za-z0-9._/-]+|https:\/\/[^\s]+)$/i.test(value) ? value : '';
+  const storyIsVideo = (url) => /\.(?:mp4|webm|mov)(?:[?#].*)?$/i.test(url || '');
+  const storyDate = (value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return '';
+    return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(value + 'T12:00:00'));
+  };
+  A.loadDeliveryStories = async function () {
+    try {
+      const response = await fetch(API_BASE + '/api/delivery-stories');
+      if (!response.ok) return [];
+      const stories = await response.json();
+      return Array.isArray(stories) ? stories : [];
+    } catch (_e) { return []; }
+  };
+  A.deliveryStoryCard = function (story) {
+    const cover = storyMedia(story.coverUrl);
+    const stage = STORY_STAGES[story.stage] || 'Обновление доставки';
+    const route = [story.fromCity, story.toCity].filter(Boolean).join(' → ');
+    const media = cover ? `<img src="${escBlog(cover)}" alt="" loading="lazy">` : '<span class="delivery-story-placeholder">INAVTO<br>ASIA</span>';
+    return `<a class="delivery-story-card reveal" href="delivery-story.html?slug=${encodeURIComponent(story.slug)}" data-goal="delivery_story_open">
+      <span class="delivery-story-media">${media}<span class="delivery-story-play" aria-hidden="true">▶</span><span class="delivery-story-stage">${escBlog(stage)}</span></span>
+      <span class="delivery-story-copy"><span class="delivery-story-date">${escBlog(storyDate(story.storyDate))}</span><strong>${escBlog(story.title)}</strong><span class="delivery-story-route">${escBlog(route || story.vehicles || 'Маршрут уточняется')}</span><span class="delivery-story-more">Смотреть обновление <b>→</b></span></span>
+    </a>`;
+  };
+  function renderDeliveryStoryPage() {
+    const root = document.querySelector('[data-delivery-story]');
+    if (!root) return;
+    const slug = new URLSearchParams(location.search).get('slug') || '';
+    A.loadDeliveryStories().then((stories) => {
+      const story = stories.find((item) => item.slug === slug);
+      if (!story) { root.innerHTML = '<div class="empty-state"><h2 class="h2">Обновление не найдено</h2><p class="lead">Посмотрите все реальные этапы доставки автомобилей.</p><a class="btn btn-red" href="delivery-stories.html">Все автомобили в пути</a></div>'; return; }
+      const stage = STORY_STAGES[story.stage] || 'Обновление доставки';
+      const route = [story.fromCity, story.toCity].filter(Boolean).join(' → ');
+      const video = storyMedia(story.videoUrl);
+      const cover = storyMedia(story.coverUrl);
+      const videoHtml = storyIsVideo(video) ? `<video class="delivery-story-video" controls playsinline preload="metadata"${cover ? ` poster="${escBlog(cover)}"` : ''}><source src="${escBlog(video)}">Ваш браузер не поддерживает видео.</video>` : (cover ? `<img class="delivery-story-cover" src="${escBlog(cover)}" alt="${escBlog(story.title)}">` : '');
+      root.innerHTML = `<div class="breadcrumbs"><a href="index.html">Главная</a> / <a href="delivery-stories.html">Автомобили в пути</a> / ${escBlog(story.vehicles || 'Обновление')}</div>
+        <div class="delivery-story-layout"><div><div class="divider-label">${escBlog(stage)}</div><h1 class="h1">${escBlog(story.title)}</h1><p class="lead">${escBlog(story.excerpt || 'Показываем реальный этап маршрута автомобиля к заказчику.')}</p><dl class="delivery-story-facts"><div><dt>Автомобили</dt><dd>${escBlog(story.vehicles || '—')}</dd></div><div><dt>Маршрут</dt><dd>${escBlog(route || '—')}</dd></div><div><dt>Обновлено</dt><dd>${escBlog(storyDate(story.storyDate) || '—')}</dd></div></dl></div><div class="delivery-story-player">${videoHtml || '<div class="delivery-story-placeholder">Видео будет добавлено</div>'}</div></div>
+        ${story.body ? `<div class="delivery-story-text"><p>${escBlog(story.body)}</p></div>` : ''}
+        <div class="cta-banner delivery-story-cta"><div><h2 class="h2">Хотите такое же сопровождение?</h2><p class="lead">Подберём автомобиль, рассчитаем стоимость и будем держать вас в курсе на каждом этапе доставки.</p></div><div class="cta-banner-actions"><button class="btn btn-red" data-quiz-open>Подобрать автомобиль</button><a class="btn btn-ghost" href="calculator.html">Рассчитать стоимость</a></div></div>`;
+      document.title = `${story.title} — INAVTO ASIA`;
+      A.initReveal();
+    });
+  }
+
   /* Конверсионное продолжение статьи: внутренние страницы + другие материалы.
      Атрибут data-blog-article ставится только на полноценных статьях, поэтому
      блок не появляется на странице списка блога. */
@@ -171,6 +221,7 @@
     ['catalog.html', 'Каталог', 'catalog'],
     ['calculator.html', 'Калькулятор', 'calculator'],
     ['kak-my-rabotaem.html', 'Как мы работаем', 'process'],
+    ['delivery-stories.html', 'Авто в пути', 'stories'],
     ['garantii.html', 'Гарантии', 'garantii'],
     ['dlya-biznesa.html', 'Для бизнеса', 'dlya-biznesa'],
     ['kontakty.html', 'Контакты', 'kontakty'],
@@ -252,6 +303,7 @@
             <div>
               <h4>Компания</h4>
               <a href="kak-my-rabotaem.html">Как мы работаем</a>
+              <a href="delivery-stories.html">Авто в пути</a>
               <a href="vydannye-avto.html">Выданные авто</a>
               <a href="blog/index.html">Блог</a>
               <a href="garantii.html">Гарантии</a>
@@ -1085,6 +1137,7 @@
     renderQuizModal();
     renderBlogArticleEnd();
     if (typeof window.INAVTO_PAGE_INIT === 'function') window.INAVTO_PAGE_INIT();
+    renderDeliveryStoryPage();
     renderGeoCatalog();
     // страницы (car.html) выставляют title после старта переводчика — доводим вручную
     if (window.INAVTO_I18N && window.INAVTO_I18N.tr) {

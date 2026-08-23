@@ -236,6 +236,15 @@
     </div>
   </section>
 
+  <!-- АВТОМОБИЛИ В ПУТИ: появляется только при наличии реальных опубликованных видео -->
+  <section class="section delivery-stories-home" data-delivery-stories-home hidden aria-labelledby="delivery-stories-home-title">
+    <div class="container">
+      <div class="section-head reveal"><div><div class="divider-label">Реальные обновления доставки</div><h2 class="h2" id="delivery-stories-home-title">Автомобили в пути</h2></div><p class="lead">Показываем, как автомобили движутся из Китая к владельцам: отправка, граница, дорога по России и выдача.</p></div>
+      <div class="delivery-stories-grid" data-delivery-stories-grid></div>
+      <div class="blog-more reveal"><a class="btn btn-ghost" href="delivery-stories.html" data-goal="delivery_stories_more">Все автомобили в пути</a></div>
+    </div>
+  </section>
+
   <!-- СОЦИАЛЬНЫЕ СЕТИ: продолжение контента после видео -->
   <section class="section social-section" aria-labelledby="social-title">
     <div class="container">
@@ -419,6 +428,16 @@
   <script>
     window.INAVTO_PAGE_INIT = function () {
       const A = window.INAVTO, I = A.ICONS;
+
+      const storiesSection = document.querySelector('[data-delivery-stories-home]');
+      const storiesGrid = document.querySelector('[data-delivery-stories-grid]');
+      if (storiesSection && storiesGrid) A.loadDeliveryStories().then((stories) => {
+        const featured = stories.filter((story) => story.featured).slice(0, 3);
+        if (!featured.length) return;
+        storiesGrid.innerHTML = featured.map(A.deliveryStoryCard).join('');
+        storiesSection.hidden = false;
+        A.initReveal();
+      });
 
 
       /* Чипы */

@@ -2,6 +2,25 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import test from 'node:test'
 
+test('cost article and delivery page link to each other', () => {
+  const costArticle = fs.readFileSync(new URL('../../site/blog/skolko-stoit-privezti-avto-iz-kitaya-2026.html', import.meta.url), 'utf8')
+  const deliveryPage = fs.readFileSync(new URL('../../site/dostavka.html', import.meta.url), 'utf8')
+
+  assert.match(costArticle, /href="\/dostavka\.html">Рассчитать стоимость доставки автомобиля из Китая<\/a>/)
+  assert.match(deliveryPage, /href="\/blog\/skolko-stoit-privezti-avto-iz-kitaya-2026\.html"/)
+})
+
+test('EREV and PHEV article links to existing hybrid cards from the site root', () => {
+  const article = fs.readFileSync(new URL('../../site/blog/erev-vs-phev.html', import.meta.url), 'utf8')
+  const slugs = ['lixiang-l7', 'lixiang-l9', 'voyah-free', 'aito-m7', 'byd-song-plus']
+
+  for (const slug of slugs) {
+    assert.match(article, new RegExp(`href="/cars/${slug}\\.html"`))
+    assert.ok(fs.existsSync(new URL(`../../site/cars/${slug}.html`, import.meta.url)))
+  }
+  assert.doesNotMatch(article, /href="cars\//)
+})
+
 test('geo pages replace legacy model links with the live API catalog', () => {
   const script = fs.readFileSync(new URL('../../site/js/main.js', import.meta.url), 'utf8')
 

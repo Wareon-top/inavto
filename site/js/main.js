@@ -765,11 +765,25 @@
     if (form) form.querySelector('button[type=submit]').disabled = true;
     leadSubmitted = true;
     A.goal('lead_submit');
+    const formCar = form && form.querySelector('[name=car]');
+    const explicitBrand = form && form.dataset.brand;
+    const payloadBrand = String(payload.brand || '').trim();
+    const carName = String(
+      payload.car_name ||
+      (formCar && formCar.value) ||
+      explicitBrand ||
+      (payloadBrand && !payloadBrand.startsWith('#') ? payloadBrand : '')
+    ).trim();
+    const requestPayload = {
+      ...payload,
+      page_url: window.location.href,
+      car_name: carName,
+    };
     try {
       await fetch(API_BASE + '/api/selections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestPayload),
       });
     } catch (err) {
       // API недоступен (статический хостинг) — заявка не потеряется: покажем контакты

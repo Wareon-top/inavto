@@ -17,13 +17,25 @@ router.post('/', async (req, res) => {
   const body = clean(req.body?.body, 80)
   const fuel = clean(req.body?.fuel, 80)
   const city = clean(req.body?.city, 120)
-  const note = clean(req.body?.note, 1200)
+  const note = clean(req.body?.note, 1000)
   const pageUrl = clean(req.body?.page_url, 500)
   const carName = clean(req.body?.car_name, 160)
+  const source = clean(req.body?.source, 160)
+  const utmSource = clean(req.body?.utm_source, 160)
+  const utmMedium = clean(req.body?.utm_medium, 160)
+  const utmCampaign = clean(req.body?.utm_campaign, 160)
+  const utmContent = clean(req.body?.utm_content, 160)
+  const utmTerm = clean(req.body?.utm_term, 160)
   const leadNote = clean([
     note,
     carName ? `Автомобиль: ${carName}` : '',
     pageUrl ? `Страница: ${pageUrl}` : '',
+    source ? `Источник: ${source}` : '',
+    utmSource ? `utm_source: ${utmSource}` : '',
+    utmMedium ? `utm_medium: ${utmMedium}` : '',
+    utmCampaign ? `utm_campaign: ${utmCampaign}` : '',
+    utmContent ? `utm_content: ${utmContent}` : '',
+    utmTerm ? `utm_term: ${utmTerm}` : '',
   ].filter(Boolean).join(' · '), 2000)
   const tg_user_id = clean(req.body?.tg_user_id, 80)
   if (!name || !phone) return res.status(400).json({ error: 'name and phone required' })

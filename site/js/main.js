@@ -7,10 +7,33 @@
   A.CATALOG_FROM_API = false;
 
   /* Цели Яндекс.Метрики: задать window.INAVTO_YM_ID = <номер счётчика> */
-  A.goal = function (name) {
+  const ATTR_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  const ATTR_KEY = 'inavto_attribution';
+  function attribution() {
+    const params = new URLSearchParams(window.location.search);
+    const current = Object.fromEntries(ATTR_KEYS.map((key) => [key, (params.get(key) || '').slice(0, 160)]));
+    const hasUtm = ATTR_KEYS.some((key) => current[key]);
+    let saved = {};
+    try { saved = JSON.parse(sessionStorage.getItem(ATTR_KEY)) || {}; } catch (_e) { /* — */ }
+    if (hasUtm) {
+      saved = current;
+      try { sessionStorage.setItem(ATTR_KEY, JSON.stringify(saved)); } catch (_e) { /* — */ }
+    }
+    let referrerSource = '';
+    try { referrerSource = document.referrer ? new URL(document.referrer).hostname : ''; } catch (_e) { /* — */ }
+    const values = { ...current, ...saved };
+    return {
+      ...values,
+      source: values.utm_source || referrerSource || 'direct',
+    };
+  }
+  A.analyticsContext = function (carName) {
+    return { page_url: window.location.href, car_name: String(carName || '').trim(), ...attribution() };
+  };
+  A.goal = function (name, params) {
     try {
       if (typeof window.ym === 'function' && window.INAVTO_YM_ID) {
-        window.ym(window.INAVTO_YM_ID, 'reachGoal', name);
+        window.ym(window.INAVTO_YM_ID, 'reachGoal', name, params || {});
       }
     } catch (e) { /* аналитика не должна ломать сайт */ }
   };
@@ -609,33 +632,7 @@
     updateHotCountdowns();
   }
 
-  /* ---------- Квиз: две ветки — частник и бизнес ---------- */
-  const QUIZ_BRANCHES = {
-    start: [
-      { key: 'segment', title: 'Для кого подбираем автомобиль?', options: ['Для себя / семьи', 'Для перепродажи / бизнеса'] },
-    ],
-    private: [
-      { key: 'body', title: 'Какой тип кузова интересует?', options: ['Кроссовер / внедорожник', 'Седан', 'Другое / не важно'] },
-      { key: 'fuel', title: 'Тип двигателя?', options: ['Бензин / дизель', 'Гибрид', 'Электро', 'Не определился(ась)'] },
-      { key: 'budget', title: 'Бюджет «под ключ»?', options: ['До 2,5 млн ₽', '2,5–4 млн ₽', '4–6 млн ₽', 'Более 6 млн ₽'] },
-    ],
-    business: [
-      { key: 'volume', title: 'Какой объём интересует?', options: ['1–2 авто', '3–10 авто в месяц', 'Более 10 в месяц'] },
-      { key: 'budget', title: 'Закупочный бюджет на автомобиль?', options: ['До 2,5 млн ₽', '2,5–4 млн ₽', 'Более 4 млн ₽', 'Разные сегменты'] },
-    ],
-  };
-  const quizSteps = (answers) => QUIZ_BRANCHES.start.concat(
-    answers.segment === 'Для перепродажи / бизнеса' ? QUIZ_BRANCHES.business : QUIZ_BRANCHES.private
-  );
-  const DRAFT_KEY = 'inavto_quiz_draft';
-  const loadDraft = () => {
-    try { return JSON.parse(localStorage.getItem(DRAFT_KEY)) || null; } catch (e) { return null; }
-  };
-  const saveDraft = (state) => {
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); } catch (e) { /* приватный режим */ }
-  };
-  const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* — */ } };
-
+  /* ---------- Короткая форма подбора ---------- */
   function renderQuizModal() {
     const el = document.createElement('div');
     el.className = 'modal-backdrop';
@@ -646,97 +643,40 @@
     </div>`;
     document.body.append(el);
 
-    const state = { step: 0, answers: {} };
     const body = el.querySelector('#quiz-body');
-
-    function draw() {
-      const steps = quizSteps(state.answers);
-      const total = steps.length + 1;
-      saveDraft(state);
-      if (state.step < steps.length) {
-        const s = steps[state.step];
-        const pct = (state.step / total) * 100;
-        body.innerHTML = `
-          <div class="muted" style="font-size:13px;font-weight:700">Шаг ${state.step + 1} из ${total}</div>
-          <div class="quiz-progress"><i style="width:${pct}%"></i></div>
-          <h3 class="h3" style="margin-bottom:18px">${s.title}</h3>
-          <div class="quiz-options">
-            ${s.options.map(o => `<button class="quiz-option${state.answers[s.key] === o ? ' selected' : ''}" data-val="${o}">${o}</button>`).join('')}
-          </div>
-          <div class="quiz-nav">
-            ${state.step > 0 ? '<button class="btn btn-ghost btn-sm" data-back>Назад</button>' : ''}
-          </div>`;
-        body.querySelectorAll('.quiz-option').forEach(b => b.addEventListener('click', () => {
-          if (s.key === 'segment' && state.answers.segment !== b.dataset.val) state.answers = {};
-          state.answers[s.key] = b.dataset.val;
-          state.step++;
-          A.goal('quiz_step_' + state.step);
-          draw();
-        }));
-        const back = body.querySelector('[data-back]');
-        if (back) back.addEventListener('click', () => { state.step--; draw(); });
-      } else {
-        const isBiz = state.answers.segment === 'Для перепродажи / бизнеса';
-        const pct = (steps.length / total) * 100;
-        body.innerHTML = `
-          <div class="muted" style="font-size:13px;font-weight:700">Последний шаг</div>
-          <div class="quiz-progress"><i style="width:${pct}%"></i></div>
-          <h3 class="h3" style="margin-bottom:8px">${isBiz ? 'Куда отправить условия для бизнеса?' : 'Куда отправить подборку?'}</h3>
-          <p class="muted" style="font-size:14px;margin-bottom:18px">${isBiz
-            ? 'Пришлём комиссию, условия по партиям и расчёт на интересующие модели — в течение рабочего дня.'
-            : 'Менеджер подберёт 3–5 вариантов под ваш запрос и пришлёт расчёт «под ключ».'}</p>
-          <form class="form-grid" id="quiz-form">
-            <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Имя" required></div>
-            <div class="form-field"><label>Телефон</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" required></div>
-            <div class="form-field"><label>${isBiz ? 'Регион работы' : 'Город доставки'}</label><input name="city" placeholder="${isBiz ? 'Например, Сибирь' : 'Например, Москва'}"></div>
-            <div class="form-field"><label>Как с вами связаться?</label><select name="messenger">
-              <option>Telegram</option><option>WhatsApp</option><option>MAX</option><option>Звонок по телефону</option>
-            </select></div>
-            <button class="btn btn-red btn-block" type="submit">${isBiz ? 'Получить условия' : 'Получить подборку'}</button>
-            <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
-          </form>
-          <div class="quiz-nav"><button class="btn btn-ghost btn-sm" data-back>Назад</button></div>`;
-        body.querySelector('[data-back]').addEventListener('click', () => { state.step--; draw(); });
-        attachPhoneMask(body.querySelector('input[name=phone]'));
-        ensureConsent(body.querySelector('#quiz-form'));
-        body.querySelector('#quiz-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const f = e.target;
-          const city = f.city.value.trim();
-          const messenger = f.messenger ? f.messenger.value : '';
-          const payload = {
-            name: f.name.value.trim(),
-            phone: f.phone.value.trim(),
-            city: city + (messenger ? (city ? ' · ' : '') + 'связь: ' + messenger : ''),
-            budget: state.answers.budget || '',
-            brand: isBiz ? '#бизнес ' + (state.answers.volume || '') : '#длясебя',
-            body: state.answers.body || '',
-            fuel: state.answers.fuel || '',
-          };
-          if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }
-          if (!consentOK(f)) return;
-          await submitLead(payload, f);
-          clearDraft();
-          body.innerHTML = successHTML('Заявка отправлена!', isBiz
-            ? 'Менеджер по работе с бизнесом свяжется с вами в течение рабочего дня с условиями и расчётом.'
-            : 'Менеджер свяжется с вами в ближайшее время и пришлёт персональную подборку с расчётом «под ключ».');
-          state.step = 0; state.answers = {};
-        });
-      }
+    function draw(carName) {
+      body.innerHTML = `
+        <h3 class="h3" style="margin-bottom:8px">Получить расчёт автомобиля</h3>
+        <p class="muted" style="font-size:14px;margin-bottom:18px">Укажите модель и контакт. Менеджер уточнит детали и пришлёт расчёт «под ключ».</p>
+        <form class="form-grid" id="quiz-form">
+          <div class="form-field"><label>Автомобиль</label><input name="car" value="${escBlog(carName)}" placeholder="Марка и модель или «пока выбираю»" required></div>
+          <div class="form-field"><label>Телефон или Telegram</label><input name="phone" type="text" inputmode="text" autocomplete="tel" placeholder="+7 900 000-00-00 или @username" required></div>
+          <div class="form-field"><label>Город доставки <span class="muted">(необязательно)</span></label><input name="city" autocomplete="address-level2" placeholder="Например, Москва"></div>
+          <button class="btn btn-red btn-block" type="submit">Получить расчёт</button>
+          <div class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.</div>
+        </form>`;
+      const form = body.querySelector('#quiz-form');
+      ensureConsent(form);
+      bindFormAnalytics(form, carName);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const contact = form.phone.value.trim();
+        if (!validContact(contact)) { form.phone.classList.add('error'); form.phone.focus(); return; }
+        if (!consentOK(form)) return;
+        const result = await submitLead({
+          name: '—', phone: contact, city: form.city.value.trim(), budget: 'Короткая форма',
+          brand: form.car.value.trim(), body: '', fuel: '', car_name: form.car.value.trim(),
+        }, form);
+        if (!result.ok) { showLeadError(form); return; }
+        body.innerHTML = successHTML('Заявка отправлена!', 'Менеджер свяжется с вами и пришлёт расчёт «под ключ».');
+      });
     }
 
-    function open() {
+    function open(carName) {
       el.classList.add('open');
       document.body.style.overflow = 'hidden';
-      const draft = loadDraft();
-      if (draft && draft.step > 0 && draft.answers) {
-        state.step = Math.min(draft.step, quizSteps(draft.answers).length);
-        state.answers = draft.answers;
-      } else {
-        state.step = 0; state.answers = {};
-      }
-      draw();
-      A.goal('quiz_open');
+      draw(carName || '');
+      A.goal('quiz_open', A.analyticsContext(carName));
     }
     function close() { el.classList.remove('open'); document.body.style.overflow = ''; }
     el.querySelector('.modal-close').addEventListener('click', close);
@@ -744,7 +684,11 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
     document.addEventListener('click', (e) => {
       const t = e.target.closest('[data-quiz-open]');
-      if (t) { e.preventDefault(); open(); }
+      if (t) {
+        e.preventDefault();
+        const carName = t.dataset.car || document.querySelector('form[data-brand]')?.dataset.brand || '';
+        open(carName);
+      }
     });
   }
 
@@ -758,40 +702,81 @@
   }
 
   /* ---------- Отправка заявок ---------- */
-  function validPhone(v) { return v.replace(/\D/g, '').length >= 10; }
+  function validContact(v) {
+    const value = String(v || '').trim();
+    return value.replace(/\D/g, '').length >= 10 || /^@[A-Za-z0-9_]{5,32}$/.test(value);
+  }
+  const validPhone = validContact;
+
+  function bindFormAnalytics(form, carName) {
+    if (!form || form.dataset.analyticsBound) return;
+    form.dataset.analyticsBound = 'true';
+    const context = () => A.analyticsContext(carName || form.dataset.brand || form.querySelector('[name=car]')?.value);
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        A.goal('lead_form_view', context());
+        observer.disconnect();
+      }, { threshold: 0.2 });
+      observer.observe(form);
+    } else {
+      A.goal('lead_form_view', context());
+    }
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      A.goal('lead_form_start', context());
+    };
+    form.addEventListener('input', start, { passive: true });
+    form.addEventListener('change', start, { passive: true });
+  }
+
+  function showLeadError(form) {
+    let message = form.querySelector('[data-lead-error]');
+    if (!message) {
+      message = document.createElement('div');
+      message.dataset.leadError = '';
+      message.className = 'form-note error';
+      form.appendChild(message);
+    }
+    message.innerHTML = `Не удалось отправить заявку. Данные сохранены в форме — повторите попытку или <a href="${C.telegram}" target="_blank" rel="noopener">напишите нам в Telegram</a>.`;
+  }
 
   let leadSubmitted = false;
   async function submitLead(payload, form) {
-    if (form) form.querySelector('button[type=submit]').disabled = true;
-    leadSubmitted = true;
-    A.goal('lead_submit');
+    const button = form && form.querySelector('button[type=submit]');
+    if (button) button.disabled = true;
     const formCar = form && form.querySelector('[name=car]');
     const explicitBrand = form && form.dataset.brand;
     const payloadBrand = String(payload.brand || '').trim();
-    const carName = String(
-      payload.car_name ||
-      (formCar && formCar.value) ||
-      explicitBrand ||
-      (payloadBrand && !payloadBrand.startsWith('#') ? payloadBrand : '')
-    ).trim();
-    const requestPayload = {
-      ...payload,
-      page_url: window.location.href,
-      car_name: carName,
-    };
+    const carName = String(payload.car_name || (formCar && formCar.value) || explicitBrand ||
+      (payloadBrand && !payloadBrand.startsWith('#') ? payloadBrand : '')).trim();
+    const context = A.analyticsContext(carName);
+    const requestPayload = { ...payload, ...context };
     try {
-      await fetch(API_BASE + '/api/selections', {
+      const response = await fetch(API_BASE + '/api/selections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestPayload),
       });
+      if (response.status !== 201) throw new Error(`Lead API returned ${response.status}`);
+      leadSubmitted = true;
+      A.goal('lead_submit_success', context);
+      A.goal('lead_submit', context);
+      return { ok: true };
     } catch (err) {
-      // API недоступен (статический хостинг) — заявка не потеряется: покажем контакты
       console.warn('Lead API unavailable', err);
+      A.goal('lead_submit_error', context);
+      if (button) button.disabled = false;
+      return { ok: false, error: err };
     }
   }
   A.submitLead = submitLead;
   A.validPhone = validPhone;
+  A.validContact = validContact;
+  A.bindFormAnalytics = bindFormAnalytics;
+  A.showLeadError = showLeadError;
   A.successHTML = successHTML;
 
   /* ---------- Маска телефона ---------- */
@@ -835,8 +820,38 @@
   /* ---------- Обычные формы (обратный звонок и т.п.) ---------- */
   function bindLeadForms() {
     document.querySelectorAll('form[data-lead-form]').forEach((f) => {
-      attachPhoneMask(f.querySelector('input[name=phone]'));
+      const contactInput = f.querySelector('input[name=phone]');
+      if (contactInput) {
+        contactInput.type = 'text';
+        contactInput.inputMode = 'text';
+        contactInput.placeholder = 'Телефон или @Telegram';
+      }
+      if (window.matchMedia('(max-width: 620px)').matches) {
+        const nameInput = f.querySelector('[name=name]');
+        if (nameInput) {
+          nameInput.required = false;
+          nameInput.value = nameInput.value || '—';
+          const field = nameInput.closest('.form-field');
+          if (field) field.hidden = true;
+        }
+        ['trim', 'comment', 'messenger'].forEach((fieldName) => {
+          const input = f.querySelector(`[name=${fieldName}]`);
+          if (input) {
+            input.required = false;
+            const field = input.closest('.form-field');
+            if (field) field.hidden = true;
+          }
+        });
+        if (!f.querySelector('[name=city]')) {
+          const cityField = document.createElement('div');
+          cityField.className = 'form-field';
+          cityField.innerHTML = '<input name="city" autocomplete="address-level2" placeholder="Город доставки (необязательно)">';
+          const submit = f.querySelector('button[type=submit]');
+          if (submit) f.insertBefore(cityField, submit);
+        }
+      }
       ensureConsent(f);
+      bindFormAnalytics(f, f.dataset.brand);
       f.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messenger = f.messenger ? f.messenger.value : '';
@@ -859,7 +874,8 @@
         };
         if (!validPhone(payload.phone)) { f.phone.classList.add('error'); return; }
         if (!consentOK(f)) return;
-        await submitLead(payload, f);
+        const result = await submitLead(payload, f);
+        if (!result.ok) { showLeadError(f); return; }
         f.innerHTML = successHTML(
           f.dataset.successTitle || 'Спасибо, заявка принята!',
           f.dataset.successMessage || 'Мы перезвоним в ближайшее рабочее время (ежедневно 9:00–21:00 мск).'

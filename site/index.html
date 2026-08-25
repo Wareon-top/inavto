@@ -145,40 +145,9 @@
           <!-- Правая колонна: форма-заявка -->
           <div class="lv-form-col">
             <form class="lead-form" id="lead-form" novalidate>
-              <div class="lead-form-row">
-                <div class="form-field"><label>Ваше имя</label><input name="name" placeholder="Как к вам обращаться" autocomplete="name"></div>
-                <div class="form-field"><label>Номер телефона</label><input name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
-              </div>
               <div class="form-field"><label>Какой автомобиль интересует</label><input name="car" placeholder="Марка и модель или «пока выбираю»"></div>
-
-              <div class="lead-q">
-                <span class="lead-q-label">Когда планируете покупку?</span>
-                <div class="lead-chips" data-single data-name="timing">
-                  <button type="button" class="lead-chip" data-val="В ближайшее время">В ближайшее время</button>
-                  <button type="button" class="lead-chip" data-val="В течение полугода">В течение полугода</button>
-                  <button type="button" class="lead-chip" data-val="Пока присматриваюсь">Пока присматриваюсь</button>
-                </div>
-              </div>
-
-              <div class="lead-q">
-                <span class="lead-q-label">Планируемый бюджет</span>
-                <div class="lead-chips" data-single data-name="budget">
-                  <button type="button" class="lead-chip" data-val="до 1,5 млн ₽">до 1,5 млн ₽</button>
-                  <button type="button" class="lead-chip" data-val="1,5–2,5 млн ₽">1,5–2,5 млн ₽</button>
-                  <button type="button" class="lead-chip" data-val="2,5–4 млн ₽">2,5–4 млн ₽</button>
-                  <button type="button" class="lead-chip" data-val="от 4 млн ₽">от 4 млн ₽</button>
-                </div>
-              </div>
-
-              <div class="lead-q">
-                <span class="lead-q-label">Удобный способ связи <em>(можно выбрать несколько)</em></span>
-                <div class="lead-chips" data-name="contact">
-                  <button type="button" class="lead-chip" data-val="Позвонить">Позвонить</button>
-                  <button type="button" class="lead-chip" data-val="Telegram">Telegram</button>
-                  <button type="button" class="lead-chip" data-val="WhatsApp">WhatsApp</button>
-                  <button type="button" class="lead-chip" data-val="MAX">MAX</button>
-                </div>
-              </div>
+              <div class="form-field"><label>Телефон или Telegram</label><input name="phone" type="text" inputmode="text" placeholder="+7 900 000-00-00 или @username" required></div>
+              <div class="form-field"><label>Город доставки <em>(необязательно)</em></label><input name="city" autocomplete="address-level2" placeholder="Например, Москва"></div>
 
               <button class="btn btn-red lead-submit" type="submit">Получить подборку и расчёт</button>
               <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>. Ваши данные защищены и не передаются третьим лицам.</p>
@@ -540,42 +509,25 @@
       /* Визитка: заявка на подбор с квалификацией */
       (function () {
         const form = document.getElementById('lead-form');
-        A.attachPhoneMask(form.querySelector('input[name=phone]'));
         A.ensureConsent(form);
-        form.querySelectorAll('.lead-chips').forEach((group) => {
-          const single = group.hasAttribute('data-single');
-          group.addEventListener('click', (e) => {
-            const b = e.target.closest('.lead-chip');
-            if (!b) return;
-            if (single) group.querySelectorAll('.lead-chip').forEach((x) => { if (x !== b) x.classList.remove('active'); });
-            b.classList.toggle('active');
-          });
-        });
-        const picked = (name) => Array.from(
-          form.querySelectorAll('.lead-chips[data-name="' + name + '"] .lead-chip.active')
-        ).map((x) => x.dataset.val);
+        A.bindFormAnalytics(form);
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const phone = form.phone.value.trim();
-          if (!A.validPhone(phone)) { form.phone.classList.add('error'); form.phone.focus(); return; }
+          if (!A.validContact(phone)) { form.phone.classList.add('error'); form.phone.focus(); return; }
           if (!A.consentOK(form)) return;
           const car = (form.car.value || '').trim();
-          const timing = picked('timing')[0] || '';
-          const contact = picked('contact');
-          const note = [
-            timing ? 'Срок покупки: ' + timing : '',
-            contact.length ? 'Связь: ' + contact.join(', ') : '',
-          ].filter(Boolean).join(' · ');
-          await A.submitLead({
-            name: form.name.value.trim() || '—',
+          const result = await A.submitLead({
+            name: '—',
             phone,
-            city: '',
-            budget: picked('budget')[0] || '',
+            city: form.city.value.trim(),
+            budget: 'Форма на главной',
             brand: car || 'не определился',
             body: '',
             fuel: '',
-            note,
+            car_name: car,
           }, form);
+          if (!result.ok) { A.showLeadError(form); return; }
           form.innerHTML = A.successHTML('Заявка принята!',
             'Подберём варианты и вернёмся с расчётом «под ключ» в ближайшее рабочее время (ежедневно 9:00–21:00 мск).');
         });
@@ -612,8 +564,9 @@
         if (!A.validPhone(phone)) { pf.phone.classList.add('error'); return; }
         if (!A.consentOK(pf)) return;
         A.goal('pdf_lead');
-        await A.submitLead({ name: pf.name.value.trim() || '—', phone, city: '',
+        const result = await A.submitLead({ name: pf.name.value.trim() || '—', phone, city: '',
           budget: 'PDF-гайд', brand: '#pdf', body: '', fuel: '' }, pf);
+        if (!result.ok) { A.showLeadError(pf); return; }
         pf.outerHTML = '<div class="magnet-form" style="grid-template-columns:auto auto;justify-content:start">' +
           '<a class="btn btn-red" href="files/inavto-guide.pdf" download data-goal="pdf_download">Скачать PDF-гайд</a>' +
           '<a class="btn btn-ghost" href="' + A.CONTACTS.telegram + '" target="_blank" rel="noopener">Получить в Telegram</a></div>';

@@ -1134,7 +1134,7 @@
     const timer = setTimeout(arm, 8000);
     document.addEventListener('mouseout', (e) => {
       if (!armed || e.relatedTarget || e.clientY > 8) return;
-      if (document.querySelector('.modal-backdrop.open, .gallery-lightbox.open')) return;
+      if (document.querySelector('.modal-backdrop.open, .gallery-lightbox.open, .telegram-subscribe-overlay.open')) return;
       armed = false;
       clearTimeout(timer);
       try { sessionStorage.setItem('inavto_exit_seen', '1'); } catch (err) { /* — */ }
@@ -1157,6 +1157,46 @@
         if (quiz) quiz.click();
       }
     });
+  }
+
+  /* ---------- Попап подписки на Telegram ---------- */
+  function initTelegramSubscribePopup() {
+    const seenKey = 'inavto_tg_subscribe_seen';
+    try { if (sessionStorage.getItem(seenKey)) return; } catch (e) { /* приватный режим */ }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'telegram-subscribe-overlay';
+    overlay.innerHTML = `
+      <section class="telegram-subscribe-dialog" role="dialog" aria-modal="true" aria-labelledby="telegram-subscribe-title">
+        <button class="telegram-subscribe-close" type="button" aria-label="Закрыть объявление">×</button>
+        <img class="telegram-subscribe-image" src="/img/telegram-channel.webp" alt="Telegram-канал INAVTO ASIA" width="1200" height="537">
+        <div class="telegram-subscribe-copy">
+          <div class="overline">INAVTO ASIA в Telegram</div>
+          <h2 class="h2" id="telegram-subscribe-title">Подпишитесь на наш канал</h2>
+          <p>Свежие автомобили из Китая, реальные цены, подборки моделей и новости — в одном месте.</p>
+          <a class="btn btn-red" href="https://t.me/Inavtoasia" target="_blank" rel="noopener" data-telegram-subscribe>Подписаться на Telegram</a>
+        </div>
+      </section>`;
+    document.body.appendChild(overlay);
+
+    const close = (goal) => {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      try { sessionStorage.setItem(seenKey, '1'); } catch (e) { /* приватный режим */ }
+      if (goal) A.goal(goal);
+    };
+    const open = () => {
+      if (document.querySelector('.modal-backdrop.open, .exit-overlay.open, .gallery-lightbox.open')) return;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      A.goal('telegram_subscribe_popup_view');
+    };
+
+    overlay.querySelector('.telegram-subscribe-close').addEventListener('click', () => close('telegram_subscribe_popup_close'));
+    overlay.querySelector('[data-telegram-subscribe]').addEventListener('click', () => close('telegram_subscribe_popup_click'));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close('telegram_subscribe_popup_close'); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) close('telegram_subscribe_popup_close'); });
+    window.setTimeout(open, 1600);
   }
 
   /* ---------- Старт ---------- */
@@ -1186,6 +1226,7 @@
     updateHotCountdowns();
     setInterval(updateHotCountdowns, 60000);
     initExitIntent();
+    initTelegramSubscribePopup();
   });
 
   /* ---------- Cookie-уведомление ---------- */

@@ -837,12 +837,41 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.
 .exit-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .exit-dialog .form-note { margin-top: 14px; }
 
+/* ---------- Подписка на Telegram ---------- */
+.telegram-subscribe-overlay {
+  position: fixed; inset: 0; z-index: 240; display: none; align-items: center; justify-content: center;
+  padding: 24px; background: rgba(7, 12, 22, .78); backdrop-filter: blur(7px);
+}
+.telegram-subscribe-overlay.open { display: flex; }
+.telegram-subscribe-dialog {
+  position: relative; width: min(620px, 100%); max-height: calc(100vh - 48px); overflow: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .35); animation: modalIn .25s ease;
+}
+.telegram-subscribe-image { display: block; width: 100%; aspect-ratio: 2.24 / 1; object-fit: cover; }
+.telegram-subscribe-copy { padding: 24px 28px 28px; }
+.telegram-subscribe-copy .overline { color: #1684e8; }
+.telegram-subscribe-copy .h2 { margin: 8px 0 10px; }
+.telegram-subscribe-copy p { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 1.55; }
+.telegram-subscribe-copy .btn { width: 100%; justify-content: center; }
+.telegram-subscribe-close {
+  position: absolute; top: 12px; right: 12px; z-index: 1; width: 40px; height: 40px;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--ink);
+  font-size: 22px; line-height: 1; box-shadow: 0 4px 16px rgba(0, 0, 0, .16); cursor: pointer;
+  transition: transform .18s ease, background .18s ease;
+}
+.telegram-subscribe-close:hover { transform: scale(1.08); background: #fff; }
+
 @media (max-width: 700px) {
   .gallery-lightbox { padding: 54px 12px 70px; }
   .gl-nav { top: auto; bottom: 12px; transform: none; }
   .gl-prev { left: 12px; } .gl-next { right: 12px; }
   .exit-overlay { padding: 0; }
   .exit-dialog { min-height: 100%; padding: 76px 22px 30px; }
+  .telegram-subscribe-overlay { padding: 14px; }
+  .telegram-subscribe-dialog { max-height: calc(100vh - 28px); border-radius: 18px; }
+  .telegram-subscribe-copy { padding: 20px 20px 22px; }
+  .telegram-subscribe-copy .h2 { font-size: 25px; line-height: 1.08; }
 }
 @media (prefers-reduced-motion: reduce) {
   .cookie-bar { transition: opacity 0.2s; transform: none; }

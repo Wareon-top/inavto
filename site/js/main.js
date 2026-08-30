@@ -1172,8 +1172,8 @@
         <img class="telegram-subscribe-image" src="/img/telegram-channel.webp" alt="Telegram-канал INAVTO ASIA" width="1200" height="537">
         <div class="telegram-subscribe-copy">
           <div class="overline">INAVTO ASIA в Telegram</div>
-          <h2 class="h2" id="telegram-subscribe-title">Подпишитесь на наш канал</h2>
-          <p>Свежие автомобили из Китая, реальные цены, подборки моделей и новости — в одном месте.</p>
+          <h2 class="h2" id="telegram-subscribe-title">Подпишитесь на Telegram</h2>
+          <p>Цены, подборки и реальные автомобили из Китая.</p>
           <a class="btn btn-red" href="https://t.me/Inavtoasia" target="_blank" rel="noopener" data-telegram-subscribe>Подписаться на Telegram</a>
         </div>
       </section>`;

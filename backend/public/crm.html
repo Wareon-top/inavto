@@ -146,6 +146,7 @@
       document.querySelectorAll('[data-locale]').forEach(button => button.onclick=()=>{crmLocale=button.dataset.locale;localStorage.setItem('inavto_crm_locale',crmLocale);crmApplyLocale();});
       $('crmLogout').onclick=()=>{localStorage.removeItem('inavto_crm_token');state.token='';showLogin();};
       $('stageFilter').onchange=crmApplyLeadFilter;
+      $('leadSearch').oninput=()=>{renderLeads();crmApplyLeadFilter();};
     }
     function crmApplyLeadFilter() { const stage=$('stageFilter')?.value||'';document.querySelectorAll('#leadRows tr[data-lead]').forEach(row=>{const item=state.leads.find(l=>l.id==row.dataset.lead);row.classList.toggle('hidden',!!stage&&item?.stage!==stage);}); }
     function crmLeadBody(item) { return { name:item.name,contact:item.contact,source:item.source,model:item.model,budget:item.budget,stage:item.stage,next_action:item.next_action,next_action_at:item.next_action_at,manager_note:item.manager_note,publication_id:item.publication_id }; }

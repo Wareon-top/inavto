@@ -20,7 +20,7 @@ export function adminOnly(req, res, next) {
 export function crmOnly(req, res, next) {
   const token = process.env.CRM_TOKEN
   if (!token) return res.status(503).json({ error: 'CRM_TOKEN is not configured on the server' })
-  const got = (req.headers.authorization || '').replace(/^Bearer\\s+/i, '')
+  const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
   if (!sameToken(got, token)) return res.status(401).json({ error: 'Unauthorized' })
   next()
 }

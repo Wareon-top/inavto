@@ -16,6 +16,15 @@ export function adminOnly(req, res, next) {
   next()
 }
 
+/* Отдельный код доступа для CRM. Он не даёт доступа к /admin и сделкам. */
+export function crmOnly(req, res, next) {
+  const token = process.env.CRM_TOKEN
+  if (!token) return res.status(503).json({ error: 'CRM_TOKEN is not configured on the server' })
+  const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  if (!sameToken(got, token)) return res.status(401).json({ error: 'Unauthorized' })
+  next()
+}
+
 /* Роль по токену: admin (ADMIN_TOKEN) или staff (STAFF_TOKEN — китайский представитель). */
 export function roleOf(req) {
   const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')

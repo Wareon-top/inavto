@@ -163,6 +163,44 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS crm_publications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    published_at TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    link TEXT DEFAULT '',
+    views INTEGER DEFAULT 0,
+    clicks INTEGER DEFAULT 0,
+    dialogs INTEGER DEFAULT 0,
+    quotes INTEGER DEFAULT 0,
+    contacts INTEGER DEFAULT 0,
+    contracts INTEGER DEFAULT 0,
+    cost REAL DEFAULT 0,
+    note TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS crm_leads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    external_selection_id INTEGER UNIQUE,
+    name TEXT NOT NULL,
+    contact TEXT NOT NULL,
+    source TEXT DEFAULT '',
+    model TEXT DEFAULT '',
+    budget TEXT DEFAULT '',
+    stage TEXT DEFAULT 'new',
+    next_action TEXT DEFAULT '',
+    next_action_at TEXT DEFAULT '',
+    manager_note TEXT DEFAULT '',
+    publication_id INTEGER,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (publication_id) REFERENCES crm_publications(id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_crm_leads_stage ON crm_leads(stage);
+  CREATE INDEX IF NOT EXISTS idx_crm_leads_next_action ON crm_leads(next_action_at);
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:

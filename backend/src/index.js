@@ -11,10 +11,11 @@ import dealsRouter from './routes/deals.js'
 import docsRouter from './routes/docs.js'
 import lkRouter from './routes/lk.js'
 import blogRouter from './routes/blog.js'
+import crmRouter from './routes/crm.js'
 import deliveryStoriesRouter from './routes/deliveryStories.js'
 import uploadRouter, { UPLOAD_DIR } from './routes/upload.js'
 import { rebuildSitePages } from './sitegen.js'
-import { adminOnly, staffOnly } from './auth.js'
+import { adminOnly, crmOnly, staffOnly } from './auth.js'
 import {
   apiLimiter,
   clientCabinetLimiter,
@@ -45,6 +46,7 @@ app.use('/api/deals', staffOnly, largeJson, dealsRouter)
 app.use('/api/docs', staffOnly, largeJson, docsRouter)
 app.use('/api/lk', clientCabinetLimiter, lkRouter)
 app.use('/api/blog', smallJson, blogRouter)
+app.use('/api/crm', crmOnly, smallJson, crmRouter)
 app.use('/api/delivery-stories', smallJson, deliveryStoriesRouter)
 app.use('/api/upload', adminOnly, largeJson, uploadRouter)
 
@@ -56,6 +58,11 @@ app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d' }))
 app.get('/admin', (_, res) => {
   res.set('Cache-Control', 'no-cache')
   res.sendFile(path.join(ROOT, '../public/admin.html'))
+})
+app.get('/crm', (_, res) => {
+  res.set('Cache-Control', 'no-cache')
+  res.set('X-Robots-Tag', 'noindex, nofollow')
+  res.sendFile(path.join(ROOT, '../public/crm.html'))
 })
 app.get('/lk', (_, res) => {
   res.set('Cache-Control', 'no-cache')

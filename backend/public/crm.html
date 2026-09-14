@@ -55,7 +55,7 @@
     const today=()=>new Date().toISOString().slice(0,10),statusName=id=>t('statusNames')[id]||id;
     const statusPill=id=>`<span class="pill status-${esc(id)}">${esc(statusName(id))}</span>`;
     const requestUrl=()=>`/requests?archive=${state.page==='archive'?'1':'0'}&q=${encodeURIComponent(state.q)}`;
-    async function api(path,options={}){const response=await fetch('/api/crm'+path,{...options,headers:{'Content-Type':'application/json','X-CRM-Token':state.token,...options.headers}});if(!response.ok){let message='HTTP '+response.status;try{message=(await response.json()).error||message}catch{}throw new Error(message)}return response.status===204?null:response.json()}
+    async function api(path,options={}){const response=await fetch('/api/crm'+path,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.token,...options.headers}});if(!response.ok){let message='HTTP '+response.status;try{message=(await response.json()).error||message}catch{}throw new Error(message)}return response.status===204?null:response.json()}
     function toast(message){const node=el('toast');node.textContent=message;node.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.classList.add('hidden'),2600)}
     function showLogin(error=''){el('login').classList.remove('hidden');el('app').innerHTML='';el('loginText').textContent=t('loginText');el('tokenInput').placeholder=t('access');el('loginButton').textContent=t('signIn');el('loginError').textContent=error}
     function navButton(page,icon){return `<button data-page="${page}" class="${state.page===page?'active':''}">${icons[icon]}<span>${t(page)}</span></button>`}
@@ -90,4 +90,3 @@
   </script>
 </body>
 </html>
-

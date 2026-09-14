@@ -46,7 +46,8 @@ app.use('/api/deals', staffOnly, largeJson, dealsRouter)
 app.use('/api/docs', staffOnly, largeJson, docsRouter)
 app.use('/api/lk', clientCabinetLimiter, lkRouter)
 app.use('/api/blog', smallJson, blogRouter)
-app.use('/api/crm', crmOnly, smallJson, crmRouter)
+/* Личная CRM принимает фото и видео в закрытом JSON API. */
+app.use('/api/crm', crmOnly, largeJson, crmRouter)
 app.use('/api/delivery-stories', smallJson, deliveryStoriesRouter)
 app.use('/api/upload', adminOnly, largeJson, uploadRouter)
 
@@ -104,3 +105,4 @@ export function start() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) start()
+

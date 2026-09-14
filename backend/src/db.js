@@ -164,43 +164,42 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS crm_publications (
+`)
+
+/* Личная CRM учёта работы. Эти таблицы изолированы от заявок сайта
+   (selections) и старой клиентской CRM (crm_leads). */
+db.exec(`
+  CREATE TABLE IF NOT EXISTS crm_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    published_at TEXT NOT NULL,
-    platform TEXT NOT NULL,
-    topic TEXT NOT NULL,
-    link TEXT DEFAULT '',
-    views INTEGER DEFAULT 0,
-    clicks INTEGER DEFAULT 0,
-    dialogs INTEGER DEFAULT 0,
-    quotes INTEGER DEFAULT 0,
-    contacts INTEGER DEFAULT 0,
-    contracts INTEGER DEFAULT 0,
-    cost REAL DEFAULT 0,
+    request_date TEXT NOT NULL,
+    brand TEXT NOT NULL,
+    condition TEXT DEFAULT 'new',
+    year INTEGER,
+    color TEXT DEFAULT '',
+    available INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'new',
     note TEXT DEFAULT '',
+    note_color TEXT DEFAULT 'yellow',
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS crm_leads (
+  CREATE TABLE IF NOT EXISTS crm_request_attachments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    external_selection_id INTEGER UNIQUE,
-    name TEXT NOT NULL,
-    contact TEXT NOT NULL,
-    source TEXT DEFAULT '',
-    model TEXT DEFAULT '',
-    budget TEXT DEFAULT '',
-    stage TEXT DEFAULT 'new',
-    next_action TEXT DEFAULT '',
-    next_action_at TEXT DEFAULT '',
-    manager_note TEXT DEFAULT '',
-    publication_id INTEGER,
+    request_id INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size INTEGER DEFAULT 0,
+    data_url TEXT NOT NULL,
     created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (publication_id) REFERENCES crm_publications(id)
+    FOREIGN KEY (request_id) REFERENCES crm_requests(id)
   );
-  CREATE INDEX IF NOT EXISTS idx_crm_leads_stage ON crm_leads(stage);
-  CREATE INDEX IF NOT EXISTS idx_crm_leads_next_action ON crm_leads(next_action_at);
+
+  CREATE INDEX IF NOT EXISTS idx_crm_requests_status_date
+    ON crm_requests(status, request_date DESC);
+  CREATE INDEX IF NOT EXISTS idx_crm_request_attachments_request
+    ON crm_request_attachments(request_id);
 `)
 
 /* Миграция баз, созданных до появления «нового/с пробегом»:

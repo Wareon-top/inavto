@@ -3,207 +3,165 @@ import db from '../db.js'
 
 const router = Router()
 
-export const LEAD_STAGES = [
-  { id: 'new', label: 'Новый диалог', tone: 'blue' },
-  { id: 'need', label: 'Уточняем потребность', tone: 'violet' },
-  { id: 'quote', label: 'Готовим расчёт', tone: 'amber' },
-  { id: 'quoted', label: 'Расчёт отправлен', tone: 'orange' },
-  { id: 'contact', label: 'Получен контакт', tone: 'teal' },
-  { id: 'negotiation', label: 'Переговоры', tone: 'purple' },
-  { id: 'contract', label: 'Договор', tone: 'green' },
-  { id: 'lost', label: 'Отказ', tone: 'red' },
-  { id: 'later', label: 'Отложено', tone: 'gray' },
+export const REQUEST_STATUSES = [
+  { id: 'new', label: 'Новая', tone: 'blue' },
+  { id: 'working', label: 'В работе', tone: 'amber' },
+  { id: 'found', label: 'Найдено', tone: 'green' },
+  { id: 'closed', label: 'Закрыта', tone: 'gray' },
 ]
 
-const stageIds = new Set(LEAD_STAGES.map((stage) => stage.id))
+const statusIds = new Set(REQUEST_STATUSES.map((item) => item.id))
+const conditions = new Set(['new', 'used'])
+const noteColors = new Set(['yellow', 'blue', 'green', 'pink', 'violet'])
 const clean = (value, max = 1000) => String(value ?? '').trim().slice(0, max)
-const number = (value) => Math.max(0, Math.round(Number(value) || 0))
-const money = (value) => Math.max(0, Number(value) || 0)
 
-/* Заявки с сайта автоматически появляются в CRM. Существующие записи
-   не перезаписываются: менеджерская работа остаётся источником истины. */
-function syncWebsiteLeads() {
-  db.prepare(`
-    INSERT OR IGNORE INTO crm_leads (
-      external_selection_id, created_at, updated_at, name, contact, source,
-      model, budget, stage, next_action, manager_note
-    )
-    SELECT
-      id, created_at, created_at,
-      COALESCE(NULLIF(name, ''), 'Без имени'),
-      COALESCE(NULLIF(phone, ''), 'Нет контакта'),
-      COALESCE(NULLIF(note, ''), 'Сайт INAVTO ASIA'),
-      COALESCE(NULLIF(brand, ''), ''),
-      COALESCE(NULLIF(budget, ''), ''),
-      'new', 'Связаться с клиентом', COALESCE(manager_note, '')
-    FROM selections
-  `).run()
-}
-
-function lead(row) {
+function requestPayload(body) {
+  const status = clean(body?.status, 24) || 'new'
+  const condition = clean(body?.condition, 24) || 'new'
+  const rawYear = Number(body?.year)
   return {
-    ...row,
-    publication_id: row.publication_id || null,
-    is_website_lead: Boolean(row.external_selection_id),
+    request_date: clean(body?.request_date, 10),
+    brand: clean(body?.brand, 180),
+    condition: conditions.has(condition) ? condition : 'new',
+    year: Number.isInteger(rawYear) && rawYear >= 1900 && rawYear <= 2100 ? rawYear : null,
+    color: clean(body?.color, 80),
+    available: body?.available === true || body?.available === 1 || body?.available === '1' ? 1 : 0,
+    status: statusIds.has(status) ? status : 'new',
+    note: clean(body?.note, 4000),
+    note_color: noteColors.has(body?.note_color) ? body.note_color : 'yellow',
   }
 }
 
-function publicationPayload(body) {
-  return {
-    published_at: clean(body?.published_at, 20),
-    platform: clean(body?.platform, 80),
-    topic: clean(body?.topic, 180),
-    link: clean(body?.link, 600),
-    views: number(body?.views), clicks: number(body?.clicks), dialogs: number(body?.dialogs),
-    quotes: number(body?.quotes), contacts: number(body?.contacts), contracts: number(body?.contracts),
-    cost: money(body?.cost), note: clean(body?.note, 1200),
+function validateRequest(item, res) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(item.request_date)) {
+    res.status(400).json({ error: 'Укажите дату заявки' })
+    return false
   }
+  if (!item.brand) {
+    res.status(400).json({ error: 'Укажите марку автомобиля' })
+    return false
+  }
+  if (!item.year) {
+    res.status(400).json({ error: 'Укажите корректный год автомобиля' })
+    return false
+  }
+  return true
 }
 
-function leadPayload(body) {
-  const stage = clean(body?.stage, 40) || 'new'
-  return {
-    name: clean(body?.name, 120), contact: clean(body?.contact, 160),
-    source: clean(body?.source, 240), model: clean(body?.model, 180),
-    budget: clean(body?.budget, 80), stage: stageIds.has(stage) ? stage : 'new',
-    next_action: clean(body?.next_action, 500), next_action_at: clean(body?.next_action_at, 20),
-    manager_note: clean(body?.manager_note, 3000),
-    publication_id: Number.isInteger(+body?.publication_id) && +body.publication_id > 0 ? +body.publication_id : null,
-  }
+function getRequest(id) {
+  return db.prepare(`
+    SELECT r.*,
+      (SELECT COUNT(*) FROM crm_request_attachments a WHERE a.request_id = r.id AND a.kind = 'photo') AS photo_count,
+      (SELECT COUNT(*) FROM crm_request_attachments a WHERE a.request_id = r.id AND a.kind = 'video') AS video_count
+    FROM crm_requests r WHERE r.id = ?
+  `).get(id)
 }
 
-router.get('/stages', (_req, res) => res.json(LEAD_STAGES))
+router.get('/statuses', (_req, res) => res.json(REQUEST_STATUSES))
 
-router.get('/dashboard', (_req, res) => {
-  syncWebsiteLeads()
-  const stageCounts = Object.fromEntries(
-    db.prepare('SELECT stage, COUNT(*) AS count FROM crm_leads GROUP BY stage').all()
-      .map((row) => [row.stage, row.count]),
-  )
-  const publications = db.prepare(`
-    SELECT COUNT(*) AS count, COALESCE(SUM(cost), 0) AS cost, COALESCE(SUM(dialogs), 0) AS dialogs,
-      COALESCE(SUM(quotes), 0) AS quotes, COALESCE(SUM(contacts), 0) AS contacts,
-      COALESCE(SUM(contracts), 0) AS contracts
-    FROM crm_publications
-  `).get()
-  const today = new Date().toISOString().slice(0, 10)
-  const due = db.prepare(`
-    SELECT * FROM crm_leads
-    WHERE next_action_at != '' AND next_action_at <= ?
-      AND stage NOT IN ('contract', 'lost')
-    ORDER BY next_action_at ASC, id DESC LIMIT 8
-  `).all(today).map(lead)
-  res.json({ stage_counts: stageCounts, publications, due, today })
-})
-
-router.get('/leads', (_req, res) => {
-  syncWebsiteLeads()
-  const stage = clean(_req.query.stage, 40)
-  const q = clean(_req.query.q, 120)
-  const where = []
+router.get('/requests', (req, res) => {
+  const q = clean(req.query.q, 120)
+  const archive = req.query.archive === '1'
   const params = []
-  if (stage && stageIds.has(stage)) { where.push('l.stage = ?'); params.push(stage) }
+  const where = [archive ? "r.status = 'closed'" : "r.status != 'closed'"]
   if (q) {
-    where.push('(l.name LIKE ? OR l.contact LIKE ? OR l.model LIKE ? OR l.source LIKE ?)')
-    params.push(...Array(4).fill(`%${q}%`))
+    where.push('(r.brand LIKE ? OR r.color LIKE ? OR r.note LIKE ?)')
+    params.push(...Array(3).fill(`%${q}%`))
   }
   const items = db.prepare(`
-    SELECT l.*, p.topic AS publication_topic, p.platform AS publication_platform
-    FROM crm_leads l
-    LEFT JOIN crm_publications p ON p.id = l.publication_id
-    ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-    ORDER BY
-      CASE WHEN l.next_action_at != '' THEN l.next_action_at END ASC,
-      l.updated_at DESC, l.id DESC
-  `).all(...params).map(lead)
+    SELECT r.*,
+      (SELECT COUNT(*) FROM crm_request_attachments a WHERE a.request_id = r.id AND a.kind = 'photo') AS photo_count,
+      (SELECT COUNT(*) FROM crm_request_attachments a WHERE a.request_id = r.id AND a.kind = 'video') AS video_count
+    FROM crm_requests r
+    WHERE ${where.join(' AND ')}
+    ORDER BY r.request_date DESC, r.id DESC
+  `).all(...params)
   res.json(items)
 })
 
-router.post('/leads', (req, res) => {
-  const item = leadPayload(req.body)
-  if (!item.name || !item.contact) return res.status(400).json({ error: 'Укажите имя и контакт' })
-  const result = db.prepare(`
-    INSERT INTO crm_leads (
-      name, contact, source, model, budget, stage, next_action, next_action_at,
-      manager_note, publication_id, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-  `).run(
-    item.name, item.contact, item.source, item.model, item.budget, item.stage,
-    item.next_action, item.next_action_at, item.manager_note, item.publication_id,
-  )
-  res.status(201).json({ id: result.lastInsertRowid, ok: true })
+router.get('/requests/:id', (req, res) => {
+  const item = getRequest(req.params.id)
+  if (!item) return res.status(404).json({ error: 'Заявка не найдена' })
+  res.json(item)
 })
 
-router.put('/leads/:id', (req, res) => {
-  const cur = db.prepare('SELECT id FROM crm_leads WHERE id = ?').get(req.params.id)
-  if (!cur) return res.status(404).json({ error: 'Заявка не найдена' })
-  const item = leadPayload(req.body)
-  if (!item.name || !item.contact) return res.status(400).json({ error: 'Укажите имя и контакт' })
+router.post('/requests', (req, res) => {
+  const item = requestPayload(req.body)
+  if (!validateRequest(item, res)) return
+  const result = db.prepare(`
+    INSERT INTO crm_requests (
+      request_date, brand, condition, year, color, available, status, note, note_color, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+  `).run(
+    item.request_date, item.brand, item.condition, item.year, item.color,
+    item.available, item.status, item.note, item.note_color,
+  )
+  res.status(201).json(getRequest(result.lastInsertRowid))
+})
+
+router.put('/requests/:id', (req, res) => {
+  if (!getRequest(req.params.id)) return res.status(404).json({ error: 'Заявка не найдена' })
+  const item = requestPayload(req.body)
+  if (!validateRequest(item, res)) return
   db.prepare(`
-    UPDATE crm_leads SET
-      name = ?, contact = ?, source = ?, model = ?, budget = ?, stage = ?,
-      next_action = ?, next_action_at = ?, manager_note = ?, publication_id = ?,
-      updated_at = datetime('now')
+    UPDATE crm_requests SET
+      request_date = ?, brand = ?, condition = ?, year = ?, color = ?, available = ?,
+      status = ?, note = ?, note_color = ?, updated_at = datetime('now')
     WHERE id = ?
   `).run(
-    item.name, item.contact, item.source, item.model, item.budget, item.stage,
-    item.next_action, item.next_action_at, item.manager_note, item.publication_id, req.params.id,
+    item.request_date, item.brand, item.condition, item.year, item.color,
+    item.available, item.status, item.note, item.note_color, req.params.id,
   )
+  res.json(getRequest(req.params.id))
+})
+
+router.delete('/requests/:id', (req, res) => {
+  const remove = db.transaction((id) => {
+    db.prepare('DELETE FROM crm_request_attachments WHERE request_id = ?').run(id)
+    return db.prepare('DELETE FROM crm_requests WHERE id = ?').run(id)
+  })
+  const result = remove(req.params.id)
+  if (!result.changes) return res.status(404).json({ error: 'Заявка не найдена' })
   res.json({ ok: true })
 })
 
-router.delete('/leads/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM crm_leads WHERE id = ? AND external_selection_id IS NULL').run(req.params.id)
-  if (!result.changes) return res.status(400).json({ error: 'Заявку с сайта нельзя удалить: отметьте её отказом' })
-  res.json({ ok: true })
-})
-
-router.get('/publications', (_req, res) => {
-  const items = db.prepare('SELECT * FROM crm_publications ORDER BY published_at DESC, id DESC').all()
+router.get('/requests/:id/attachments', (req, res) => {
+  if (!getRequest(req.params.id)) return res.status(404).json({ error: 'Заявка не найдена' })
+  const items = db.prepare(`
+    SELECT id, request_id, kind, filename, mime_type, size, data_url, created_at
+    FROM crm_request_attachments WHERE request_id = ? ORDER BY id ASC
+  `).all(req.params.id)
   res.json(items)
 })
 
-router.post('/publications', (req, res) => {
-  const item = publicationPayload(req.body)
-  if (!item.published_at || !item.platform || !item.topic) {
-    return res.status(400).json({ error: 'Укажите дату, площадку и тему публикации' })
+router.post('/requests/:id/attachments', (req, res) => {
+  if (!getRequest(req.params.id)) return res.status(404).json({ error: 'Заявка не найдена' })
+  const kind = req.body?.kind === 'video' ? 'video' : req.body?.kind === 'photo' ? 'photo' : ''
+  const filename = clean(req.body?.filename, 240)
+  const mimeType = clean(req.body?.mime_type, 100)
+  const dataUrl = String(req.body?.data_url ?? '')
+  const expectedPrefix = kind === 'photo' ? 'data:image/' : 'data:video/'
+  if (!kind || !filename || !mimeType || !dataUrl.startsWith(expectedPrefix)) {
+    return res.status(400).json({ error: 'Некорректное вложение' })
+  }
+  const comma = dataUrl.indexOf(',')
+  const encoded = comma >= 0 ? dataUrl.slice(comma + 1) : ''
+  const size = Math.floor(encoded.length * 0.75)
+  const limit = kind === 'photo' ? 12 * 1024 * 1024 : 50 * 1024 * 1024
+  if (!encoded || size > limit) {
+    return res.status(413).json({ error: kind === 'photo' ? 'Фото больше 12 МБ' : 'Видео больше 50 МБ' })
   }
   const result = db.prepare(`
-    INSERT INTO crm_publications (
-      published_at, platform, topic, link, views, clicks, dialogs, quotes,
-      contacts, contracts, cost, note, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-  `).run(
-    item.published_at, item.platform, item.topic, item.link, item.views, item.clicks,
-    item.dialogs, item.quotes, item.contacts, item.contracts, item.cost, item.note,
-  )
+    INSERT INTO crm_request_attachments (request_id, kind, filename, mime_type, size, data_url)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(req.params.id, kind, filename, mimeType, size, dataUrl)
+  db.prepare("UPDATE crm_requests SET updated_at = datetime('now') WHERE id = ?").run(req.params.id)
   res.status(201).json({ id: result.lastInsertRowid, ok: true })
 })
 
-router.put('/publications/:id', (req, res) => {
-  const cur = db.prepare('SELECT id FROM crm_publications WHERE id = ?').get(req.params.id)
-  if (!cur) return res.status(404).json({ error: 'Публикация не найдена' })
-  const item = publicationPayload(req.body)
-  if (!item.published_at || !item.platform || !item.topic) {
-    return res.status(400).json({ error: 'Укажите дату, площадку и тему публикации' })
-  }
-  db.prepare(`
-    UPDATE crm_publications SET
-      published_at = ?, platform = ?, topic = ?, link = ?, views = ?, clicks = ?,
-      dialogs = ?, quotes = ?, contacts = ?, contracts = ?, cost = ?, note = ?,
-      updated_at = datetime('now') WHERE id = ?
-  `).run(
-    item.published_at, item.platform, item.topic, item.link, item.views, item.clicks,
-    item.dialogs, item.quotes, item.contacts, item.contracts, item.cost, item.note, req.params.id,
-  )
-  res.json({ ok: true })
-})
-
-router.delete('/publications/:id', (req, res) => {
-  const used = db.prepare('SELECT COUNT(*) AS count FROM crm_leads WHERE publication_id = ?').get(req.params.id)
-  if (used.count) return res.status(400).json({ error: 'Сначала отвяжите заявки от этой публикации' })
-  const result = db.prepare('DELETE FROM crm_publications WHERE id = ?').run(req.params.id)
-  if (!result.changes) return res.status(404).json({ error: 'Публикация не найдена' })
+router.delete('/attachments/:id', (req, res) => {
+  const result = db.prepare('DELETE FROM crm_request_attachments WHERE id = ?').run(req.params.id)
+  if (!result.changes) return res.status(404).json({ error: 'Вложение не найдено' })
   res.json({ ok: true })
 })
 

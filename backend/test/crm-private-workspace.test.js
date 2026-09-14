@@ -28,6 +28,8 @@ test('private attachment API accepts photos and videos behind CRM auth', () => {
   assert.match(route, /kind === 'video'/)
   assert.match(route, /crm_request_attachments/)
   assert.match(index, /app\.use\('\/api\/crm', crmOnly, largeJson, crmRouter\)/)
+  assert.match(ui, /'Authorization':'Bearer '\+state\.token/)
+  assert.doesNotMatch(ui, /X-CRM-Token/)
 })
 
 test('UI matches the reference information architecture', () => {

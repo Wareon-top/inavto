@@ -48,6 +48,10 @@ test('UI matches the reference information architecture', () => {
 })
 
 test('UI remains available in Russian, English and Chinese', () => {
+  assert.match(ui, /@media\(max-width:820px\)/)
+  assert.match(ui, /100dvh/)
+  assert.match(ui, /data-label=/)
+  assert.match(ui, /matchMedia\('\(max-width:820px\)'\)/)
   assert.match(ui, /ru:\{/)
   assert.match(ui, /en:\{/)
   assert.match(ui, /zh:\{/)
